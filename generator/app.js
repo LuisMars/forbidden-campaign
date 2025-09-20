@@ -1297,34 +1297,82 @@ function render() {
   const list = el('charList');
   list.innerHTML = '';
   state.chars.forEach((c) => {
-    const row = document.createElement('div');
-    row.className = 'row';
-    row.style.justifyContent = 'space-between';
-    const left = document.createElement('div');
-    left.className = 'row';
-    const btn = document.createElement('button');
-    btn.className = c.id === state.selectedId ? '' : 'ghost';
-    btn.textContent = c.name || '(unnamed)';
-    btn.onclick = () => { state.selectedId = c.id; saveState(); };
-    left.appendChild(btn);
-    const right = document.createElement('div');
-    right.className = 'row';
+    const card = document.createElement('div');
+    card.className = 'char-card';
+    if (c.id === state.selectedId) card.classList.add('active');
+
+    card.addEventListener('click', (ev) => {
+      if (ev.target.closest('.char-card-actions')) return;
+      if (ev.target.closest('button')) return;
+      if (state.selectedId === c.id) return;
+      state.selectedId = c.id;
+      saveState();
+    });
+
+    const header = document.createElement('div');
+    header.className = 'char-card-header';
+
+    const info = document.createElement('div');
+    info.className = 'char-card-info';
+
+    const nameBtn = document.createElement('button');
+    nameBtn.type = 'button';
+    nameBtn.className = 'char-card-name';
+    nameBtn.textContent = c.name || '(unnamed)';
+    nameBtn.onclick = (ev) => {
+      ev.stopPropagation();
+      if (state.selectedId === c.id) return;
+      state.selectedId = c.id;
+      saveState();
+    };
+    info.appendChild(nameBtn);
+
+    const noteBits = [];
+    if (c.isMage) noteBits.push('Spellcaster');
+    const tragedies = Number(c.tragedies || 0);
+    if (tragedies > 0) noteBits.push(tragedies === 1 ? '1 tragedy' : `${tragedies} tragedies`);
+    const armor = Number(c.armor || 0);
+    if (armor > 0) noteBits.push(`Armor ${armor}`);
+    if (noteBits.length) {
+      const notes = document.createElement('div');
+      notes.className = 'char-card-notes';
+      notes.textContent = noteBits.join(' · ');
+      info.appendChild(notes);
+    }
+
+    header.appendChild(info);
+
+    const actions = document.createElement('div');
+    actions.className = 'char-card-actions';
+
+    const del = document.createElement('button');
+    del.className = 'danger';
+    del.textContent = 'Delete';
+    del.onclick = (ev) => {
+      ev.stopPropagation();
+      if (!confirm('Delete character?')) return;
+      state.chars = state.chars.filter(x => x.id !== c.id);
+      if (state.selectedId === c.id) state.selectedId = null;
+      saveState();
+    };
+    actions.appendChild(del);
+
+    header.appendChild(actions);
+    card.appendChild(header);
+
+    const meta = document.createElement('div');
+    meta.className = 'char-card-meta';
     const slots = slotUsage(c);
     const slotTag = tag(`Slots ${slots.used}/${slots.total}`);
     if (slots.used > slots.total) slotTag.classList.add('warn');
     slotTag.title = `Base ${slots.base}, Bonus ${slots.bonus}`;
+    meta.appendChild(slotTag);
     const xpTag = tag(`XP ${Number(c.experience || 0)}`);
-    right.appendChild(slotTag);
-    right.appendChild(xpTag);
-    right.appendChild(tag(`${charPoints(c)} g`));
-    const del = document.createElement('button');
-    del.className = 'danger';
-    del.textContent = 'Delete';
-    del.onclick = () => { if (confirm('Delete character?')) { state.chars = state.chars.filter(x=>x.id!==c.id); if (state.selectedId===c.id) state.selectedId=null; saveState(); } };
-    right.appendChild(del);
-    row.appendChild(left);
-    row.appendChild(right);
-    list.appendChild(row);
+    meta.appendChild(xpTag);
+    meta.appendChild(tag(`${charPoints(c)} g`));
+    card.appendChild(meta);
+
+    list.appendChild(card);
   });
 
   // Editor
