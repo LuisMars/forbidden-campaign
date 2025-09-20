@@ -71,9 +71,13 @@ const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const NAMES = [ 'Danbert','Nifehl','Doodlplex','El Bobo','Hald','Pannoyed','Dugnutt','Tauk','Kvali','Gride','Dug','Saint','Andrew','Tim','Vlan Bator','Esheg','Abathur','Jack','Sven','Anja','Toomas','Marek','Storm','Reed','Nohr' ];
 const TYPES = ['Mercenary','Zealot','Brute','Acolyte','Scoundrel'];
 const TRAITS_PATH = 'traits.json';
+const SCROLLS_PATH = 'scrolls.json';
+const MAGE_COST = 5;
 
 let traitData = { feats: [], flaws: [] };
 let traitsLoaded = false;
+let scrollData = { clean: [], unclean: [] };
+let scrollsLoaded = false;
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
@@ -289,6 +293,23 @@ function loadTraitData() {
     });
 }
 
+function loadScrollData() {
+  fetch(SCROLLS_PATH)
+    .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Failed to load scrolls: ${res.status}`))))
+    .then((data) => {
+      scrollData = {
+        clean: Array.isArray(data?.clean) ? data.clean : [],
+        unclean: Array.isArray(data?.unclean) ? data.unclean : [],
+      };
+      scrollsLoaded = true;
+      render();
+    })
+    .catch((err) => {
+      console.error(err);
+      scrollsLoaded = true;
+    });
+}
+
 function loadState() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
 }
@@ -318,6 +339,7 @@ function normalizeState() {
   });
   const validIds = new Set(state.catalog.map(item => item.id));
   state.stash = state.stash.filter(entry => entry && validIds.has(entry.itemId));
+  let mageOwner = null;
   state.chars.forEach(ch => {
     if (!ch || typeof ch !== 'object') return;
     ch.weapons = Array.isArray(ch.weapons) ? ch.weapons.filter(w => w && validIds.has(w.itemId)) : [];
@@ -328,6 +350,18 @@ function normalizeState() {
     }
     if (!Array.isArray(ch.flaws)) {
       ch.flaws = Array.isArray(ch.flaws) ? ch.flaws : splitLines(String(ch.flaws || ''));
+    }
+    ch.isMage = !!ch.isMage;
+    ch.tragedies = Number(ch.tragedies || 0);
+    if (ch.tragedies < 0) ch.tragedies = 0;
+    ensureTraitArrays(ch);
+    ensureScrollLibrary(ch);
+    if (ch.isMage) {
+      if (mageOwner && mageOwner !== ch.id) {
+        ch.isMage = false;
+      } else {
+        mageOwner = ch.id;
+      }
     }
     if (ch.statTemplate && ch.statTemplate.id) {
       ensureStatTemplate(ch, ch.statTemplate.id);
@@ -407,6 +441,9 @@ function newCharacter(name) {
     scrolls: { clean: 0, unclean: 0 },
     notes: '',
     pack: [],
+    isMage: false,
+    tragedies: 0,
+    mageScrolls: { clean: [], unclean: [] },
   };
   ensureStatTemplate(char, STAT_SETS[0].id);
   return char;
@@ -417,6 +454,7 @@ function charPoints(c) {
   for (const w of c.weapons || []) { const it = resolveItem(w.itemId); if (it) gold += Number(it.cost || 0); }
   for (const e of c.equipment || []) { const it = resolveItem(e.itemId); if (it) gold += Number(it.cost || 0); }
   for (const pid of c.pack || []) { const it = resolveItem(pid); if (it) gold += Number(it.cost || 0); }
+  if (c.isMage) gold += MAGE_COST;
   return gold;
 }
 
@@ -848,6 +886,197 @@ function renderTraitControls() {
   });
 }
 
+function ensureScrollLibrary(char) {
+  if (!char || typeof char !== 'object') return;
+  if (!char.mageScrolls || typeof char.mageScrolls !== 'object') {
+    char.mageScrolls = { clean: [], unclean: [] };
+  }
+  ['clean', 'unclean'].forEach((key) => {
+    if (!Array.isArray(char.mageScrolls[key])) {
+      const raw = char.mageScrolls[key];
+      if (typeof raw === 'string') {
+        char.mageScrolls[key] = splitLines(raw);
+      } else {
+        char.mageScrolls[key] = Array.isArray(raw) ? raw.filter(Boolean) : [];
+      }
+    }
+  });
+}
+
+function updateScrollDetails(targetId, scroll) {
+  const target = el(targetId);
+  if (!target) return;
+  if (!scroll) {
+    target.textContent = '';
+    return;
+  }
+  const rangeText = `${scroll.range.min}-${scroll.range.max}`;
+  target.textContent = `Roll ${rangeText}: ${scroll.description || 'No description provided.'}`;
+}
+
+function applyScroll(type, scroll) {
+  const char = getSelectedChar();
+  if (!char || !scroll || !char.isMage) return;
+  ensureScrollLibrary(char);
+  const bucket = char.mageScrolls[type];
+  if (!bucket.some((name) => name.toLowerCase() === scroll.name.toLowerCase())) {
+    bucket.push(scroll.name);
+  }
+  renderScrollLists(char);
+  saveState();
+}
+
+function renderScrollLists(char) {
+  const configs = [
+    { type: 'clean', containerId: 'cleanScrollList', empty: 'No clean scrolls prepared.' },
+    { type: 'unclean', containerId: 'uncleanScrollList', empty: 'No unclean scrolls prepared.' },
+  ];
+
+  configs.forEach(({ type, containerId, empty }) => {
+    const container = el(containerId);
+    if (!container) return;
+
+    if (!char) {
+      container.innerHTML = '<div class="muted small">Select a character to manage scrolls.</div>';
+      return;
+    }
+
+    if (!char.isMage) {
+      container.innerHTML = '<div class="muted small">Only mages can prepare scrolls.</div>';
+      return;
+    }
+
+    ensureScrollLibrary(char);
+    const list = char.mageScrolls[type] || [];
+
+    if (!list.length) {
+      container.innerHTML = `<div class="muted small">${empty}</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    list.forEach((name, idx) => {
+      const item = document.createElement('div');
+      item.className = 'trait-item';
+
+      const header = document.createElement('header');
+      const title = document.createElement('span');
+      title.textContent = name;
+      header.appendChild(title);
+
+      const scroll = (scrollData?.[type] || []).find((s) => s.name.toLowerCase() === name.toLowerCase()) || null;
+      if (scroll) {
+        const rangeTag = document.createElement('span');
+        rangeTag.className = 'tag';
+        rangeTag.textContent = `${scroll.range.min}-${scroll.range.max}`;
+        header.appendChild(rangeTag);
+      }
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'ghost';
+      removeBtn.type = 'button';
+      removeBtn.textContent = 'Remove';
+      removeBtn.onclick = () => {
+        char.mageScrolls[type].splice(idx, 1);
+        saveState();
+      };
+      header.appendChild(removeBtn);
+
+      item.appendChild(header);
+
+      const desc = document.createElement('div');
+      desc.className = 'trait-desc';
+      desc.textContent = scroll?.description || 'No description available.';
+      item.appendChild(desc);
+
+      container.appendChild(item);
+    });
+  });
+}
+
+function renderScrollControls() {
+  const config = [
+    { type: 'clean', pickerId: 'cleanScrollPicker', addId: 'addCleanScrollBtn', randId: 'randCleanScrollBtn', detailsId: 'cleanScrollDetails' },
+    { type: 'unclean', pickerId: 'uncleanScrollPicker', addId: 'addUncleanScrollBtn', randId: 'randUncleanScrollBtn', detailsId: 'uncleanScrollDetails' },
+  ];
+  const selectedChar = getSelectedChar();
+
+  config.forEach(({ type, pickerId, addId, randId, detailsId }) => {
+    const picker = el(pickerId);
+    const addBtn = el(addId);
+    const randBtn = el(randId);
+    const details = el(detailsId);
+    const list = scrollData?.[type] || [];
+
+    if (!picker || !addBtn || !randBtn || !details) return;
+
+    const disable = !selectedChar || !selectedChar.isMage;
+
+    if (!list.length) {
+      picker.innerHTML = `<option value="">${scrollsLoaded ? 'Unavailable' : 'Loading...'}</option>`;
+      picker.disabled = true;
+      addBtn.disabled = true;
+      randBtn.disabled = true;
+      details.textContent = scrollsLoaded ? 'Scrolls unavailable.' : 'Loading...';
+      return;
+    }
+
+    if (picker.dataset.version !== String(list.length)) {
+      const prevValue = picker.value;
+      const options = ['<option value="">Select...</option>', ...list.map((scroll) => `<option value="${scroll.id}">${scroll.name}</option>`)].join('');
+      picker.innerHTML = options;
+      picker.dataset.version = String(list.length);
+      if (prevValue && list.find((scroll) => scroll.id === prevValue)) {
+        picker.value = prevValue;
+      } else {
+        picker.value = '';
+      }
+    }
+
+    picker.disabled = disable;
+    addBtn.disabled = disable;
+    randBtn.disabled = disable;
+
+    if (!picker.dataset.bound) {
+      picker.addEventListener('change', () => {
+        const pool = scrollData?.[type] || [];
+        const scroll = pool.find((s) => s.id === picker.value) || null;
+        updateScrollDetails(detailsId, scroll);
+      });
+      addBtn.addEventListener('click', () => {
+        const char = getSelectedChar();
+        if (!char || !char.isMage) return;
+        const pool = scrollData?.[type] || [];
+        const scroll = pool.find((s) => s.id === picker.value) || null;
+        if (scroll) applyScroll(type, scroll);
+      });
+      randBtn.addEventListener('click', () => {
+        const char = getSelectedChar();
+        if (!char || !char.isMage) return;
+        const pool = scrollData?.[type] || [];
+        if (!pool.length) return;
+        ensureScrollLibrary(char);
+        const existing = new Set((char.mageScrolls[type] || []).map((name) => name.toLowerCase()));
+        const available = pool.filter((scroll) => !existing.has(scroll.name.toLowerCase()));
+        const scroll = available.length ? randomFrom(available) : randomFrom(pool);
+        picker.value = scroll.id;
+        updateScrollDetails(detailsId, scroll);
+        applyScroll(type, scroll);
+      });
+      picker.dataset.bound = 'true';
+    }
+
+    if (disable) {
+      picker.value = '';
+      details.textContent = selectedChar ? 'Only mages can prepare scrolls.' : 'Select a character to manage scrolls.';
+      return;
+    }
+
+    const current = (scrollData?.[type] || []).find((s) => s.id === picker.value) || null;
+    updateScrollDetails(detailsId, current);
+  });
+}
+
 function removeFromPack(char, itemId, idxHint) {
   if (!Array.isArray(char.pack)) return;
   if (Number.isInteger(idxHint) && idxHint >= 0 && idxHint < char.pack.length && char.pack[idxHint] === itemId) {
@@ -932,8 +1161,20 @@ function render() {
     fillEditor(selected);
   } else {
     renderTraitLists(null);
+    renderScrollLists(null);
+    const mageToggle = el('isMageToggle');
+    if (mageToggle) {
+      mageToggle.checked = false;
+      mageToggle.disabled = true;
+    }
+    const tragediesInput = el('edTragedies');
+    if (tragediesInput) {
+      tragediesInput.value = 0;
+      tragediesInput.disabled = true;
+    }
   }
   renderTraitControls();
+  renderScrollControls();
 
   // Stash
   const tbody = el('stash');
@@ -1095,6 +1336,16 @@ function setOptions(sel, list) {
   }
   el('edName').value = c.name||'';
   el('edType').value = c.type||'';
+  const mageToggle = el('isMageToggle');
+  if (mageToggle) {
+    mageToggle.checked = !!c.isMage;
+    mageToggle.disabled = false;
+  }
+  const tragediesInput = el('edTragedies');
+  if (tragediesInput) {
+    tragediesInput.value = Number(c.tragedies || 0);
+    tragediesInput.disabled = !c.isMage;
+  }
   el('edArmor').value = c.armor||0;
   el('edHP').value = c.hp||0;
     const showStat = (key) => {
@@ -1109,8 +1360,6 @@ function setOptions(sel, list) {
     el('edPre').value = showStat('pre');
     el('edStr').value = showStat('str');
     el('edTou').value = showStat('tou');
-  el('edClean').value = c.scrolls?.clean || 0;
-  el('edUnclean').value = c.scrolls?.unclean || 0;
   el('edNotes').value = c.notes || '';
   el('edPoints').textContent = charPoints(c);
   const autoCb = document.getElementById('autoArmor'); if (autoCb) autoCb.checked = !!(state.settings && state.settings.autoArmor);
@@ -1126,6 +1375,8 @@ function setOptions(sel, list) {
   renderStatTemplate(c);
   ensureTraitArrays(c);
   renderTraitLists(c);
+  ensureScrollLibrary(c);
+  renderScrollLists(c);
 
   // weapons
   const listW = el('edWeapons'); listW.innerHTML = '';
@@ -1233,8 +1484,6 @@ bindEditorInput('edName', (c,e)=> c.name = e.target.value);
 bindEditorInput('edType', (c,e)=> c.type = e.target.value);
 bindEditorInput('edArmor', (c,e)=> c.armor = Number(e.target.value)||0);
 bindEditorInput('edHP', (c,e)=> c.hp = Number(e.target.value)||0);
-bindEditorInput('edClean', (c,e)=> c.scrolls.clean = Number(e.target.value)||0);
-bindEditorInput('edUnclean', (c,e)=> c.scrolls.unclean = Number(e.target.value)||0);
 bindEditorInput('edNotes', (c,e)=> c.notes = e.target.value);
 
 function bindCustomStatChange(id, key) {
@@ -1260,6 +1509,47 @@ bindCustomStatChange('edAgi', 'agi');
 bindCustomStatChange('edPre', 'pre');
 bindCustomStatChange('edStr', 'str');
 bindCustomStatChange('edTou', 'tou');
+
+const mageToggleCtrl = el('isMageToggle');
+if (mageToggleCtrl) {
+  mageToggleCtrl.addEventListener('change', (e) => {
+    const char = getSelectedChar();
+    if (!char) {
+      e.target.checked = false;
+      return;
+    }
+    if (e.target.checked) {
+      const otherMage = state.chars.find((ch) => ch.id !== char.id && ch.isMage);
+      if (otherMage) {
+        alert('Only one mage may serve the warband at a time.');
+        e.target.checked = false;
+        return;
+      }
+      char.isMage = true;
+      char.tragedies = Number(char.tragedies || 0);
+      ensureScrollLibrary(char);
+    } else {
+      char.isMage = false;
+    }
+    saveState();
+  });
+}
+
+const tragediesCtrl = el('edTragedies');
+if (tragediesCtrl) {
+  tragediesCtrl.addEventListener('change', (e) => {
+    const char = getSelectedChar();
+    const value = Math.max(0, Number(e.target.value) || 0);
+    if (!char || !char.isMage) {
+      e.target.value = char ? Number(char.tragedies || 0) : 0;
+      return;
+    }
+    char.tragedies = value;
+    e.target.value = value;
+    saveState();
+  });
+}
+
 // Auto armor toggle
 document.getElementById('autoArmor').addEventListener('change', (e)=>{ state.settings = state.settings||{}; state.settings.autoArmor = !!e.target.checked; saveState(); });
 
@@ -1333,4 +1623,5 @@ if (!state._seeded) {
 }
 
 loadTraitData();
+loadScrollData();
 render();

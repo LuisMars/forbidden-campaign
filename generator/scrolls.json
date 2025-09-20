@@ -1,0 +1,294 @@
+{
+  "clean": [
+    {
+      "id": "hope-s-last-breath",
+      "name": "Hope's Last Breath",
+      "range": {
+        "min": 11,
+        "max": 11
+      },
+      "description": "Heal a model within 1 inch of the reader for D6 HP. Does not work on Downed or Dead models."
+    },
+    {
+      "id": "will-of-the-optimistic",
+      "name": "Will of the Optimistic",
+      "range": {
+        "min": 12,
+        "max": 12
+      },
+      "description": "Target model adds an extra D6 to the next test they make."
+    },
+    {
+      "id": "not-dead-yet",
+      "name": "Not Dead Yet",
+      "range": {
+        "min": 13,
+        "max": 13
+      },
+      "description": "A Dead model is awakened with 1 HP and gains an additional Flaw."
+    },
+    {
+      "id": "second-wind",
+      "name": "Second Wind",
+      "range": {
+        "min": 14,
+        "max": 14
+      },
+      "description": "Target gains D6 temporary HP until the end of the Scenario. Reduce the reader's maximum HP by 2 each time they cast Hope's Last Breath. Cannot target Downed, Dead, or the reader."
+    },
+    {
+      "id": "visions-of-tomorrow",
+      "name": "Visions of Tomorrow",
+      "range": {
+        "min": 21,
+        "max": 21
+      },
+      "description": "Target model must flee following the Morale rules."
+    },
+    {
+      "id": "shield-of-the-faithless",
+      "name": "Shield of the Faithless",
+      "range": {
+        "min": 22,
+        "max": 22
+      },
+      "description": "Model cannot be targeted by ranged attacks for one round."
+    },
+    {
+      "id": "false-dawn",
+      "name": "False Dawn",
+      "range": {
+        "min": 23,
+        "max": 23
+      },
+      "description": "Target model produces light as if they carried a lantern for five rounds."
+    },
+    {
+      "id": "mind-blast",
+      "name": "Mind Blast",
+      "range": {
+        "min": 24,
+        "max": 24
+      },
+      "description": "Target model must pass a Presence test or becomes Dazed for one round."
+    },
+    {
+      "id": "golden-flare",
+      "name": "Golden Flare",
+      "range": {
+        "min": 31,
+        "max": 31
+      },
+      "description": "Target model must pass a Presence test or becomes Blinded for one round."
+    },
+    {
+      "id": "obey",
+      "name": "Obey",
+      "range": {
+        "min": 32,
+        "max": 32
+      },
+      "description": "Target obeys one command, taking a single action or move it can perform. On failure the reader performs the command under the opponent's control."
+    },
+    {
+      "id": "unbreakable",
+      "name": "Unbreakable",
+      "range": {
+        "min": 33,
+        "max": 33
+      },
+      "description": "Target cannot fail Morale tests for the rest of the Scenario."
+    },
+    {
+      "id": "inmortalium-inventioni",
+      "name": "Inmortalium Inventioni",
+      "range": {
+        "min": 34,
+        "max": 34
+      },
+      "description": "One model of your choice cannot be killed this Scenario. They can still be Downed. On a Fumble the reader is marked for death and automatically dies if Downed."
+    },
+    {
+      "id": "sanctify",
+      "name": "Sanctify",
+      "range": {
+        "min": 41,
+        "max": 41
+      },
+      "description": "Monsters ignore the target for the rest of the Scenario unless the target attacks them. On a Fumble the Laughing Man appears and targets the reader."
+    },
+    {
+      "id": "bow-of-skadi",
+      "name": "Bow of Skadi",
+      "range": {
+        "min": 42,
+        "max": 42
+      },
+      "description": "Target increases the range of all ranged attacks by 3 inches for this Scenario."
+    },
+    {
+      "id": "danse-macabre",
+      "name": "Danse Macabre",
+      "range": {
+        "min": 43,
+        "max": 43
+      },
+      "description": "Target must make a Presence test or loses movement for the rest of the Scenario while dancing in place. Fumbles make the reader dance instead. Dancing models can spend an action to attempt a Presence test to stop."
+    },
+    {
+      "id": "visions-of-the-future",
+      "name": "Visions of the Future",
+      "range": {
+        "min": 44,
+        "max": 44
+      },
+      "description": "Target can reroll one test this Scenario."
+    }
+  ],
+  "unclean": [
+    {
+      "id": "flaming-hands-of-st-vilmarex",
+      "name": "Flaming Hands of St Vilmarex",
+      "range": {
+        "min": 11,
+        "max": 11
+      },
+      "description": "Reader hurls a ball of fire at a visible enemy, dealing D6 damage [Cruel]."
+    },
+    {
+      "id": "mindless-eyes",
+      "name": "Mindless Eyes",
+      "range": {
+        "min": 12,
+        "max": 12
+      },
+      "description": "Target model becomes deranged and must pass a Presence test or attack the nearest model."
+    },
+    {
+      "id": "invisible-hands",
+      "name": "Invisible Hands",
+      "range": {
+        "min": 13,
+        "max": 13
+      },
+      "description": "Move a dropped Weapon or Treasure up to D12 inches."
+    },
+    {
+      "id": "ungrounded",
+      "name": "Ungrounded",
+      "range": {
+        "min": 14,
+        "max": 14
+      },
+      "description": "Target hovers for one round, ignoring terrain and moving at twice normal speed."
+    },
+    {
+      "id": "breath-of-the-undying",
+      "name": "Breath of the Undying",
+      "range": {
+        "min": 21,
+        "max": 21
+      },
+      "description": "Target begins to suffocate and takes D4 damage when activated. They must pass a Presence test as an action to remove the effect."
+    },
+    {
+      "id": "one-eyed-king",
+      "name": "One-Eyed King",
+      "range": {
+        "min": 22,
+        "max": 22
+      },
+      "description": "Target becomes invisible and cannot be targeted by attacks, spells, or Monsters until they make any test."
+    },
+    {
+      "id": "bones-them-damn-bones",
+      "name": "Bones, Them Damn Bones",
+      "range": {
+        "min": 23,
+        "max": 23
+      },
+      "description": "Summon a Skeleton at a target point. It attacks the nearest model but never the reader. On a failed cast it still appears and hunts the reader. If the reader dies the Skeleton leaves the board."
+    },
+    {
+      "id": "eternal-sleep",
+      "name": "Eternal Sleep",
+      "range": {
+        "min": 24,
+        "max": 24
+      },
+      "description": "Target must pass a Presence test or fall asleep. Sleeping models cannot activate until woken by damage or an ally's action."
+    },
+    {
+      "id": "ride-the-lightning",
+      "name": "Ride the Lightning",
+      "range": {
+        "min": 31,
+        "max": 31
+      },
+      "description": "Strike a target within 12 inches for D6 damage that ignores Armor."
+    },
+    {
+      "id": "lost-at-sea",
+      "name": "Lost at Sea",
+      "range": {
+        "min": 32,
+        "max": 32
+      },
+      "description": "Target must pass a DR4 Presence test or be removed from play and make a Death Save. On a failed cast the reader takes the test instead. Cast once per Scenario."
+    },
+    {
+      "id": "doom",
+      "name": "Doom",
+      "range": {
+        "min": 33,
+        "max": 33
+      },
+      "description": "All models within 12 inches, including allies and the reader, must pass a Presence test or take D10 damage ignoring Armor. Any failed cast counts as a Fumble."
+    },
+    {
+      "id": "boil-the-blood",
+      "name": "Boil the Blood",
+      "range": {
+        "min": 34,
+        "max": 34
+      },
+      "description": "Target makes a Toughness test. On failure their blood boils, dealing D8 damage that ignores Armor."
+    },
+    {
+      "id": "vocare-cattus",
+      "name": "Vocare Cattus",
+      "range": {
+        "min": 41,
+        "max": 41
+      },
+      "description": "Summon the Cath Palug. This is not recommended."
+    },
+    {
+      "id": "miasma",
+      "name": "Miasma",
+      "range": {
+        "min": 42,
+        "max": 42
+      },
+      "description": "Target becomes Diseased and is surrounded by a 1 inch gas cloud on all sides."
+    },
+    {
+      "id": "soul-bind",
+      "name": "Soul Bind",
+      "range": {
+        "min": 43,
+        "max": 43
+      },
+      "description": "Bind the soul of a model killed this Scenario to the reader. Bound souls can be sold after the battle for Gold equal to the model's HP."
+    },
+    {
+      "id": "chaos",
+      "name": "Chaos",
+      "range": {
+        "min": 44,
+        "max": 44
+      },
+      "description": "Roll to determine a random Unclean Scroll and immediately attempt to cast it. Choose targets after determining the Scroll."
+    }
+  ]
+}

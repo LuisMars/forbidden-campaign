@@ -134,6 +134,19 @@
       .trait-controls button {
         flex-shrink: 0;
       }
+      .trait-section {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .trait-section h4 {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
       .trait-list {
         display: flex;
         flex-direction: column;
