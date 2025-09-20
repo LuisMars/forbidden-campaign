@@ -21,7 +21,7 @@ const NAMES = [ 'Danbert','Nifehl','Doodlplex','El Bobo','Hald','Pannoyed','Dugn
 const TYPES = ['Mercenary','Zealot','Brute','Acolyte','Scoundrel'];
 const TRAITS_PATH = 'traits.json';
 const SCROLLS_PATH = 'scrolls.json';
-const MAGE_COST = 5;
+const SPELLCASTER_COST = 5;
 
 let traitData = { feats: [], flaws: [] };
 let traitsLoaded = false;
@@ -444,7 +444,7 @@ function charPoints(c) {
   for (const w of c.weapons || []) { const it = resolveItem(w.itemId); if (it) gold += Number(it.cost || 0); }
   for (const e of c.equipment || []) { const it = resolveItem(e.itemId); if (it) gold += Number(it.cost || 0); }
   for (const pid of c.pack || []) { const it = resolveItem(pid); if (it) gold += Number(it.cost || 0); }
-  if (c.isMage) gold += MAGE_COST;
+  if (c.isMage) gold += SPELLCASTER_COST;
   return gold;
 }
 
@@ -1162,6 +1162,8 @@ function render() {
       tragediesInput.value = 0;
       tragediesInput.disabled = true;
     }
+    const tragediesLabel = el('tragediesLabel');
+    if (tragediesLabel) tragediesLabel.style.display = 'none';
   }
   renderTraitControls();
   renderScrollControls();
@@ -1390,6 +1392,10 @@ function setOptions(sel, list) {
     tragediesInput.value = Number(c.tragedies || 0);
     tragediesInput.disabled = !c.isMage;
   }
+  const tragediesLabel = el('tragediesLabel');
+  if (tragediesLabel) {
+    tragediesLabel.style.display = c.isMage ? '' : 'none';
+  }
   el('edArmor').value = c.armor||0;
   el('edHP').value = c.hp||0;
     const showStat = (key) => {
@@ -1565,7 +1571,7 @@ if (mageToggleCtrl) {
     if (e.target.checked) {
       const otherMage = state.chars.find((ch) => ch.id !== char.id && ch.isMage);
       if (otherMage) {
-        alert('Only one mage may serve the warband at a time.');
+        alert('Only one spellcaster may serve the warband at a time.');
         e.target.checked = false;
         return;
       }

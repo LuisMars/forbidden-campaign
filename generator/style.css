@@ -8,6 +8,10 @@
   --accent: #d23b3b;
   --bad: #e45858;
   --good: #4ad295;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
 }
 
 * {
@@ -72,8 +76,8 @@ h4 {
   align-items: start;
   grid-template-columns: minmax(260px, 1fr) minmax(480px, 2fr);
   grid-template-areas:
-    'stash editor'
-    'warband editor';
+    'warband editor'
+    'stash editor';
 }
 
 #stashCard { grid-area: stash; }
@@ -83,7 +87,7 @@ h4 {
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 18px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset, 0 6px 16px rgba(0, 0, 0, 0.35);
 }
@@ -108,7 +112,7 @@ h4 {
 
 .stash-row {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.02);
   padding: 12px 14px;
   display: flex;
@@ -186,7 +190,7 @@ textarea {
   background: #0f0f0f;
   border: 1px solid #333;
   color: var(--ink);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 10px 12px;
   font: inherit;
   min-height: 40px;
@@ -207,7 +211,7 @@ button {
   background: var(--accent);
   border: 1px solid #8b2020;
   color: #fff;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 10px 14px;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -260,7 +264,7 @@ button:active {
   background: #111;
   border: 1px solid var(--border);
   padding: 8px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-size: 0.8rem;
   color: var(--ink);
 }
@@ -324,7 +328,7 @@ button:active {
   gap: 6px;
   background: #111;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
 }
 
@@ -347,7 +351,7 @@ button:active {
 }
 
 .stat-chip {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   padding: 6px 12px;
   background: #111;
@@ -369,7 +373,7 @@ button:active {
 
 .stat-template-panel {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel-alt);
   overflow: hidden;
 }
@@ -529,8 +533,8 @@ details > summary {
     grid-template-columns: 1fr;
     grid-template-areas:
       'warband'
-      'editor'
-      'stash';
+      'stash'
+      'editor';
   }
 
   button,
