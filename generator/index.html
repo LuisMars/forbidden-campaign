@@ -70,11 +70,23 @@
             <div class="grid2">
               <div>
                 <h3>Feats</h3>
-                <textarea id="edFeats" placeholder="One per line"></textarea>
+                <div class="row trait-controls">
+                  <select id="featPicker"></select>
+                  <button id="addFeatBtn" type="button">Add</button>
+                  <button id="randFeatBtn" class="ghost" type="button">Random</button>
+                </div>
+                <div id="featDetails" class="muted small"></div>
+                <div id="featList" class="trait-list"></div>
               </div>
               <div>
                 <h3>Flaws</h3>
-                <textarea id="edFlaws" placeholder="One per line"></textarea>
+                <div class="row trait-controls">
+                  <select id="flawPicker"></select>
+                  <button id="addFlawBtn" type="button">Add</button>
+                  <button id="randFlawBtn" class="ghost" type="button">Random</button>
+                </div>
+                <div id="flawDetails" class="muted small"></div>
+                <div id="flawList" class="trait-list"></div>
               </div>
             </div>
             <div class="sep"></div>

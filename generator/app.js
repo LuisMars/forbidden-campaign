@@ -70,6 +70,10 @@ const STAT_KEYS = [
 const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const NAMES = [ 'Danbert','Nifehl','Doodlplex','El Bobo','Hald','Pannoyed','Dugnutt','Tauk','Kvali','Gride','Dug','Saint','Andrew','Tim','Vlan Bator','Esheg','Abathur','Jack','Sven','Anja','Toomas','Marek','Storm','Reed','Nohr' ];
 const TYPES = ['Mercenary','Zealot','Brute','Acolyte','Scoundrel'];
+const TRAITS_PATH = 'traits.json';
+
+let traitData = { feats: [], flaws: [] };
+let traitsLoaded = false;
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
@@ -146,6 +150,10 @@ function updateStatsFromAssignments(char) {
       char.stats[key] = Number.isFinite(val) ? val : 0;
     }
   });
+}
+
+function getSelectedChar() {
+  return state.chars.find((c) => c.id === state.selectedId) || null;
 }
 
 function assignmentUsage(assignments) {
@@ -264,6 +272,23 @@ function ensureStatTemplate(char, setId) {
   updateStatsFromAssignments(char);
 }
 
+function loadTraitData() {
+  fetch(TRAITS_PATH)
+    .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Failed to load traits: ${res.status}`))))
+    .then((data) => {
+      traitData = {
+        feats: Array.isArray(data?.feats) ? data.feats : [],
+        flaws: Array.isArray(data?.flaws) ? data.flaws : [],
+      };
+      traitsLoaded = true;
+      render();
+    })
+    .catch((err) => {
+      console.error(err);
+      traitsLoaded = true;
+    });
+}
+
 function loadState() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
 }
@@ -298,6 +323,12 @@ function normalizeState() {
     ch.weapons = Array.isArray(ch.weapons) ? ch.weapons.filter(w => w && validIds.has(w.itemId)) : [];
     ch.equipment = Array.isArray(ch.equipment) ? ch.equipment.filter(e => e && validIds.has(e.itemId)) : [];
     ch.pack = Array.isArray(ch.pack) ? ch.pack.filter(id => validIds.has(id)) : [];
+    if (!Array.isArray(ch.feats)) {
+      ch.feats = Array.isArray(ch.feats) ? ch.feats : splitLines(String(ch.feats || ''));
+    }
+    if (!Array.isArray(ch.flaws)) {
+      ch.flaws = Array.isArray(ch.flaws) ? ch.flaws : splitLines(String(ch.flaws || ''));
+    }
     if (ch.statTemplate && ch.statTemplate.id) {
       ensureStatTemplate(ch, ch.statTemplate.id);
     }
@@ -446,6 +477,7 @@ function renderStatTemplate(char) {
     if (!value) {
       char.statTemplate = { id: null, assignments: {}, locked: false };
       setStatInputsReadonly(false);
+      saveState();
       render();
       return;
     }
@@ -644,6 +676,178 @@ function renderStatTemplate(char) {
   }
 }
 
+function ensureTraitArrays(char) {
+  if (!Array.isArray(char.feats)) char.feats = [];
+  if (!Array.isArray(char.flaws)) char.flaws = [];
+}
+
+function updateTraitDetails(targetId, trait) {
+  const target = el(targetId);
+  if (!target) return;
+  if (!trait) {
+    target.textContent = '';
+    return;
+  }
+  const rangeText = `${trait.range.min}-${trait.range.max}`;
+  const desc = trait.description ? trait.description : 'No description provided.';
+  target.textContent = `Roll ${rangeText}: ${desc}`;
+}
+
+function applyTrait(type, trait) {
+  const char = getSelectedChar();
+  if (!char || !trait) return;
+  const key = type === 'feats' ? 'feats' : 'flaws';
+  ensureTraitArrays(char);
+  if (!char[key].some((name) => name.toLowerCase() === trait.name.toLowerCase())) {
+    char[key].push(trait.name);
+  }
+  renderTraitLists(char);
+  saveState();
+}
+
+function renderTraitLists(char) {
+  const configs = [
+    { type: 'feats', key: 'feats', containerId: 'featList', empty: 'No feats selected.' },
+    { type: 'flaws', key: 'flaws', containerId: 'flawList', empty: 'No flaws selected.' },
+  ];
+
+  configs.forEach(({ type, key, containerId, empty }) => {
+    const container = el(containerId);
+    if (!container) return;
+
+    if (!char) {
+      container.innerHTML = '<div class="muted small">Select a character to manage traits.</div>';
+      return;
+    }
+
+    ensureTraitArrays(char);
+    const names = Array.isArray(char[key]) ? char[key] : [];
+
+    if (!names.length) {
+      container.innerHTML = `<div class="muted small">${empty}</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+
+    names.forEach((name, idx) => {
+      const item = document.createElement('div');
+      item.className = 'trait-item';
+
+      const header = document.createElement('header');
+      const title = document.createElement('span');
+      title.textContent = name;
+      header.appendChild(title);
+
+      const trait = (traitData?.[type] || []).find((t) => t.name.toLowerCase() === name.toLowerCase()) || null;
+      if (trait && trait.range) {
+        const rangeTag = document.createElement('span');
+        rangeTag.className = 'tag';
+        rangeTag.textContent = `${trait.range.min}-${trait.range.max}`;
+        header.appendChild(rangeTag);
+      }
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'ghost';
+      removeBtn.type = 'button';
+      removeBtn.textContent = 'Remove';
+      removeBtn.onclick = () => {
+        char[key].splice(idx, 1);
+        saveState();
+      };
+      header.appendChild(removeBtn);
+
+      item.appendChild(header);
+
+      const desc = document.createElement('div');
+      desc.className = 'trait-desc';
+      desc.textContent = trait?.description || 'No description available.';
+      item.appendChild(desc);
+
+      container.appendChild(item);
+    });
+  });
+}
+
+function renderTraitControls() {
+  const config = [
+    { type: 'feats', pickerId: 'featPicker', addId: 'addFeatBtn', randId: 'randFeatBtn', detailsId: 'featDetails' },
+    { type: 'flaws', pickerId: 'flawPicker', addId: 'addFlawBtn', randId: 'randFlawBtn', detailsId: 'flawDetails' },
+  ];
+  const selectedChar = getSelectedChar();
+
+  config.forEach(({ type, pickerId, addId, randId, detailsId }) => {
+    const picker = el(pickerId);
+    const addBtn = el(addId);
+    const randBtn = el(randId);
+    const details = el(detailsId);
+    const list = traitData?.[type] || [];
+
+    if (!picker || !addBtn || !randBtn || !details) return;
+
+    const disable = !selectedChar;
+
+    if (!list.length) {
+      picker.innerHTML = `<option value="">${traitsLoaded ? 'Unavailable' : 'Loading...'}</option>`;
+      picker.disabled = true;
+      addBtn.disabled = true;
+      randBtn.disabled = true;
+      details.textContent = traitsLoaded ? 'Traits unavailable.' : 'Loading...';
+      return;
+    }
+
+    if (picker.dataset.version !== String(list.length)) {
+      const prevValue = picker.value;
+      const options = ['<option value="">Select...</option>', ...list.map((trait) => `<option value="${trait.id}">${trait.name}</option>`)].join('');
+      picker.innerHTML = options;
+      picker.dataset.version = String(list.length);
+      if (prevValue && list.find((trait) => trait.id === prevValue)) {
+        picker.value = prevValue;
+      } else {
+        picker.value = '';
+      }
+    }
+
+    picker.disabled = disable;
+    addBtn.disabled = disable;
+    randBtn.disabled = disable;
+
+    if (!picker.dataset.bound) {
+      picker.addEventListener('change', () => {
+        const pool = traitData?.[type] || [];
+        const trait = pool.find((t) => t.id === picker.value) || null;
+        updateTraitDetails(detailsId, trait);
+      });
+      addBtn.addEventListener('click', () => {
+        const pool = traitData?.[type] || [];
+        const trait = pool.find((t) => t.id === picker.value) || null;
+        if (trait) applyTrait(type, trait);
+      });
+      randBtn.addEventListener('click', () => {
+        const char = getSelectedChar();
+        if (!char) return;
+        const pool = traitData?.[type] || [];
+        if (!pool.length) return;
+        const existing = new Set((Array.isArray(char[type]) ? char[type] : []).map((name) => name.toLowerCase()));
+        const available = pool.filter((trait) => !existing.has(trait.name.toLowerCase()));
+        const trait = available.length ? randomFrom(available) : randomFrom(pool);
+        picker.value = trait.id;
+        updateTraitDetails(detailsId, trait);
+        applyTrait(type, trait);
+      });
+      picker.dataset.bound = 'true';
+    }
+
+    if (disable) {
+      picker.value = '';
+      details.textContent = 'Select a character to manage traits.';
+      return;
+    }
+
+    updateTraitDetails(detailsId, list.find((t) => t.id === picker.value) || null);
+  });
+}
+
 function removeFromPack(char, itemId, idxHint) {
   if (!Array.isArray(char.pack)) return;
   if (Number.isInteger(idxHint) && idxHint >= 0 && idxHint < char.pack.length && char.pack[idxHint] === itemId) {
@@ -724,7 +928,12 @@ function render() {
   const selected = state.chars.find(c => c.id === state.selectedId);
   el('editor').style.display = selected ? '' : 'none';
   el('noSelection').style.display = selected ? 'none' : '';
-  if (selected) fillEditor(selected);
+  if (selected) {
+    fillEditor(selected);
+  } else {
+    renderTraitLists(null);
+  }
+  renderTraitControls();
 
   // Stash
   const tbody = el('stash');
@@ -900,8 +1109,6 @@ function setOptions(sel, list) {
     el('edPre').value = showStat('pre');
     el('edStr').value = showStat('str');
     el('edTou').value = showStat('tou');
-  el('edFeats').value = (c.feats||[]).join('\n');
-  el('edFlaws').value = (c.flaws||[]).join('\n');
   el('edClean').value = c.scrolls?.clean || 0;
   el('edUnclean').value = c.scrolls?.unclean || 0;
   el('edNotes').value = c.notes || '';
@@ -917,6 +1124,8 @@ function setOptions(sel, list) {
   }
 
   renderStatTemplate(c);
+  ensureTraitArrays(c);
+  renderTraitLists(c);
 
   // weapons
   const listW = el('edWeapons'); listW.innerHTML = '';
@@ -1015,13 +1224,15 @@ el('randChar').onclick = () => {
 };
 
 // Editor bindings
-function bindEditorInput(id, apply) { el(id).addEventListener('input', (e)=>{ const c=state.chars.find(x=>x.id===state.selectedId); if(!c) return; apply(c, e); saveState(); }); }
+function bindEditorInput(id, apply) {
+  const input = el(id);
+  if (!input) return;
+  input.addEventListener('input', (e)=>{ const c=state.chars.find(x=>x.id===state.selectedId); if(!c) return; apply(c, e); saveState(); });
+}
 bindEditorInput('edName', (c,e)=> c.name = e.target.value);
 bindEditorInput('edType', (c,e)=> c.type = e.target.value);
 bindEditorInput('edArmor', (c,e)=> c.armor = Number(e.target.value)||0);
 bindEditorInput('edHP', (c,e)=> c.hp = Number(e.target.value)||0);
-bindEditorInput('edFeats', (c,e)=> c.feats = splitLines(e.target.value));
-bindEditorInput('edFlaws', (c,e)=> c.flaws = splitLines(e.target.value));
 bindEditorInput('edClean', (c,e)=> c.scrolls.clean = Number(e.target.value)||0);
 bindEditorInput('edUnclean', (c,e)=> c.scrolls.unclean = Number(e.target.value)||0);
 bindEditorInput('edNotes', (c,e)=> c.notes = e.target.value);
@@ -1030,7 +1241,7 @@ function bindCustomStatChange(id, key) {
   const input = el(id);
   if (!input) return;
   input.addEventListener('change', (e) => {
-    const c = state.chars.find(x => x.id === state.selectedId);
+    const c = getSelectedChar();
     if (!c) return;
     const tmpl = c.statTemplate;
     const templateActive = !!(tmpl && ((tmpl.draft && tmpl.draft.id) || tmpl.id));
@@ -1121,4 +1332,5 @@ if (!state._seeded) {
   state._seeded = true;
 }
 
+loadTraitData();
 render();

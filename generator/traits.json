@@ -1,0 +1,456 @@
+{
+  "flaws": [
+    {
+      "id": "cursed",
+      "name": "Cursed",
+      "range": {
+        "min": 1,
+        "max": 4
+      },
+      "description": "Roll two more times and apply all results."
+    },
+    {
+      "id": "gammy-foot",
+      "name": "Gammy Foot",
+      "range": {
+        "min": 5,
+        "max": 8
+      },
+      "description": "Suffers -1 to movement."
+    },
+    {
+      "id": "brittle-bones",
+      "name": "Brittle Bones",
+      "range": {
+        "min": 9,
+        "max": 12
+      },
+      "description": "+1 damage received when hit."
+    },
+    {
+      "id": "putrid-smell",
+      "name": "Putrid Smell",
+      "range": {
+        "min": 13,
+        "max": 16
+      },
+      "description": "All other models within 3\" suffer -1 to Presence tests."
+    },
+    {
+      "id": "weak-hands",
+      "name": "Weak Hands",
+      "range": {
+        "min": 17,
+        "max": 20
+      },
+      "description": "Can only wield One-Handed Weapons. Cannot use a Shield or Torch while holding a Weapon."
+    },
+    {
+      "id": "greasy-hands",
+      "name": "Greasy Hands",
+      "range": {
+        "min": 21,
+        "max": 24
+      },
+      "description": "-1 to all Agility tests."
+    },
+    {
+      "id": "one-eyed",
+      "name": "One Eyed",
+      "range": {
+        "min": 25,
+        "max": 28
+      },
+      "description": "-1 on all ranged attacks and all spells."
+    },
+    {
+      "id": "malnutrition",
+      "name": "Malnutrition",
+      "range": {
+        "min": 29,
+        "max": 32
+      },
+      "description": "-1 to all Strength tests."
+    },
+    {
+      "id": "scared-of-heights",
+      "name": "Scared of Heights",
+      "range": {
+        "min": 33,
+        "max": 36
+      },
+      "description": "Cannot climb or jump."
+    },
+    {
+      "id": "angry",
+      "name": "Angry",
+      "range": {
+        "min": 37,
+        "max": 40
+      },
+      "description": "If a non-friendly model is within line of sight this model must move towards it and make an attack if possible. Uses its action and movement."
+    },
+    {
+      "id": "weak-bodied",
+      "name": "Weak Bodied",
+      "range": {
+        "min": 41,
+        "max": 44
+      },
+      "description": "-1 HP."
+    },
+    {
+      "id": "vacant-mind",
+      "name": "Vacant Mind",
+      "range": {
+        "min": 45,
+        "max": 48
+      },
+      "description": "Never collects Treasure or Items from the battlefield."
+    },
+    {
+      "id": "allergic-to-metal",
+      "name": "Allergic To Metal",
+      "range": {
+        "min": 49,
+        "max": 52
+      },
+      "description": "Cannot wear metal Armor."
+    },
+    {
+      "id": "squeamish",
+      "name": "Squeamish",
+      "range": {
+        "min": 53,
+        "max": 56
+      },
+      "description": "-1 damage dealt to others."
+    },
+    {
+      "id": "slow-learner",
+      "name": "Slow Learner",
+      "range": {
+        "min": 57,
+        "max": 60
+      },
+      "description": "+1 XP required to level up."
+    },
+    {
+      "id": "scared-of-monsters",
+      "name": "Scared of Monsters",
+      "range": {
+        "min": 61,
+        "max": 64
+      },
+      "description": "-1 to attack Monsters and Beasts."
+    },
+    {
+      "id": "loner",
+      "name": "Loner",
+      "range": {
+        "min": 65,
+        "max": 68
+      },
+      "description": "-1 on all tests when within 2\" of a friendly model."
+    },
+    {
+      "id": "realist",
+      "name": "Realist",
+      "range": {
+        "min": 69,
+        "max": 72
+      },
+      "description": "Cannot use Omens."
+    },
+    {
+      "id": "poor-morale",
+      "name": "Poor Morale",
+      "range": {
+        "min": 73,
+        "max": 76
+      },
+      "description": "Must make a Morale test whenever they take damage."
+    },
+    {
+      "id": "newbie",
+      "name": "Newbie",
+      "range": {
+        "min": 77,
+        "max": 80
+      },
+      "description": "Gain no Flaw and no Feat."
+    },
+    {
+      "id": "luddite",
+      "name": "Luddite",
+      "range": {
+        "min": 81,
+        "max": 84
+      },
+      "description": "Cannot use Weapons that Explode."
+    },
+    {
+      "id": "scared-of-dying",
+      "name": "Scared of Dying",
+      "range": {
+        "min": 85,
+        "max": 88
+      },
+      "description": "When any warband member dies, this model auto-fails a Morale test."
+    },
+    {
+      "id": "steady-on",
+      "name": "Steady On",
+      "range": {
+        "min": 89,
+        "max": 92
+      },
+      "description": "Can only move once per activation."
+    },
+    {
+      "id": "one-foot-in-the-grave",
+      "name": "One Foot in the Grave",
+      "range": {
+        "min": 93,
+        "max": 96
+      },
+      "description": "If Downed, this model auto-fails Death Saves."
+    },
+    {
+      "id": "dutch-courage",
+      "name": "Dutch Courage",
+      "range": {
+        "min": 97,
+        "max": 100
+      },
+      "description": "Must have Whisky equipped to participate in a Scenario."
+    }
+  ],
+  "feats": [
+    {
+      "id": "intimidating-presence",
+      "name": "Intimidating Presence",
+      "range": {
+        "min": 1,
+        "max": 4
+      },
+      "description": "As an action, force an enemy model to make a Presence test. On failure you may move that model as if it were yours, or make it drop a weapon."
+    },
+    {
+      "id": "slippery-when-wet",
+      "name": "Slippery When Wet",
+      "range": {
+        "min": 5,
+        "max": 8
+      },
+      "description": "Model automatically leaves combat."
+    },
+    {
+      "id": "cowardly",
+      "name": "Cowardly",
+      "range": {
+        "min": 9,
+        "max": 12
+      },
+      "description": "Model suffers -1 on all Morale tests but gains +1 Agility."
+    },
+    {
+      "id": "meathead",
+      "name": "Meathead",
+      "range": {
+        "min": 13,
+        "max": 16
+      },
+      "description": "+2 Strength and -1 Presence."
+    },
+    {
+      "id": "mind-over-matter",
+      "name": "Mind Over Matter",
+      "range": {
+        "min": 17,
+        "max": 20
+      },
+      "description": "May make a Presence test to ignore D4 damage each time they are hit."
+    },
+    {
+      "id": "through-gritted-teeth",
+      "name": "Through Gritted Teeth",
+      "range": {
+        "min": 21,
+        "max": 24
+      },
+      "description": "May make a Presence test to avoid being Downed once per Scenario, remaining standing with 1 HP."
+    },
+    {
+      "id": "revolting-appearance",
+      "name": "Revolting Appearance",
+      "range": {
+        "min": 25,
+        "max": 28
+      },
+      "description": "Enemies suffer -1 to hit this model."
+    },
+    {
+      "id": "what-we-do-in-the-shadows",
+      "name": "What We Do in the Shadows",
+      "range": {
+        "min": 29,
+        "max": 32
+      },
+      "description": "Heal by drinking the blood of others. Make a melee attack and heal damage dealt. Gain Teeth [D4] [Agility] [Cruel]. Cannot be healed by any other means."
+    },
+    {
+      "id": "hard-to-see",
+      "name": "Hard to See",
+      "range": {
+        "min": 33,
+        "max": 36
+      },
+      "description": "Cannot be targeted by enemy ranged attacks and cannot make ranged attacks. Spells work as normal."
+    },
+    {
+      "id": "tough-as-nails",
+      "name": "Tough as Nails",
+      "range": {
+        "min": 37,
+        "max": 40
+      },
+      "description": "+2 HP and -1 Agility."
+    },
+    {
+      "id": "marksman",
+      "name": "Marksman",
+      "range": {
+        "min": 41,
+        "max": 44
+      },
+      "description": "Increase range by 3\" when using ranged weapons."
+    },
+    {
+      "id": "vaccinated",
+      "name": "Vaccinated",
+      "range": {
+        "min": 45,
+        "max": 48
+      },
+      "description": "Immune to Diseased."
+    },
+    {
+      "id": "rat-catcher",
+      "name": "Rat Catcher",
+      "range": {
+        "min": 49,
+        "max": 52
+      },
+      "description": "Gains a free Bag o\u2019 Rats."
+    },
+    {
+      "id": "alchemist",
+      "name": "Alchemist",
+      "range": {
+        "min": 53,
+        "max": 56
+      },
+      "description": "Starts each Scenario with a Potion."
+    },
+    {
+      "id": "animal-lover",
+      "name": "Animal Lover",
+      "range": {
+        "min": 57,
+        "max": 60
+      },
+      "description": "Warband pays half cost to recruit Pets."
+    },
+    {
+      "id": "scavenger",
+      "name": "Scavenger",
+      "range": {
+        "min": 61,
+        "max": 64
+      },
+      "description": "Makes two Treasure Rolls when searching and takes both results if slots are free. Excess Items are left on the ground."
+    },
+    {
+      "id": "barkskin",
+      "name": "Barkskin",
+      "range": {
+        "min": 65,
+        "max": 68
+      },
+      "description": "+1 Armor from tough skin but -1 Agility."
+    },
+    {
+      "id": "clawed-nails",
+      "name": "Clawed Nails",
+      "range": {
+        "min": 69,
+        "max": 72
+      },
+      "description": "Replace Fists with Claws [D6][Agility]."
+    },
+    {
+      "id": "swindler",
+      "name": "Swindler",
+      "range": {
+        "min": 73,
+        "max": 76
+      },
+      "description": "At the end of a Scenario, if they survive Death Saves they gain one free Treasure Roll."
+    },
+    {
+      "id": "medic",
+      "name": "Medic",
+      "range": {
+        "min": 77,
+        "max": 80
+      },
+      "description": "As an action, make a Presence test to heal one Downed model in line of sight. That model returns with 1 HP."
+    },
+    {
+      "id": "improvised-fighter",
+      "name": "Improvised Fighter",
+      "range": {
+        "min": 81,
+        "max": 84
+      },
+      "description": "As an action, can make a One-Handed Makeshift Weapon mid-Scenario."
+    },
+    {
+      "id": "shield-bash",
+      "name": "Shield Bash",
+      "range": {
+        "min": 85,
+        "max": 88
+      },
+      "description": "Deals +2 damage in melee when equipped with a Shield."
+    },
+    {
+      "id": "lucky-goblin-foot",
+      "name": "Lucky Goblin Foot",
+      "range": {
+        "min": 89,
+        "max": 92
+      },
+      "description": "May reroll any one die roll per Scenario but has -1 Equipment slot."
+    },
+    {
+      "id": "charge",
+      "name": "Charge",
+      "range": {
+        "min": 93,
+        "max": 96
+      },
+      "description": "May move twice its movement value but must end within 1\" of an enemy; otherwise moves as normal."
+    },
+    {
+      "id": "feint-disarm",
+      "name": "Feint/Disarm",
+      "range": {
+        "min": 97,
+        "max": 100
+      },
+      "description": "When attacked in melee may make an Agility test to Feint instead of striking back. On success avoids damage; if the attacker also fails to hit they are disarmed and drop their weapon."
+    }
+  ]
+}
