@@ -14,14 +14,16 @@
   <body>
     <div class="wrap">
       <h1>Forbidden Psalm – Warband Builder</h1>
+      <h2 id="warbandTitle" class="warband-title" style="display:none"></h2>
       <div class="sub">Editable warband roster with stash and gold costs. Data persists locally.</div>
       <div class="grid">
         <div class="column-left">
           <!-- Left: Warband + Stash -->
           <section class="card" id="warbandCard">
             <h2>Warband</h2>
-            <div class="row">
-              <input id="wbName" type="text" placeholder="Warband name" />
+            <div class="row warband-row">
+              <input id="wbName" type="text" class="warband-input" placeholder="Warband name" />
+              <button id="randWbName" type="button" class="ghost warband-rand" title="Generate a random warband name">Random name</button>
             </div>
             <div class="row">
               <label class="pill">Gold Limit <input id="wbLimit" type="number" min="0" step="1" style="width:100px"/></label>

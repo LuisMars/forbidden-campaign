@@ -586,3 +586,26 @@ details > summary {
     font-size: 1.2rem;
   }
 }
+#warbandTitle {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-family: 'New Rocker', cursive;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.warband-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.warband-input {
+  flex: 1 1 100%;
+  min-width: 220px;
+}
+
+.warband-rand {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}

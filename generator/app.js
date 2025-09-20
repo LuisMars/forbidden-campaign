@@ -20,7 +20,13 @@ const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const TRAITS_PATH = 'traits.json';
 const SCROLLS_PATH = 'scrolls.json';
 const NAMES_PATH = 'names.json';
+const PERCHANCE_PATH = 'perchance.txt';
 const SPELLCASTER_COST = 5;
+
+const WARBAND_IMPORT_FALLBACKS = {
+  color: ['Crimson', 'Umber', 'Ivory', 'Sable', 'Verdant', 'Ochre'],
+  animal: ['Raven', 'Goat', 'Serpent', 'Wolf', 'Rat', 'Moth'],
+};
 
 let traitData = { feats: [], flaws: [] };
 let traitsLoaded = false;
@@ -28,6 +34,8 @@ let scrollData = { clean: [], unclean: [] };
 let scrollsLoaded = false;
 let nameParts = { first: [], second: [] };
 let namesLoaded = false;
+let warbandNameData = null;
+let warbandNamePromise = null;
 const FALLBACK_FIRST = ['Nohr', 'Ash', 'Saint', 'Dire'];
 const FALLBACK_SECOND = ['the Wanderer', 'the Dire', 'the Returned', 'the Merciful'];
 let seedCatalog = [];
@@ -509,6 +517,125 @@ function randomName() {
   const first = nameParts.first.length ? nameParts.first : FALLBACK_FIRST;
   const second = nameParts.second.length ? nameParts.second : FALLBACK_SECOND;
   return `${randomFrom(first)} ${randomFrom(second)}`.replace(/\s+/g, ' ').trim();
+}
+
+function defaultWarbandNameData() {
+  return {
+    templates: ['the [adjective] [group]'],
+    lookups: {
+      adjective: ['Nameless', 'Forgotten', 'Lost'],
+      group: ['Band', 'Company', 'Horde'],
+    },
+  };
+}
+
+function parsePerchanceWarband(text) {
+  const lines = String(text || '').split(/\r?\n/);
+  const sections = new Map();
+  let current = null;
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    if (trimmed.startsWith('//')) return;
+    if (/^taken from:/i.test(trimmed)) return;
+    if (!line.startsWith(' ')) {
+      current = trimmed.toLowerCase();
+      if (!sections.has(current)) sections.set(current, new Set());
+      return;
+    }
+    if (!current || !line.startsWith('  ')) return;
+    let entry = trimmed;
+    const commentIdx = entry.indexOf('//');
+    if (commentIdx >= 0) entry = entry.slice(0, commentIdx);
+    entry = entry.replace(/\s*\^[0-9.]+$/, '');
+    entry = entry.trim();
+    if (!entry) return;
+    const store = sections.get(current) || new Set();
+    store.add(entry);
+    sections.set(current, store);
+  });
+
+  const lookups = {};
+  sections.forEach((set, key) => {
+    if (!set.size) return;
+    lookups[key] = Array.from(set).filter(Boolean);
+  });
+
+  const templates = Array.isArray(lookups.warband_name) ? lookups.warband_name.slice() : [];
+  delete lookups.warband_name;
+
+  return {
+    templates,
+    lookups,
+  };
+}
+
+function ensureWarbandNameData() {
+  if (warbandNameData && Array.isArray(warbandNameData.templates) && warbandNameData.templates.length) {
+    return Promise.resolve(warbandNameData);
+  }
+  if (warbandNamePromise) return warbandNamePromise;
+
+  warbandNamePromise = fetch(PERCHANCE_PATH)
+    .then((res) => (res.ok ? res.text() : Promise.reject(new Error(`Failed to load warband names: ${res.status}`))))
+    .then((text) => {
+      const parsed = parsePerchanceWarband(text);
+      if (parsed.templates.length) {
+        warbandNameData = parsed;
+      } else {
+        warbandNameData = defaultWarbandNameData();
+      }
+      return warbandNameData;
+    })
+    .catch((err) => {
+      console.error(err);
+      warbandNameData = warbandNameData || defaultWarbandNameData();
+      return warbandNameData;
+    })
+    .finally(() => {
+      warbandNamePromise = null;
+    });
+
+  return warbandNamePromise;
+}
+
+function warbandTokenOptions(key, lookups) {
+  if (!key) return null;
+  const normalized = key.replace(/^import:/i, '').trim().toLowerCase();
+  if (!normalized) return null;
+  const source = lookups?.[normalized];
+  if (Array.isArray(source) && source.length) return source;
+  const fallback = WARBAND_IMPORT_FALLBACKS[normalized];
+  if (Array.isArray(fallback) && fallback.length) return fallback;
+  return null;
+}
+
+function randomWarbandName() {
+  const data = warbandNameData && warbandNameData.templates?.length ? warbandNameData : defaultWarbandNameData();
+  const templates = Array.isArray(data.templates) && data.templates.length ? data.templates : defaultWarbandNameData().templates;
+  const lookups = data.lookups || {};
+  let template = randomFrom(templates);
+  if (!template) template = 'the [adjective] [group]';
+
+  const tokenPattern = /(\{import:[^}]+\}|\[[^\]]+\])/g;
+  let result = template;
+  for (let i = 0; i < 8; i += 1) {
+    let changed = false;
+    result = result.replace(tokenPattern, (match) => {
+      const token = match.slice(1, -1);
+      const options = warbandTokenOptions(token, lookups);
+      if (!options || !options.length) return match;
+      changed = true;
+      return randomFrom(options);
+    });
+    if (!changed) break;
+  }
+
+  result = result.replace(/\s+'/g, "'");
+  result = result.replace(/\s+/g, ' ').trim();
+  if (/[\[{]/.test(result)) return 'Nameless Warband';
+  if (result) result = result.charAt(0).toUpperCase() + result.slice(1);
+  return result || 'Nameless Warband';
 }
 
 const isShieldItem = (item) => !!item && /shield/i.test(item.name || '');
@@ -1148,7 +1275,19 @@ function warbandPoints() { return state.chars.reduce((a,c)=>a+charPoints(c),0); 
 const el = id => document.getElementById(id);
 function render() {
   // Warband header
-  el('wbName').value = state.warband.name || '';
+  const currentName = (state.warband.name || '').trim();
+  const titleEl = el('warbandTitle');
+  if (titleEl) {
+    if (currentName) {
+      titleEl.textContent = currentName;
+      titleEl.style.display = '';
+    } else {
+      titleEl.textContent = '';
+      titleEl.style.display = 'none';
+    }
+  }
+  const wbNameInput = el('wbName');
+  if (wbNameInput) wbNameInput.value = state.warband.name || '';
   el('wbLimit').value = state.warband.limit || 0;
   const total = warbandPoints();
   el('wbPoints').textContent = `${total} g` + (state.warband.limit?` / ${state.warband.limit} g`:'');
@@ -1563,6 +1702,19 @@ function setOptions(sel, list) {
 el('wbName').addEventListener('input', (e)=>{ state.warband.name = e.target.value; saveState(); });
 el('wbLimit').addEventListener('input', (e)=>{ state.warband.limit = Number(e.target.value)||0; render(); saveState(); });
 
+const randWbNameBtn = el('randWbName');
+if (randWbNameBtn) {
+  randWbNameBtn.onclick = () => {
+    ensureWarbandNameData().then(() => {
+      const name = randomWarbandName();
+      const input = el('wbName');
+      if (input) input.value = name;
+      state.warband.name = name;
+      saveState();
+    });
+  };
+}
+
 const addCharBtn = el('addChar');
 if (addCharBtn) {
   addCharBtn.onclick = () => {
@@ -1721,4 +1873,5 @@ loadCatalogData();
 loadTraitData();
 loadScrollData();
 loadNameData();
+ensureWarbandNameData();
 render();
