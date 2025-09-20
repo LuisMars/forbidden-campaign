@@ -324,6 +324,126 @@ function isOverexposedOnScenario(pid, sid) {
 }
 
 // ======================
+// Match suggestions: per-scenario and batch (unique scenarios)
+// ======================
+function suggestPairsForScenario(sid) {
+  const sc = state.scenarios.find((s) => s.id === sid);
+  if (!sc) return { pairs: [], leftover: null, scenario: null };
+  const players = state.players.map((p) => ({
+    id: p.id,
+    name: p.name,
+    on: getPlayCount(p.id, sid),
+    cov: totalScenariosPlayed(p.id),
+  }));
+  // Sort by: have not played this scenario (on asc), then overall coverage (cov asc), then name
+  players.sort((a, b) => a.on - b.on || a.cov - b.cov || a.name.localeCompare(b.name));
+
+  const remaining = players.slice();
+  const pairs = [];
+  while (remaining.length >= 2) {
+    const a = remaining.shift();
+    // pick partner by same criteria among remaining
+    remaining.sort((x, y) => x.on - y.on || x.cov - y.cov || x.name.localeCompare(y.name));
+    const b = remaining.shift();
+    pairs.push({
+      a,
+      b,
+      bothUnplayed: a.on === 0 && b.on === 0,
+      sumOn: a.on + b.on,
+      sumCov: a.cov + b.cov,
+    });
+  }
+  const leftover = remaining.length ? remaining[0] : null;
+  return { pairs, leftover, scenario: sc };
+}
+
+// Build greedy fair pairs across the whole roster (scenario-agnostic)
+function buildFairPairs(selectedIds) {
+  const allowed = new Set(selectedIds || []);
+  const pool = (allowed.size ? state.players.filter((p) => allowed.has(p.id)) : state.players);
+  const players = pool.map((p) => ({
+    id: p.id,
+    name: p.name,
+    cov: totalScenariosPlayed(p.id),
+  }));
+  players.sort((a, b) => a.cov - b.cov || a.name.localeCompare(b.name));
+  const pairs = [];
+  const rem = players.slice();
+  while (rem.length >= 2) {
+    const a = rem.shift();
+    rem.sort((x, y) => x.cov - y.cov || x.name.localeCompare(y.name));
+    const b = rem.shift();
+    pairs.push({ a, b });
+  }
+  const leftovers = rem.map((x) => x.name);
+  return { pairs, leftovers };
+}
+
+// Choose best scenario for a pair with optional starting index and excludes
+function chooseScenarioForPair(a, b, opts) {
+  const { startIdx = 1, excludeIds = new Set(), boost = true } = opts || {};
+  const orderedAll = [...state.scenarios].sort((x, y) => x.idx - y.idx);
+  // Build wrap-around order starting at startIdx, then wrap to 1..startIdx-1
+  const tail = orderedAll.filter((s) => s.idx >= startIdx);
+  const head = orderedAll.filter((s) => s.idx < startIdx);
+  const ordered = tail.concat(head).filter((s) => !excludeIds.has(s.id));
+  if (!ordered.length) return null;
+  // Pass 1: earliest both-unplayed for the pair
+  for (const s of ordered) {
+    if (getPlayCount(a.id, s.id) === 0 && getPlayCount(b.id, s.id) === 0) {
+      return s;
+    }
+  }
+  if (boost) {
+    // Laggard-aware nudge
+    const ta = totalScenariosPlayed(a.id);
+    const tb = totalScenariosPlayed(b.id);
+    const laggards = new Set();
+    const non = new Set();
+    if (ta <= tb) laggards.add(a.id); else non.add(a.id);
+    if (tb <= ta) laggards.add(b.id); else non.add(b.id);
+    for (const s of ordered) {
+      const helps = [...laggards].some((pid) => getPlayCount(pid, s.id) === 0);
+      if (!helps) continue;
+      const blocked = [...non].some((pid) => isOverexposedOnScenario(pid, s.id));
+      if (!blocked) return s;
+    }
+  }
+  // Pass 3: earliest with minimal duplicate sum among the pair
+  let best = null;
+  let bestSum = Infinity;
+  for (const s of ordered) {
+    const sum = getPlayCount(a.id, s.id) + getPlayCount(b.id, s.id);
+    if (sum < bestSum) {
+      bestSum = sum;
+      best = s;
+      if (sum === 0) break;
+    }
+  }
+  return best;
+}
+
+// Suggest batch matches across roster; assign scenarios per pair
+function suggestBatchMatches(startSid, unique, selectedIds) {
+  const start = state.scenarios.find((s) => s.id === startSid);
+  const startIdx = start ? start.idx : 1;
+  const boost = $("#lateBoost")?.checked ?? true;
+  const { pairs, leftovers } = buildFairPairs(selectedIds);
+  const used = new Set();
+  const results = [];
+  for (const { a, b } of pairs) {
+    const s = chooseScenarioForPair(a, b, { startIdx, excludeIds: used, boost });
+    if (s) {
+      results.push({ a, b, scenario: s, bothUnplayed: getPlayCount(a.id, s.id) === 0 && getPlayCount(b.id, s.id) === 0 });
+      if (unique) used.add(s.id);
+    } else {
+      results.push({ a, b, scenario: null, bothUnplayed: false });
+    }
+  }
+  return { results, leftovers };
+}
+
+// ======================
 // Export / Import (scenarios immutable)
 // ======================
 function exportJson() {
@@ -427,44 +547,35 @@ $("#wipe").onclick = () => {
   toast("Restored the 26 default scenarios.");
 };
 
-$("#suggest").onclick = () => {
-  const selected = $$("#selector input[type=checkbox]:checked").map(
-    (ch) => ch.dataset.id
-  );
-  const mode = $("#filterMode").value;
-  const useBoost = $("#lateBoost")?.checked;
-  const s = useBoost
-    ? suggestScenarioLateAware(selected)
-    : suggestScenario(selected, mode);
-  const box = $("#suggestion");
-  if (!selected.length) {
-    box.innerHTML =
-      '<div class="muted">Please select at least one player.</div>';
+function refreshSuggestions() {
+  const sid = $("#playedScenario").value;
+  const unique = $("#uniqueScenarios")?.checked;
+  const selected = $$("#selector input[type=checkbox]:checked").map((ch) => ch.dataset.id);
+  const box = $("#matchSuggestions");
+  if (!selected.length || selected.length === 1) {
+    box.innerHTML = '<div class="muted">Select at least two players.</div>';
     return;
   }
-  if (!s) {
-    box.innerHTML = '<div class="muted">No scenario matches the current settings.</div>';
-    return;
+  const { results, leftovers } = suggestBatchMatches(sid, unique, selected);
+  let html = '';
+  html += results
+    .map(({ a, b, scenario, bothUnplayed }) => {
+      if (!scenario) {
+        return `<div class="pill"><b>${esc(a.name)}</b> + <b>${esc(b.name)}</b> <span class="tag">no available scenario</span></div>`;
+      }
+      const tag = `<span class="tag">#${scenario.idx} ${esc(scenario.name)}</span>`;
+      const up = bothUnplayed ? ' <span class="tag">unplayed</span>' : '';
+      return `<div class="pill"><b>${esc(a.name)}</b> + <b>${esc(b.name)}</b> ${tag}${up} <button data-role="record-one" data-a="${a.id}" data-b="${b.id}" data-sid="${scenario.id}">Record</button></div>`;
+    })
+    .join("");
+  if (leftovers && leftovers.length) {
+    html += `<div class="muted">Unpaired: ${leftovers.map(esc).join(', ')}</div>`;
   }
-  const who = selected
-    .map((id) => state.players.find((p) => p.id === id)?.name)
-    .filter(Boolean);
-  const badge = useBoost
-    ? '<span class="tag">late-join priority</span>'
-    : "";
-  box.innerHTML = `<div class="pill">Suggested: <span class="scenario-badge">#${s.idx} ${esc(
-    s.name
-  )}</span> <span class="tag">for</span> ${who
-    .map((w) => `<b>${esc(w)}</b>`)
-    .join(", ")} ${badge}</div>`;
-  $("#playedScenario").value = s.id;
-  if (who.length >= 2) {
-    const pa = state.players.find((p) => p.name === who[0]);
-    const pb = state.players.find((p) => p.name === who[1]);
-    if (pa) $("#pA").value = pa.id;
-    if (pb) $("#pB").value = pb.id;
-  }
-};
+  box.innerHTML = html || '<div class="muted">No pairs to suggest.</div>';
+}
+
+const suggestBtn = $("#suggest");
+if (suggestBtn) suggestBtn.onclick = refreshSuggestions;
 
 $("#log").onclick = () => {
   const sid = $("#playedScenario").value;
@@ -480,6 +591,56 @@ $("#log").onclick = () => {
   renderCoverage();
   toast("Result recorded.");
 };
+
+// Suggest matches handled by refreshSuggestions()
+
+// Record all suggested pairs with their assigned scenarios
+$("#recordAllMatches").onclick = () => {
+  const sid = $("#playedScenario").value;
+  const unique = $("#uniqueScenarios")?.checked;
+  const selected = $$("#selector input[type=checkbox]:checked").map((ch) => ch.dataset.id);
+  if (!selected.length || selected.length === 1) {
+    alert("Select at least two players.");
+    return;
+  }
+  const { results } = suggestBatchMatches(sid, unique, selected);
+  const toRecord = results.filter((r) => r.scenario);
+  if (!toRecord.length) {
+    alert("No pairs to record.");
+    return;
+  }
+  for (const { a, b, scenario } of toRecord) {
+    incPlay(a.id, scenario.id);
+    incPlay(b.id, scenario.id);
+  }
+  saveState();
+  renderCoverage();
+  refreshSuggestions();
+  toast(`Recorded ${toRecord.length} match${toRecord.length === 1 ? '' : 'es'}.`);
+};
+
+// Per-item record button in the suggestions list
+const listBox = $("#matchSuggestions");
+if (listBox) {
+  listBox.addEventListener("click", (e) => {
+    const btn = e.target.closest('button[data-role="record-one"]');
+    if (!btn) return;
+    const a = btn.dataset.a;
+    const b = btn.dataset.b;
+    const sid = btn.dataset.sid;
+    if (!a || !b || !sid) return;
+    // Prevent double-clicks and remove the item immediately
+    btn.disabled = true;
+    const item = btn.closest('.pill');
+    incPlay(a, sid);
+    incPlay(b, sid);
+    saveState();
+    renderCoverage();
+    if (item) item.remove();
+    refreshSuggestions();
+    toast("Result recorded.");
+  });
+}
 
 // ======================
 // Utilities & tests
