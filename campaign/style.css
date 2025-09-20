@@ -129,6 +129,26 @@ button:active { transform: translateY(1px); }
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 8px;
 }
+.site-footer {
+  margin: 32px 0 0;
+  padding: 18px 0 8px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin: 6px 0;
+}
+
+.site-footer a {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.site-footer .back-link {
+  font-weight: 600;
+}
 .table {
   width: 100%;
   border-collapse: collapse;
