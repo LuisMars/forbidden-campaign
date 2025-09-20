@@ -67,6 +67,17 @@
       .nowrap { white-space: nowrap; }
       .badge { background: #0d0d0d; border: 1px solid #3a3a3a; padding: 2px 6px; border-radius: 9px; font-size: 11px; }
       .warn { color: #ffb4a9; border-color: #7a1e1e; }
+      .stat-template-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .stat-template-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
     </style>
   </head>
   <body>
@@ -119,6 +130,12 @@
               <label class="pill">Pre <input id="edPre" type="number" step="1" min="-5" max="5"/></label>
               <label class="pill">Str <input id="edStr" type="number" step="1" min="-5" max="5"/></label>
               <label class="pill">Tou <input id="edTou" type="number" step="1" min="-5" max="5"/></label>
+            </div>
+            <div class="sep"></div>
+            <div id="statTemplateBox">
+              <h3>Stat Template</h3>
+              <div class="row" id="statTemplateControls"></div>
+              <div class="stat-template-grid" id="statAssignmentGrid"></div>
             </div>
             <div class="sep"></div>
             <div class="grid2">
@@ -284,11 +301,135 @@
         { name: 'Comfy Socks', armorVal: 0, cost: 15, slots: 0, traits: 'Armor Value 1 if the model has at least one Scroll; takes up no Equipment slots.', type: 'armor', id: 'comfy-socks' }
       ];
 
+      const STAT_SETS = [
+        { id: 'setA', label: '+3, +1, 0, -3', values: [3, 1, 0, -3] },
+        { id: 'setB', label: '+2, +2, -1, -2', values: [2, 2, -1, -2] },
+      ];
+      const STAT_KEYS = [
+        { key: 'agi', label: 'Agility' },
+        { key: 'pre', label: 'Presence' },
+        { key: 'str', label: 'Strength' },
+        { key: 'tou', label: 'Toughness' },
+      ];
+
       const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
       const NAMES = [ 'Danbert','Nifehl','Doodlplex','El Bobo','Hald','Pannoyed','Dugnutt','Tauk','Kvali','Gride','Dug','Saint','Andrew','Tim','Vlan Bator','Esheg','Abathur','Jack','Sven','Anja','Toomas','Marek','Storm','Reed','Nohr' ];
       const TYPES = ['Mercenary','Zealot','Brute','Acolyte','Scoundrel'];
 
       function uid() { return Math.random().toString(36).slice(2, 10); }
+
+      function formatStatValue(val) {
+        const num = Number(val);
+        if (Number.isNaN(num)) return String(val);
+        return num > 0 ? `+${num}` : String(num);
+      }
+
+      function formatSlotBonus(val) {
+        const num = Number(val);
+        if (!num) return null;
+        const label = Math.abs(num) === 1 ? 'slot' : 'slots';
+        return `${num > 0 ? '+' : ''}${num} ${label}`;
+      }
+
+      function countValues(values) {
+        const counts = {};
+        values.forEach(v => {
+          const key = String(Number(v));
+          counts[key] = (counts[key] || 0) + 1;
+        });
+        return counts;
+      }
+
+      function assignmentsValid(assignments, counts) {
+        const used = {};
+        for (const { key } of STAT_KEYS) {
+          const val = assignments?.[key];
+          if (val == null) continue;
+          const valKey = String(Number(val));
+          used[valKey] = (used[valKey] || 0) + 1;
+          if (used[valKey] > (counts[valKey] || 0)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function updateStatsFromAssignments(char) {
+        if (!char.statTemplate || !char.statTemplate.assignments) return;
+        STAT_KEYS.forEach(({ key }) => {
+          const val = Number(char.statTemplate.assignments[key]);
+          char.stats[key] = Number.isFinite(val) ? val : 0;
+        });
+      }
+
+      function detectStatSetId(char) {
+        if (!char || !char.stats) return null;
+        const currentValues = STAT_KEYS.map(({ key }) => Number(char.stats[key] || 0));
+        const currentCounts = countValues(currentValues);
+        for (const set of STAT_SETS) {
+          const counts = countValues(set.values);
+          const keys = new Set([...Object.keys(counts), ...Object.keys(currentCounts)]);
+          let match = true;
+          for (const key of keys) {
+            if ((counts[key] || 0) !== (currentCounts[key] || 0)) {
+              match = false;
+              break;
+            }
+          }
+          if (match) return set.id;
+        }
+        return null;
+      }
+
+      function ensureStatTemplate(char, setId) {
+        const set = STAT_SETS.find(s => s.id === setId);
+        if (!set) {
+          delete char.statTemplate;
+          return;
+        }
+        const counts = countValues(set.values);
+        const assignments = {};
+        const detected = detectStatSetId(char);
+
+        if (detected === setId) {
+          STAT_KEYS.forEach(({ key }) => {
+            assignments[key] = Number(char.stats?.[key] || 0);
+          });
+        } else if (char.statTemplate && char.statTemplate.id === setId && assignmentsValid(char.statTemplate.assignments, counts)) {
+          STAT_KEYS.forEach(({ key }) => {
+            const val = Number(char.statTemplate.assignments[key]);
+            if (Number.isFinite(val)) assignments[key] = val;
+          });
+        }
+
+        // fill remaining slots from the set values while respecting counts
+        const remaining = countValues(set.values);
+        STAT_KEYS.forEach(({ key }) => {
+          const val = assignments[key];
+          if (val == null) return;
+          const k = String(val);
+          if (remaining[k] > 0) remaining[k] -= 1;
+          else delete assignments[key];
+        });
+
+        STAT_KEYS.forEach(({ key }) => {
+          if (assignments[key] != null) return;
+          const nextKey = Object.keys(remaining).find(k => remaining[k] > 0);
+          const value = nextKey != null ? Number(nextKey) : set.values[0];
+          assignments[key] = value;
+          if (nextKey != null) remaining[nextKey] -= 1;
+        });
+
+        if (!assignmentsValid(assignments, counts)) {
+          const values = set.values.slice();
+          STAT_KEYS.forEach(({ key }, idx) => {
+            assignments[key] = Number(values[idx] != null ? values[idx] : values[values.length - 1] || 0);
+          });
+        }
+
+        char.statTemplate = { id: setId, assignments };
+        updateStatsFromAssignments(char);
+      }
 
       function loadState() {
         try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
@@ -324,6 +465,13 @@
           ch.weapons = Array.isArray(ch.weapons) ? ch.weapons.filter(w => w && validIds.has(w.itemId)) : [];
           ch.equipment = Array.isArray(ch.equipment) ? ch.equipment.filter(e => e && validIds.has(e.itemId)) : [];
           ch.pack = Array.isArray(ch.pack) ? ch.pack.filter(id => validIds.has(id)) : [];
+          if (ch.statTemplate && ch.statTemplate.id) {
+            ensureStatTemplate(ch, ch.statTemplate.id);
+          }
+          if (!ch.statTemplate) {
+            const detected = detectStatSetId(ch);
+            if (detected) ensureStatTemplate(ch, detected);
+          }
         });
         delete state.points;
         delete state.profiles;
@@ -381,7 +529,7 @@
       // Character logic
       // =====================
       function newCharacter(name) {
-        return {
+        const char = {
           id: uid(),
           name: name || randomFrom(NAMES),
           type: randomFrom(TYPES),
@@ -396,6 +544,8 @@
           notes: '',
           pack: [],
         };
+        ensureStatTemplate(char, STAT_SETS[0].id);
+        return char;
       }
 
       function charPoints(c) {
@@ -431,6 +581,108 @@
       function ensurePackArray(char) {
         if (!Array.isArray(char.pack)) char.pack = [];
         return char.pack;
+      }
+
+      function renderStatTemplate(char) {
+        const controls = el('statTemplateControls');
+        const grid = el('statAssignmentGrid');
+        if (!controls || !grid) return;
+
+        controls.innerHTML = '';
+        grid.innerHTML = '';
+
+        const label = document.createElement('label');
+        label.className = 'pill';
+        label.textContent = 'Preset ';
+        const select = document.createElement('select');
+        select.innerHTML = '<option value="">Custom</option>' + STAT_SETS.map(set => `<option value="${set.id}">${set.label}</option>`).join('');
+        label.appendChild(select);
+        controls.appendChild(label);
+
+        let setId = char.statTemplate?.id;
+        const hasTemplateObject = typeof char.statTemplate !== 'undefined';
+        if (setId && !STAT_SETS.find(s => s.id === setId)) setId = null;
+        if (!setId && !hasTemplateObject) {
+          const detected = detectStatSetId(char);
+          if (detected) setId = detected;
+        }
+        select.value = setId || '';
+
+        select.onchange = (e) => {
+          const value = e.target.value;
+          if (!value) {
+            char.statTemplate = { id: null };
+            saveState();
+            return;
+          }
+          ensureStatTemplate(char, value);
+          saveState();
+        };
+
+        if (!setId) {
+          const msg = document.createElement('div');
+          msg.className = 'muted small';
+          msg.textContent = 'Custom distribution. Adjust stats manually.';
+          grid.appendChild(msg);
+          return;
+        }
+
+        ensureStatTemplate(char, setId);
+        const set = STAT_SETS.find(s => s.id === setId);
+        if (!set || !char.statTemplate) return;
+        const assignments = char.statTemplate.assignments;
+        const counts = countValues(set.values);
+
+        STAT_KEYS.forEach(({ key, label }) => {
+          const container = document.createElement('div');
+          container.className = 'stat-template-item';
+
+          const title = document.createElement('div');
+          title.className = 'muted small';
+          title.textContent = label;
+
+          const select = document.createElement('select');
+          const usage = {};
+          STAT_KEYS.filter(s => s.key !== key).forEach(({ key: otherKey }) => {
+            const val = assignments[otherKey];
+            if (val == null) return;
+            const valKey = String(Number(val));
+            usage[valKey] = (usage[valKey] || 0) + 1;
+          });
+
+          const uniqueValues = set.values
+            .map(v => Number(v))
+            .filter((val, idx, arr) => arr.indexOf(val) === idx);
+          uniqueValues.forEach(val => {
+            const keyStr = String(val);
+            const option = document.createElement('option');
+            option.value = String(val);
+            option.textContent = formatStatValue(val);
+            const allowed = counts[keyStr] || 0;
+            const used = usage[keyStr] || 0;
+            const current = Number(assignments[key]);
+            if (used >= allowed && current !== val) option.disabled = true;
+            if (current === val) option.selected = true;
+            select.appendChild(option);
+          });
+
+          select.onchange = (e) => {
+            const prev = assignments[key];
+            const next = Number(e.target.value);
+            assignments[key] = next;
+            if (!assignmentsValid(assignments, counts)) {
+              assignments[key] = prev;
+              e.target.value = String(prev);
+              return;
+            }
+            updateStatsFromAssignments(char);
+            saveState();
+          };
+
+          container.appendChild(title);
+          container.appendChild(select);
+          grid.appendChild(container);
+        });
       }
 
       function removeFromPack(char, itemId, idxHint) {
@@ -658,7 +910,8 @@
           }
           if (i.type === 'armor' && i.armorVal != null) info.push(`AV:${i.armorVal}`);
           if (i.slots != null) info.push(`Slots:${i.slots}`);
-          if (i.slotBonus) info.push(`+${i.slotBonus} slots`);
+          const bonusText = formatSlotBonus(i.slotBonus || 0);
+          if (bonusText) info.push(bonusText);
           o.textContent = `${i.name} (${info.join(', ')})`;
           sel.appendChild(o);
         });
@@ -695,6 +948,8 @@
           slotsBadge.classList.toggle('warn', slotsInfo.used > slotsInfo.total);
           slotsBadge.title = `Base ${slotsInfo.base}, Bonus ${slotsInfo.bonus}`;
         }
+
+        renderStatTemplate(c);
 
         // weapons
         const listW = el('edWeapons'); listW.innerHTML = '';
@@ -798,10 +1053,10 @@
       bindEditorInput('edType', (c,e)=> c.type = e.target.value);
       bindEditorInput('edArmor', (c,e)=> c.armor = Number(e.target.value)||0);
       bindEditorInput('edHP', (c,e)=> c.hp = Number(e.target.value)||0);
-      bindEditorInput('edAgi', (c,e)=> c.stats.agi = Number(e.target.value)||0);
-      bindEditorInput('edPre', (c,e)=> c.stats.pre = Number(e.target.value)||0);
-      bindEditorInput('edStr', (c,e)=> c.stats.str = Number(e.target.value)||0);
-      bindEditorInput('edTou', (c,e)=> c.stats.tou = Number(e.target.value)||0);
+      bindEditorInput('edAgi', (c,e)=> { c.stats.agi = Number(e.target.value)||0; c.statTemplate = { id: null }; });
+      bindEditorInput('edPre', (c,e)=> { c.stats.pre = Number(e.target.value)||0; c.statTemplate = { id: null }; });
+      bindEditorInput('edStr', (c,e)=> { c.stats.str = Number(e.target.value)||0; c.statTemplate = { id: null }; });
+      bindEditorInput('edTou', (c,e)=> { c.stats.tou = Number(e.target.value)||0; c.statTemplate = { id: null }; });
       bindEditorInput('edFeats', (c,e)=> c.feats = splitLines(e.target.value));
       bindEditorInput('edFlaws', (c,e)=> c.flaws = splitLines(e.target.value));
       bindEditorInput('edClean', (c,e)=> c.scrolls.clean = Number(e.target.value)||0);
@@ -858,8 +1113,9 @@
         } else {
           if (it.traits) parts.push(it.traits);
         }
-        if (it.slots != null) parts.push(`${it.slots} slot${it.slots === 1 ? '' : 's'}`);
-        if (it.slotBonus) parts.push(`+${it.slotBonus} slot${it.slotBonus === 1 ? '' : 's'}`);
+        if (it.slots != null) parts.push(`${it.slots} slot${Math.abs(it.slots) === 1 ? '' : 's'}`);
+        const bonusText = formatSlotBonus(it.slotBonus || 0);
+        if (bonusText) parts.push(bonusText);
         if (it.notes) parts.push(it.notes);
         return parts.join(' · ');
       }
