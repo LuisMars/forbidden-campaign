@@ -89,9 +89,7 @@ function renderPlayers() {
   state.players.forEach((p) => {
     const el = document.createElement("div");
     el.className = "pill";
-    el.innerHTML = `<b>${esc(p.name)}</b> <small class="muted">ID:${
-      p.id
-    }</small> <button class="ghost" data-id="${p.id}">Remove</button>`;
+    el.innerHTML = `<b>${esc(p.name)}</b> <button class="ghost" data-id="${p.id}">Remove</button>`;
     el.querySelector("button").onclick = () => removePlayer(p.id);
     box.appendChild(el);
   });
@@ -145,7 +143,7 @@ function renderPlayerDropdowns() {
   const a = $("#pA"),
     b = $("#pB");
   [a, b].forEach((sel) => {
-    sel.innerHTML = '<option value="">— Player —</option>';
+    sel.innerHTML = '<option value="">— Select Player —</option>';
   });
   state.players.forEach((p) => {
     a.add(new Option(p.name, p.id));
@@ -165,7 +163,7 @@ function renderCoverage() {
   const box = $("#coverage");
   if (!state.players.length || !state.scenarios.length) {
     box.innerHTML =
-      '<div class="muted">Add players to see the matrix.</div>';
+      '<div class="muted">Add players to view the matrix.</div>';
     return;
   }
   const list = [...state.scenarios].sort((a, b) => a.idx - b.idx);
@@ -347,7 +345,7 @@ function importJson(file) {
     try {
       const obj = JSON.parse(reader.result);
       if (!obj || !obj.players || !obj.plays) {
-        throw new Error("Invalid file: need players and plays");
+        throw new Error("Invalid file: expected 'players' and 'plays' sections");
       }
       // Restore canonical scenarios first (immutable), then remap plays by scenario name if provided
       ensureDefault26();
@@ -409,7 +407,7 @@ $("#reset").onclick = () => {
   state.plays = {};
   saveState();
   renderCoverage();
-  toast("All play counts reset.");
+  toast("All play counts have been reset.");
 };
 $("#wipe").onclick = () => {
   if (
@@ -426,7 +424,7 @@ $("#wipe").onclick = () => {
   renderCoverage();
   renderPlayerDropdowns();
   renderScenarioDropdown();
-  toast("Restored default 26 scenarios");
+  toast("Restored the 26 default scenarios.");
 };
 
 $("#suggest").onclick = () => {
@@ -441,18 +439,18 @@ $("#suggest").onclick = () => {
   const box = $("#suggestion");
   if (!selected.length) {
     box.innerHTML =
-      '<div class="muted">Select at least one player.</div>';
+      '<div class="muted">Please select at least one player.</div>';
     return;
   }
   if (!s) {
-    box.innerHTML = '<div class="muted">No scenario fits the rule.</div>';
+    box.innerHTML = '<div class="muted">No scenario matches the current settings.</div>';
     return;
   }
   const who = selected
     .map((id) => state.players.find((p) => p.id === id)?.name)
     .filter(Boolean);
   const badge = useBoost
-    ? '<span class="tag">late-join boost</span>'
+    ? '<span class="tag">late-join priority</span>'
     : "";
   box.innerHTML = `<div class="pill">Suggested: <span class="scenario-badge">#${s.idx} ${esc(
     s.name
@@ -473,14 +471,14 @@ $("#log").onclick = () => {
   const pa = $("#pA").value;
   const pb = $("#pB").value;
   if (!sid || !pa || !pb || pa === pb) {
-    alert("Choose scenario and two distinct players.");
+    alert("Please choose a scenario and two different players.");
     return;
   }
   incPlay(pa, sid);
   incPlay(pb, sid);
   saveState();
   renderCoverage();
-  toast("Logged match.");
+  toast("Result recorded.");
 };
 
 // ======================

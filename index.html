@@ -8,12 +8,8 @@
   </head>
   <body>
     <div class="wrap">
-      <h1>Forbidden Psalm — Async League Helper</h1>
-      <div class="sub">
-        No backend. Add/remove players, fixed 26-scenario campaign, coverage
-        matrix, fair suggestions, and JSON export/import. Autosaves to
-        <code>localStorage</code>.
-      </div>
+      <h1>Forbidden Psalm — League Helper</h1>
+      <div class="sub">Track a 26‑scenario campaign. Suggest matchups. Record results.</div>
 
       <div class="grid">
         <!-- Left column: roster & scenarios -->
@@ -32,10 +28,7 @@
             <input id="scenarioName" type="text" placeholder="(locked)" />
             <button id="addScenario" disabled>Add Scenario</button>
           </div>
-          <div class="muted">
-            End Times campaign: fixed 26 scenarios, order locked. You can’t
-            add/remove scenarios.
-          </div>
+          <div class="muted">End Times campaign (26 scenarios).</div>
           <details id="scenariosPanel" class="collapsible" open>
             <summary>
               <span class="caret">▶</span> Scenarios
@@ -46,65 +39,53 @@
 
           <div class="sep"></div>
           <div class="row">
-            <button id="export">Export JSON</button>
+            <button id="export">Export</button>
             <label class="pill" for="importFile" style="cursor: pointer"
-              >Import JSON
+              >Import
               <input
                 id="importFile"
                 type="file"
                 accept="application/json"
                 style="display: none"
             /></label>
-            <button id="reset" class="ghost" type="button">
-              Reset (keep players)
-            </button>
-            <button id="wipe" class="danger" type="button">Wipe All</button>
+            <button id="reset" class="ghost" type="button">Reset Plays</button>
+            <button id="wipe" class="danger" type="button">Clear All</button>
           </div>
         </section>
 
         <!-- Right column: selection & suggestion -->
         <section class="card">
-          <h2>Who wants to play now?</h2>
+          <h2>Available Players</h2>
           <div id="selector" class="checkbox-grid"></div>
           <div class="spacer"></div>
           <div class="row">
-            <label
-              >Filter
+            <label>Mode
               <select id="filterMode">
-                <option value="best">
-                  Best (fewest prior plays among selected)
-                </option>
-                <option value="unplayed">
-                  Only ones nobody selected has played
-                </option>
-                <option value="any">
-                  Any (balanced by counts, allows repeats)
-                </option>
+                <option value="best">Fair</option>
+                <option value="unplayed">Unplayed</option>
+                <option value="any">Any</option>
               </select>
             </label>
             <label class="pill" style="gap: 8px; align-items: center">
               <input type="checkbox" id="lateBoost" checked />
-              <span>Late-Join Boost</span>
+              <span>Late-Join Priority</span>
             </label>
-            <button id="suggest">Suggest Scenario</button>
+            <button id="suggest">Suggest</button>
           </div>
           <div id="suggestion"></div>
 
           <div class="sep"></div>
-          <h2>Log result</h2>
+          <h2>Record</h2>
           <div class="row">
             <select id="playedScenario"></select>
             <select id="pA"></select>
             <select id="pB"></select>
-            <button id="log">Log Pairs as Played</button>
+            <button id="log">Record</button>
           </div>
-          <div class="muted">
-            This records that both selected players have played the chosen
-            scenario once.
-          </div>
+          <div class="muted">Adds one play for each selected player.</div>
 
           <div class="sep"></div>
-          <h2>Coverage Matrix</h2>
+          <h2>Coverage</h2>
           <div id="coverage"></div>
         </section>
       </div>
