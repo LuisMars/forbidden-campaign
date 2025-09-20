@@ -1,0 +1,463 @@
+[
+  {
+    "name": "Bandages",
+    "cost": 1,
+    "traits": "Cures Bleeding (pg. 22).",
+    "slots": 1,
+    "type": "equipment",
+    "id": "bandages"
+  },
+  {
+    "name": "Lantern",
+    "cost": 3,
+    "traits": "Required for models to see in the dark.",
+    "slots": 1,
+    "type": "equipment",
+    "id": "lantern"
+  },
+  {
+    "name": "Torch",
+    "cost": 1,
+    "traits": "As a lantern but only lasts 3 rounds. Can be used as a One-Handed Makeshift Weapon.",
+    "slots": 1,
+    "type": "equipment",
+    "id": "torch"
+  },
+  {
+    "name": "Backpack",
+    "cost": 1,
+    "traits": "Takes up one slot, but provides +2 additional Equipment slots.",
+    "slots": 1,
+    "slotBonus": 2,
+    "type": "equipment",
+    "id": "backpack"
+  },
+  {
+    "name": "Potion",
+    "cost": 6,
+    "traits": "Heals D6. Then the drinker makes a Toughness test or becomes Dazed (pg. 22).",
+    "slots": 1,
+    "type": "equipment",
+    "id": "potion"
+  },
+  {
+    "name": "Ammo",
+    "cost": 1,
+    "traits": "Five shots per stack of Ammo.",
+    "slots": 1,
+    "type": "equipment",
+    "id": "ammo"
+  },
+  {
+    "name": "Antidote",
+    "cost": 7,
+    "traits": "Cures Poisoned (pg. 23).",
+    "slots": 1,
+    "type": "equipment",
+    "id": "antidote"
+  },
+  {
+    "name": "Tincture",
+    "cost": 7,
+    "traits": "Cures Diseased (pg. 22).",
+    "slots": 1,
+    "type": "equipment",
+    "id": "tincture"
+  },
+  {
+    "name": "Cannonball",
+    "cost": 2,
+    "traits": "One shot of Cannon ammo.",
+    "slots": 1,
+    "type": "equipment",
+    "id": "cannonball"
+  },
+  {
+    "name": "Whisky",
+    "cost": 2,
+    "traits": "After drinking, auto-pass Morale tests for the remainder of the Scenario.",
+    "slots": 1,
+    "type": "equipment",
+    "id": "whisky"
+  },
+  {
+    "name": "Flintlock Pistol",
+    "dmg": "D8",
+    "attr": "Presence",
+    "traits": "Ranged; Explode; Reload",
+    "cost": 15,
+    "slots": 1,
+    "type": "weapon",
+    "id": "flintlock-pistol"
+  },
+  {
+    "name": "Sling",
+    "dmg": "D4",
+    "attr": "Agility",
+    "traits": "Ranged",
+    "cost": 1,
+    "slots": 1,
+    "type": "weapon",
+    "id": "sling"
+  },
+  {
+    "name": "Musket",
+    "dmg": "D10",
+    "attr": "Presence",
+    "traits": "Ranged; Explode; Reload",
+    "cost": 20,
+    "slots": 2,
+    "type": "weapon",
+    "id": "musket"
+  },
+  {
+    "name": "Cannon",
+    "dmg": "D20",
+    "attr": "Strength",
+    "traits": "Ranged; Explode; Reload",
+    "cost": 100,
+    "slots": 2,
+    "type": "weapon",
+    "id": "cannon"
+  },
+  {
+    "name": "Crossbow",
+    "dmg": "D6",
+    "attr": "Presence",
+    "traits": "Ranged; Cruel; Reload",
+    "cost": 8,
+    "slots": 2,
+    "type": "weapon",
+    "id": "crossbow"
+  },
+  {
+    "name": "Bow",
+    "dmg": "D6",
+    "attr": "Presence",
+    "traits": "Ranged",
+    "cost": 5,
+    "slots": 2,
+    "type": "weapon",
+    "id": "bow"
+  },
+  {
+    "name": "One-Handed Makeshift Melee Weapon",
+    "dmg": "D4",
+    "attr": "Strength",
+    "traits": "",
+    "cost": 0,
+    "slots": 1,
+    "type": "weapon",
+    "id": "one-handed-makeshift-melee-weapon"
+  },
+  {
+    "name": "Staff",
+    "dmg": "D4",
+    "attr": "Strength",
+    "traits": "",
+    "cost": 1,
+    "slots": 1,
+    "type": "weapon",
+    "id": "staff"
+  },
+  {
+    "name": "Shortsword",
+    "dmg": "D6",
+    "attr": "Agility",
+    "traits": "",
+    "cost": 2,
+    "slots": 1,
+    "type": "weapon",
+    "id": "shortsword"
+  },
+  {
+    "name": "Dagger",
+    "dmg": "D4",
+    "attr": "Agility",
+    "traits": "Thrown",
+    "cost": 1,
+    "slots": 1,
+    "type": "weapon",
+    "id": "dagger"
+  },
+  {
+    "name": "Hand Axe",
+    "dmg": "D8",
+    "attr": "Strength",
+    "traits": "Thrown",
+    "cost": 3,
+    "slots": 1,
+    "type": "weapon",
+    "id": "hand-axe"
+  },
+  {
+    "name": "Ulfberht Sword",
+    "dmg": "D8",
+    "attr": "Strength",
+    "traits": "Criticals cause Bleeding (pg. 22)",
+    "cost": 5,
+    "slots": 1,
+    "type": "weapon",
+    "id": "ulfberht-sword"
+  },
+  {
+    "name": "Morning Star",
+    "dmg": "D8",
+    "attr": "Strength",
+    "traits": "Criticals cause Dazed (pg. 22); Cruel",
+    "cost": 7,
+    "slots": 1,
+    "type": "weapon",
+    "id": "morning-star"
+  },
+  {
+    "name": "Horseman's Pick",
+    "dmg": "D6",
+    "attr": "Strength",
+    "traits": "Cruel",
+    "cost": 4,
+    "slots": 1,
+    "type": "weapon",
+    "id": "horseman-s-pick"
+  },
+  {
+    "name": "Flail",
+    "dmg": "D8",
+    "attr": "Strength",
+    "traits": "Criticals cause Bleeding (pg. 22)",
+    "cost": 5,
+    "slots": 1,
+    "type": "weapon",
+    "id": "flail"
+  },
+  {
+    "name": "Brass Knuckles",
+    "dmg": "2",
+    "attr": "Agility",
+    "traits": "Takes up no Equipment slot; Criticals cause Dazed (pg. 22)",
+    "cost": 2,
+    "slots": 0,
+    "type": "weapon",
+    "id": "brass-knuckles"
+  },
+  {
+    "name": "Bone Flail",
+    "dmg": "D8",
+    "attr": "Strength",
+    "traits": "Criticals cause Dazed and Bleeding (pg. 22)",
+    "cost": 9,
+    "slots": 1,
+    "type": "weapon",
+    "id": "bone-flail"
+  },
+  {
+    "name": "Net",
+    "dmg": "-",
+    "attr": "Agility",
+    "traits": "Thrown; target must pass an Agility test or lose all movement until freed. Models can spend an action to attempt an Agility or Strength test to escape.",
+    "cost": 3,
+    "slots": 1,
+    "type": "weapon",
+    "id": "net"
+  },
+  {
+    "name": "Warhammer",
+    "dmg": "D6",
+    "attr": "Strength",
+    "traits": "Criticals cause Dazed (pg. 22)",
+    "cost": 4,
+    "slots": 1,
+    "type": "weapon",
+    "id": "warhammer"
+  },
+  {
+    "name": "Sword",
+    "dmg": "D6",
+    "attr": "Strength",
+    "traits": "",
+    "cost": 3,
+    "slots": 1,
+    "type": "weapon",
+    "id": "sword"
+  },
+  {
+    "name": "Rapier",
+    "dmg": "D6",
+    "attr": "Agility",
+    "traits": "Criticals disarm enemy",
+    "cost": 4,
+    "slots": 1,
+    "type": "weapon",
+    "id": "rapier"
+  },
+  {
+    "name": "Two-Handed Makeshift Melee Weapon",
+    "dmg": "D6",
+    "attr": "Strength",
+    "traits": "",
+    "cost": 0,
+    "slots": 2,
+    "type": "weapon",
+    "id": "two-handed-makeshift-melee-weapon"
+  },
+  {
+    "name": "Bastard Sword",
+    "dmg": "D10",
+    "attr": "Strength",
+    "traits": "Criticals destroy enemy Weapons",
+    "cost": 10,
+    "slots": 2,
+    "type": "weapon",
+    "id": "bastard-sword"
+  },
+  {
+    "name": "Great Axe",
+    "dmg": "D10",
+    "attr": "Strength",
+    "traits": "Criticals destroy Shields and deal damage",
+    "cost": 10,
+    "slots": 2,
+    "type": "weapon",
+    "id": "great-axe"
+  },
+  {
+    "name": "Glaive",
+    "dmg": "D8",
+    "attr": "Strength",
+    "traits": "Reach",
+    "cost": 8,
+    "slots": 2,
+    "type": "weapon",
+    "id": "glaive"
+  },
+  {
+    "name": "Spear",
+    "dmg": "D6",
+    "attr": "Agility",
+    "traits": "Reach; Thrown",
+    "cost": 8,
+    "slots": 2,
+    "type": "weapon",
+    "id": "spear"
+  },
+  {
+    "name": "Trident",
+    "dmg": "D6",
+    "attr": "Agility",
+    "traits": "Thrown; Criticals disarm enemy",
+    "cost": 7,
+    "slots": 2,
+    "type": "weapon",
+    "id": "trident"
+  },
+  {
+    "name": "Unholy Hand Grenades of Apameia",
+    "dmg": "D10",
+    "attr": "Agility",
+    "traits": "Thrown; Explode; Called Shot",
+    "cost": 6,
+    "slots": 1,
+    "type": "weapon",
+    "id": "unholy-hand-grenades-of-apameia"
+  },
+  {
+    "name": "Bag o' Rats",
+    "dmg": "-",
+    "attr": "Agility",
+    "traits": "Thrown; target must pass a Toughness test or become Diseased (pg. 22); on a Fumble the user becomes Diseased instead",
+    "cost": 1,
+    "slots": 1,
+    "type": "weapon",
+    "id": "bag-o-rats"
+  },
+  {
+    "name": "Light Armor",
+    "armorVal": 1,
+    "cost": 2,
+    "slots": 1,
+    "traits": "",
+    "type": "armor",
+    "id": "light-armor"
+  },
+  {
+    "name": "Medium Armor",
+    "armorVal": 2,
+    "cost": 5,
+    "slots": 1,
+    "traits": "",
+    "type": "armor",
+    "id": "medium-armor"
+  },
+  {
+    "name": "Heavy Armor",
+    "armorVal": 3,
+    "cost": 20,
+    "slots": 2,
+    "traits": "Takes up two Equipment slots.",
+    "type": "armor",
+    "id": "heavy-armor"
+  },
+  {
+    "name": "Helm",
+    "armorVal": 0,
+    "cost": 5,
+    "slots": 1,
+    "traits": "Ignores Dazed (pg. 22).",
+    "type": "armor",
+    "id": "helm"
+  },
+  {
+    "name": "Shield",
+    "armorVal": 0,
+    "cost": 2,
+    "slots": 1,
+    "traits": "If an attack would deal damage, the bearer may destroy the Shield to ignore it.",
+    "type": "armor",
+    "id": "shield"
+  },
+  {
+    "name": "Tower Shield",
+    "armorVal": 0,
+    "cost": 10,
+    "slots": 2,
+    "traits": "Acts as cover; all ranged attacks suffer -3 to hit the bearer; takes up two Equipment slots.",
+    "type": "armor",
+    "id": "tower-shield"
+  },
+  {
+    "name": "Full Plate",
+    "armorVal": 4,
+    "cost": 50,
+    "slots": 2,
+    "traits": "+2 Strength required to use or wearer suffers -1 Agility; takes up two Equipment slots.",
+    "type": "armor",
+    "id": "full-plate"
+  },
+  {
+    "name": "Pet Armor",
+    "armorVal": 1,
+    "cost": 10,
+    "slots": 1,
+    "traits": "Can be used on any pet.",
+    "type": "armor",
+    "id": "pet-armor"
+  },
+  {
+    "name": "Improvised Armor",
+    "armorVal": 1,
+    "cost": 0,
+    "slots": 1,
+    "traits": "-1 Agility.",
+    "type": "armor",
+    "id": "improvised-armor"
+  },
+  {
+    "name": "Comfy Socks",
+    "armorVal": 0,
+    "cost": 15,
+    "slots": 0,
+    "traits": "Armor Value 1 if the model has at least one Scroll; takes up no Equipment slots.",
+    "type": "armor",
+    "id": "comfy-socks"
+  }
+]

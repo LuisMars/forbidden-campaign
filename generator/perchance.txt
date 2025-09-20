@@ -1,0 +1,794 @@
+font = {import:font-plugin}
+dice = {import:dice-plugin}
+rollTable = {import:roll-table-plugin}
+selectLeaves = {import:select-leaves-plugin}
+generatorStats = {import:generator-stats-plugin}
+
+page
+	title = Warband Roster Generator for Forbidden Psalm
+	description = [warband_name]
+
+cards
+	card1
+		title = [Name] [surname]
+		subtitle = [type]
+		content
+			
+			stats ;;; Agi:[rollTable(ability_score, dice("1d20") )] ;;; Pre:[rollTable(ability_score, dice("1d20") )] ;;; str:[rollTable(ability_score, dice("1d20") )] ;;; tou:[rollTable(ability_score,d = dice("1d20") )]
+			rule
+      property-line ;;; Armor ;;; [armor]
+      property-line ;;; HP ;;; [rollTable(hptable,d)]
+      header ;;; Flaws
+			property-block ;;; [flaws]
+      header ;;; Feats
+			property-block ;;; [feats]     
+			
+			header ;;; Weapons
+			property-block ;;; [weapon]
+			header ;;; Equipment
+			property-block ;;; [selectLeaves(equipment, 2)]
+
+      
+  card5
+    title = [Name] [surname]
+    subtitle = [type]
+    content
+      
+      stats ;;; Agi:[rollTable(ability_score, dice("1d20") )] ;;; Pre:[rollTable(ability_score, dice("1d20") )] ;;; str:[rollTable(ability_score, dice("1d20") )] ;;; tou:[rollTable(ability_score,d = dice("1d20") )]
+      rule
+      property-line ;;; Armor ;;; [armor]
+      property-line ;;; HP ;;; [rollTable(hptable,d)]
+      header ;;; Flaws
+      property-block ;;; [flaws]
+      header ;;; Feats
+      property-block ;;; [feats]
+      
+      
+      header ;;; Weapons
+      property-block ;;; [weapon]
+      header ;;; Equipment
+      property-block ;;; [selectLeaves(equipment, 2)]
+      header ;;; Scrolls
+      property-line ;;; Clean ;;; [scrolls_clean]
+      rule
+      property-line ;;; Unclean ;;; [scrolls_unclean]
+
+flaws
+  Gammy Foot: Suffer -1 to movement.
+  Brittle Bones: +1 to damage when hit.
+  Putrid Amell: All models within 3 inches suffer -1 to presence tests. 
+  Weak Hands: Can only wield one handed weapons
+  Greasy Hands: Suffer -1 to agility tests. 
+  One Eyed: Suffer -1 on all ranged attacks and all spells 
+  Malnutrition : –1 on strength based tests
+  Scared of Heights: Cannot climb or jump
+  Angry: If a nonfriendly model is within line of sight you must move towards them and make an attack if possible.
+  Vacant Mmind: Uncaring for the real world, they never collect treasure or items from the battlefield.
+  Weak Bodied: -1HP
+  Allergic to Metal: Cannot wear Armor
+  Squeamish: -1 dmg dealt to others
+  Loner:-1 on all tests when within 2 inches of a friendly model
+  Scared of Monsters: -1 to attack monsters and beasts
+  Realist: Model cannot use Omens
+  Poor Morale: Whenever they take damage they make a morale roll.
+  Newbie: No Flaws!!
+  
+feats
+  Intimidating Presence: A single enemy model you can see within 6 inches must make a Presence test. If failed, you may make a full move with that model as if it was yours or drop one of its weapons.
+  Slippery When Wet: Model can always leave combat.
+  Intimidating Presence: A single enemy model you can see within 6 inches must make a Presence test. If failed, you may make a full move with that model as if it was yours or drop one of its weapons.
+  Slippery When Wet: Model can always leave combat.
+  Cowardly: Model gets a -1 on all morale tests but gains +1 Agility
+  Meathead: Model is stronger than they are smart, +2 Strength -1 Presence
+  Mind over matter: Model can make a Presence test to ignore D4 damage each time they are hit
+  Through gritted teeth: Model can make a Presence test to avoid being downed once per encounter, they remain standing on 1HP.
+  Revolting appearance: Enemies suffer -1 to hit this model
+  What we do in the shadows: Model can heal by drinking blood of others. Make a melee attack and heal damage dealt. Gain Teeth:D4:Agility based: Cruel Model cannot be healed by any other means.
+  Hard to see: Model cannot be targeted by enemy ranged attacks, and can not make ranged attacks itself. Spells work as normal.
+  Tough as nails: +2 HP, -1 Agility.
+  Scavenger: Roll twice on treasure tables when searching and take both, if they have sufficient equipment slots free. Extra items are placed on ground as per treasure rules.
+  Barkskin: +1 armor from tough skin -1 agility
+  Clawed nails : Replace Fists with Claws. Claws: D6:Agility Based
+  Swindler : At the end of the scenario, if they survive, gain one free roll on the treasure table.
+  Medic : Can make a Presence test to heal one downed model, model is restored on 1HP and returns to the fight.
+  Improvised fighter : Model can make a makeshift one handed weapon when out in the field
+  Shield bash Model equipped with a shield deals an additional 2 damage in melee.
+  Lucky goblin foot: Model can reroll 1 dice roll per scenario but has -1 equipment slot.
+  Charge Model can move twice its movement value but must end within an inch of an enemy
+  Feint/Disarm: Instead of making an attack during a close combat attack, make an Agility test to feint the enemy’s attack, preventing a successful hit. If the enemy also fails to hit they are considered to have dropped their weapon and are disarmed.
+
+ability_score
+  1-4, -3
+  5-6, -2
+  7-8, -1
+  9-12, 0
+  13-14, +1
+  15-16, +2
+  17-20, +3
+  
+hptable
+  1-4, 5
+  5-6, 6
+  7-8, 7
+  9-12, 8
+  13-14, 9
+  15-16, 10
+  17-20, 11
+  
+Name
+  Danbert
+  Nifehl
+  Doodlplex
+  El Bobo
+  Hald
+  Pannoyed
+  Dugnutt
+  Tauk
+  Kvali
+  Gride
+  Dug
+  Saint
+  Andrew
+  Tim
+  Vlan Bator
+  Esheg
+  Abathur
+  John Eternal
+  Jack
+  Hawksmoor
+  Van Dar
+  Thomas
+  Skinflint
+  Sven
+  Anja
+  Toomas
+  Marek
+  Mottokrosh
+  Gorand
+  Higgins
+  Rory
+  Skinny
+  Marc
+  Lain
+  Andy
+  Uri Moti
+  David
+  Bob
+  Daryl
+  Donatella
+  Xigah
+  Azathoth
+  Ada
+  Cora
+  Yslen
+  Getri
+  Fairy
+  Krust
+  Dwarf’o
+  Daniel
+  Rizzen
+  De’ath
+  Winter
+  Ariana
+  Uaqoh
+  Eisenqush
+  Haunsakhuz
+  Nakus
+  Chenu
+  Suszi
+  Ocejos
+  Egesh
+  Ocei
+  Thaxeq
+  Uqoniq
+  Nishet
+  Maag
+  Steven
+  Turner
+  Toranako
+  Illiax
+  Graleth
+  Argon
+  Shandri
+  Mikkaeus
+  Artanaro
+  Severina
+  Storm
+  Reed
+  Steve
+  Nohr
+  Ramses
+  Wolfram
+  Pookie
+  Pew
+  Sand
+  Cold
+  Rain
+  Wolf
+  Marxillo
+  Flem
+  Shorty
+  Breadman
+  Bungle
+  Ocelt
+  Celt
+  Lolth
+  Quix
+  Satan
+  Mad
+  
+surname
+  The Saint
+  The Bloodless
+  The Monster
+  The Fiendish
+  The Contessa’s Handmaid
+  The Neither
+  The Unbuttered
+  The Blind Idiot God
+  The Smoothest
+  The False Bastard
+  The Prodigal
+  The High Elf
+  The Avaricious
+  The Hermit
+  The Lost
+  The Broken
+  The Strange
+  The Moist
+  The Deadly
+  The Smelly
+  The Palid
+  The Distressed
+  The Biggest
+  The Loudest
+  The Loyal
+  The One Most Likely to Die
+  Grande
+  The Sometimes
+  The Loud
+  The Duplicate
+  The Duplicate
+  The Saintly
+  The Nocrumpet
+  The Unholy
+  The Driven
+  The Desperate
+  The Wiles
+  The Witchmonger
+  The Cacorro
+  the Cloven-Hoofed
+  The SilverTongued
+  The Horrible
+  The Everliving
+  The Tainted
+  The Terrible
+  The Forsworn
+  The Raider
+  The Patron
+  The Dirge
+  The Thankless
+  The Saltmonger
+  The Prophet Mime
+  The Hermit alsoknown as... Dave
+  The Sad
+  The Night-Child
+  The Demonslayer
+  The Thyme Master
+  The Namtabandy
+  The Boil-Pincher
+  The Neophyte
+  The Depraved
+  The Last-Fated
+  The monkeybutt
+  The Snail
+  The Too-Many-Eyed
+  The Sorrowful
+  The Juhelees
+  Grande
+  The Blacken
+  The Sly
+  The Empty
+  The Possum
+  The Collector
+  The Toothsayer
+  The Great Wyrm
+  The Occult Herbmaster
+  The Knight
+  The Ranger
+  The Grave Cleric
+  The Firewizard
+  The Lost
+  The Scared
+  I don’t understand
+  The pantsless
+  The Baby legs
+  The Fast
+  The Furious
+  The Artist
+  The King of the Wastes
+  The Forgiven
+  The Percipient
+  The Pew Pew
+  The Father
+  The Mother
+  The Dead
+  The Slime
+  The Mortis
+  The Evil Beats
+  The Doctor
+  The One Most Foul
+  
+armor
+  <strong>1</strong> Light
+  <strong>2</strong> Medium
+  <strong>3</strong> Heavy | Takes up two slots
+  <strong>0</strong> Helm | Cannot be dazed by an attack
+  <strong>0</strong> Shield | Can be destroyed to ignore one attack after all rolls.  
+
+weapon
+  [d2] (d2)
+  [d4] (d4)
+  [d6] (d6)
+  [d8] (d8)
+  [d10] (d10)
+
+d2
+  Bloodied fists | Fumble you take 1 damage (Strength)
+d4
+  One Handed Makeshift Weapon - could be a piece of bone, debris or rock (Strength)
+  Staff - (Strength)
+  Dagger - Thrown (Agility)
+d6
+  Shortsword (Agility)
+  Warhammer - Critical causes dazed (Strength)
+  Rapier - Critical disarms enemy (Agility)
+  Horsmans Pick - Cruel (Strength)
+  Bow - comes with 5 arrows - ranged (Presence)
+  Crossbow - comes with 5 arrows -cruel - ranged (Presence)
+  Spear - reach and thrown (Agility)
+d8
+  Ulfberht Sword - critical causes bleeding (Strength)
+  Morning star - critical causes dazed (Strength)
+  Flail - critical causes bleeding (Strength)
+  Glaive - reach (Strength)
+d10
+  Bastard Sword - on critical can choose to destroy enemies weapon (Strength)
+  Great Axe - critical breaks enemy shield and damages (Strength)
+
+equipment
+  Bandages - Used to stop bleeding condition <br>
+  Lantern - required for models to see in the dark<br>
+  Torch - as a lantern but only lasts 3 rounds, can be used as a one handed makeshift weapon<br>
+  Backpack - counts as 1 equipment slot, but provides 2 additional slots<br>
+  Potion - heals D6: toughness test or become dazed.<br>
+  Ammo - 5 shots<br>
+
+
+scrolls_clean
+  Hopes last breath: Heal D6 HP on one model you are within 1 inch of. Does not work on downed models.
+  Will of the Optimistic: Target model adds an extra D6 to next test they make.
+  not dead yet: A dead model is awakened with 1HP and a new flaw.
+  Second wind: Target creature gains 1D6 extra HP until the end of the scenario, Reduce casters HP by 2 each time its cast. Does not work on downed models or caster.
+  Visions of tomorrow: Target model must flee as per morale rules.
+  Shield of faithless: Model cannot be targeted by ranged attacks for 1 round 
+  False dawn: Target model produces light as if they had a lantern, lasts 5 rounds.
+  Mind blast: Target Model must pass a Presence test or is dazed for 1 round
+  Golden flare: Target Model must pass a Presence test or is blinded for 1 round
+  Obey: Target creature must obey one command, taking one action or movement. The action must be one the target can complete. On a failure the caster instead performs the command if it can, but under the control of the other player. Speak the command before rolling the dice.
+
+scrolls_unclean
+  Flaming hands of St vilmarex: Caster hurls a ball of fire at an enemy it can see dealing D6 damage - cruel
+  Mindless eyes: Target creature becomes deranged and must make a Presence test or attack the nearest model.
+  Invisible hands: Can move an object (dropped weapon or treasure) D12 inches
+  Ungrounded: Target creature can hover for 1 round, ignores all terrain features and moves at twice normal speed
+  Breath of the undying: Target creature begins to suffocate and takes D4 damage when activated. Must make a Presence test as an action to remove effect.
+  One eyed king: Target creature becomes invisible and cannot be targeted by any attack or spell, Target is ignored by monsters. Lasts until creature makes a test of any kind
+  Bones, them damn bones: A skeleton (page 31) appears at a target point on the table, it always fights the nearest model but never attacks the caster. On a failure to cast it still appears but always moves towards and attacks the caster. If caster dies it leaves.
+  Eternal sleep: Target creature makesa Presence test and falls asleep on a failure.Wakes up if they take any damage. Friendly models can wake them up as an action when within 1 inch.
+  Ride the lighting: Caster produces lightning and strikes a target within 12 inches. Deals D6 damage. Ignores armor.
+  Doom: All models and creatures within 12 inches, including allies and the caster, must make a Presence test, on failure take D10 damage, ignoring armor. Any failure to cast this scroll is conisdered a fumble
+  
+// Template design credit:
+// https://valloric.github.io/statblock5e/
+// https://codepen.io/retractedhack/pen/gPLpWe
+createCardHtml(c) => 
+	let html = ``;
+	
+	let items = c.content.selectAll.map(c => c.evaluateItem).map(l => ({
+		type: l.split(";;;")[0].trim(),
+		params: l.split(";;;").slice(1).map(p => p.trim()),
+	}));
+
+	for(let i = 0; i < items.length; i++) {
+		let type = items[i].type;
+		let params = items[i].params;
+		if(type === "rule") {
+			html += `<svg height="5" width="100%" class="tapered-rule"><polyline points="0,0 270,2.5 0,5"></polyline></svg>`;
+		}
+		if(type === "property-line") {
+			let firstLastClass = !items[i-1] || items[i-1].type !== "property-line" ? "first" : "";
+			if(!firstLastClass && items[i+1] && items[i+1].type !== "property-line") firstLastClass = "last";
+		  html += `<div class="property-line ${firstLastClass}"><h4>${params[0]}</h4> <p>${params[1]}</p></div>`;
+		}
+		if(type === "property-block") {
+		  html += `<div class="property-block"><p>${params[0]}</h4> </p>`;
+		}
+		if(type === "stats") {
+			let statMap = params.reduce((a,v) => (a[v.split(":")[0]]=Number(v.split(":")[1]), a), {});
+			html += `<div class="abilities">`;
+			for(let [name, value] of Object.entries(statMap)) {
+				let mod;
+				html += `<div class="ability-intelligence"><h4>${name.toUpperCase()}</h4><p>${value}</p></div>`;
+			}
+			html += "</div>";
+		}
+		if(type === "header") {
+			html += `<h3>${params[0]}</h3>`;
+		}
+    if(type == "content"){
+    
+    }
+	}
+	return html;
+
+
+type
+  A <b>cryptic hag</b> with misshapen limbs, she wants your eyes and your tongue. 
+  A wheezing, <b>withered lay bishop</b>; jumps at any hissing sound, a craven soul.
+  A <b>grumbling, withered plague peddlar</b> wrapped in mouldering robes. 
+  A <b>craven rakehell</b>, cringes at a glance, fears last night’s lover. Palms a blade.
+  A <b>fanged deserter</b>, jaw bitterly broken; it seeks to posture for power.
+  A <b>shrieking midwife</b>, throat hoarse with rage. She’d kill again if she could.
+  A <b>penitent thief</b>, with only a few gangrenous fingers left. Offers fair warnings.
+  A <b>fool reveler</b>; manic, vulgar, and too familiar. The world will break this one cruelly.
+  A <b>disgraced royal</b>; eyes of fear, deserving betrayal. Hunted by former friends.
+  A <b>cackling houndmaster</b>, accompanied by brutal beasts. Fears their disloyalty.
+  A lugubrious <b>cyclopean mutant</b>, all too lost in dreams. Sees only doom to come. 
+  A <b>pale horror</b> of dripping, melded flesh and exposed narrow teeth.
+  A <b>despondent, fell knight</b> in service of fallen <B>Zigmund</b> who was slain by the usurper Fathmu. 
+  A <b>malformed mound-dweller</b>, petty and slathered in mud. An oath-breaker.
+  A <b>self-righteous justicar</b>, their judgment inevitable and their beliefs beyond reproach. 
+  A <b>gaunt old vagrant</b>, a dagger embedded in their head. Delirious, not quite dead.
+  A <b>dreary cartographer</b>, gnawing upon their fingertips and sneering at the sunless sky. 
+  An <b>unfortunate undead</b>, hands show signs of recent escape from crucifixion. 
+  A <b>burgermeister</b>, deposed in all but ego. The people licked their boots once, and with violence enough they will do so again.
+  A <b>simpering martinet</b>, they cling to authority and seek to enforce order so they might reign over others. 
+  A <b>faithful prioress</b> of the Basilisks, her heart shackled in self-loathing.^0.5
+  A <b>foul marauder</b>, like those out of Wästland. A sadist of profane greed and hateful laughter.
+  A <b>water-logged undead</b> cursed by the Rot-Lands. Vomits crocodilian larvae as it speaks.
+  An <b>elderly brigand</b>, their neck bent wrong from a dance at the gallows. Hates the world.
+  A <b>starved waif</b> of wild hair, accompanied by a <b><i>miscreant hound</b></i>. They’ll eat it if they must.
+  A <b>thrice-burned witch</b>, their charred skin cracks off, malformed. Their every word, ablaze.
+  A <b>wayward coachman</b>, paranoid of the terrors of the wild. <b><i>Their horse</b></i>, a bastard; hungry for flesh.
+  A <b>knight</b>, branded by cultists and believing themselves host to an immortal fighting spirit.
+  An <b>old drunkard</b>, the rot-gut has left them in delirium; but keeps them from their deep shames.
+  A <b>caravaneer</b> and <b><i>their daughter</b></i>, they bicker and argue. They’ve killed, they’ll kill again.
+  A <b>young horse thief</b>, still wounded from the whip of a job gone wrong. Clever but young.
+  An <b>alchemist</b>, on the verge of a breakthrough which will not save this rotten world.
+  A <b>wandering monster hunter</b>, with trouble in their wake. They are cruel in their avarice.
+  A <b>beggar</b>, distraught by circumstance, hateful of many; they’ll lead a pestilent crusade.
+  A <b>petty lordling</b> who reigns over meager masses. They crave true power, they lust for it.
+  A <b>failed sovereign</b>, all their riches pawned; they fear for their line and a serf’s vengeance.
+  A <b>broken hermit</b>, fastidious and crawling like a beast. They selfishly know how to survive.
+  A <b>lonely anchorite</b>, desperate for kind company; hesitant to address the world’s ending.
+  A <b>dreary taverner</b>, polishing a mug with a spittal rag. Bilesome, with no aspirations.
+  A <b>groaning magistrate</b>, they can barely stomach the cruelty needed for their office. 
+  An <b>errant haunt</b>, barely aware it has passed. All their world is agony, and Hell is empty.
+  A <b>fiend</b> in the body of a <b><i>once blessed vestal</b></i>. It is joyous for this world to come.
+  A <b>minstrel of disrepute</b>, their songs discordant, their bawdy nature a disgrace to all.
+  A <b>wretched banker</b>, bloated from comfort. Sneering, they know how to get more riches.
+  A <b>numbed eunuch</b>, a tired soul denied baser comforts. They know where beauty hides.
+  A <b>young torchbearer</b>, charred hands. Too young for this work. Always eyes their employer's purse.
+  A <b>vile poisoner</b>, phlegmatic; suicidally addicted to their supply. A horrid love for the dying.
+  A <b>brutalized apprentice</b>, underappreciated; courts murderous intent with each indignity.
+  The <b>bastard executioner</b>, hated for their work. Seeks to kill They who condemned them.
+  A <b>doomsayer of ill-repute</b>; moonstruck and naked. Fears the end, but seeks it’s bliss.
+  A <b>rat whisperer</b>, a mewling paramour to cancers and vermin. Knows a single dark truth.
+  A <b>wigged barrister</b>, haughty and bold. Clings to an authority they no longer hold.
+  A <b>vile apothecary</b>, peddling foul poultices and withered herbs. Offers deadly solutions.
+  A <b>disgraced nun</b>, her order fallen. She seeks a new truth. She’ll scourge those who deny her this.
+  A <b>political agitator</b>, they cry for the death of kings; of tyrants. “Before it Ends, for justice!”
+  A <b>watchman</b>, milky-eyed. They let so much happen. They want bribes, beer; not trouble.
+  An <b>artist</b>, cracked at the doom of the world. Their work is aberrant, risque; prophetic.
+  A <b>noble’s envoy</b>, grown wretched on perceived authority. All are peasants in their eyes.
+  A <b>duellist</b>, a maddened laugh to them. An honorable death will surely save their soul.
+  A <b>foreign spy</b>. Doubt for what may emerge after the End sullies their ambitions.
+  A <b>half-rotting swamp dweller</b>, inbred and consumed by parasite and spore bloom alike. 
+  A <b>butler</b>; craven and murderous. Acts on behalf of their betters. Seeks their doom.
+  An <b>enslaved toiler</b>, broken by their chains. “Free me!” They cry. “I must have revenge!”
+  A <b>broken-faced thrall</b>, they flinch from your gaze. Too few teeth. Can hardly scream.
+  An <b>elderly herbalist</b>, drunk on hedge magic and laudanaum. A heretic, to be flayed.
+  A <b>roughly hewn miner</b>, born in the dark. They know the whisper of stones; of silent screams.
+  A <b>bounty hunter</b>, not here for you. Not yet. Professional but curt. Keeps ear trophies.
+  A <b>meager pedler</b>; little to sell that is not stolen. A thief’s friend, but all too cautious.
+  The <b>municipal Witch Burner</b>, and all are suspect. A cruel, stone-faced sadist. 
+  A <b>distant-eyed sailor</b>, haunted by what lurks upon the waves; beyond them. Drinks, weeps; heavily.
+  A <b>common smuggler</b>; a broken smile and a rusty shank. Always available for work.
+  A <b>crusty stevedore</b>, a mind that’s weak; a back that’s strong. Loves to tell horrid tales.
+  A <b>disillusioned harlot</b>; disillusioned but offering services. Seldom kills, but has before. Will again.
+  A <b>scandalous charlatan</b>, fleeing from one mob to the next. Has plenty of ill-gained coins.
+  A <b>reputable fence</b>; honest and professional to those who are neither. Deeply connected.
+  An <b>outlaw</b>, quick with the blade. A bounty on their head. Just trying to get by.
+  A <b>grave robber</b>, festooned in petty jewelry. Hates the undead. “Bah. Chatterers all.”
+  A <b>lowly ganger</b>, a thief playing at legitimacy. Marked by hazing; looking for new blood.
+  A <b>lonesome cavalryman</b>, their <i><b>horse</b></i> the only thing left to trust. The brute beast calls the shots now.
+  A <b>local guard</b>, a petty sadist. An extortionist, a murderer. All in the name of authority.
+  A <b>masked highwayman</b>, burdened by regret and colonized in cruelty. They just wanted their pay.
+  A <b>ghoulish cannibal</b>; but they admit it! Marrow and sweet meats bring them joy.
+  An <b>obsequious soldier</b>, coldly calm unless in a fit of rage. The battle fervor brings them needed clarity.
+  A <b>pit fighter</b>, stained in sin. Addicted to the crowd. A being for a short, brutal, fast life.
+  A <b>brutalized busker</b>, none grant them mercy; none care for them. They are deeply wise.
+  A <b>morbid puppeteer</b>; </b>playing at morality tales in a world of sin. Caresses their faces.
+  An <b>ogre of a tyrant</b>, with bulging eyes and a hateful laugh. Desires dominion over all.
+  A <b>caged goblin</b>, a guttural shrieking horror. It snaps at flesh. It can barely eke out words.
+  <b>One</b> out of <b><i>a gang of guttersnipes</b></i>, wretched children. They’ll pick your pocket; gnaw your bones.
+  A <b>local dung mongerer</b>, casually optimistic. Everyone shits still. That won’t change soon.
+  A <b>cultist</b>, rapturous and joyous. They have been chosen! Their robes, slashed, stained.
+  A <b>young muleskinner</b>, they know hidden paths; but safety is a luxury they can ill afford.
+  A <b>cenobite</b> from a nearby shrine. They are profane in thought, but wise beyond years.
+  A <b>mercenary captain</b>, eager to be obeyed; fearful their soldiers will turn on them soon.
+  A <b>squire-cadet</b>, slowly disillusioned by their bleak masters and the nature of warfare.
+  A <b>blackguard</b> returned once more from the Valley of Unfortunate Undead. They will not be crucified again.
+  A <b>drown-bloated admiral</b> from the Endless Sea, insane and cacophonous in portent.
+  A <b>swamp skimmer</b>, riddled with bot flies in their eyes. Agonized, they grumble and moan.
+  A <b>sack-hooded warlock</b>, nude and scabrous. Their flesh seeks to birth forth new terrors.
+  <b>One</b> out of <b><i>a flock of zealots</b></i>, whipping themselves raw in an orgy of blood. They seek the End.
+  A <b>vile crucifier</b>, their back bent by the weight of timbers. They suck on errant, rusty, nails.
+  A <b>messiah</b> false or scorned. A holy fool, unloved and growing to loathe this world they wish to save. 
+  A <b>hunter of the dire</b>, once a child denied even this world's grim illusion of innoceance. 
+  The <b>fool prophet of a dead god</b>.
+  A fool that hears only whispers. Fettered ideas. And for this, they are a <b>heretic</b>.
+  A <b>cursed mortal</b> soul whose screams for a humanity lost remains little more than a choking cough; a whisper drowned beneath the black and trackless seas.
+  A <b>dejected philosopher</b>, forlorn by society. Condemned as a sophist, mocked as a voice for a world without reason. 
+  A <b>corpse hunter</b>, a butcher of beasts and dark undead. A scourge of the Valley. 
+  A <b>lowly songbird</b>, a lothario who made a fool dealing for hope of a longer life.
+  An <b>astral pilgrim</b>, too deeply drunk in the absinthe to notice the ruin of the world. 
+  A poisoned soul, <b>one of the bent</b>, scum of a fiendish mien who make the alleyways and backroads of this world all the bleaker still. 
+  A <b>faint ember</b>, a wickhead diminished. A lantern-headed slasher, denied their mastery of the dark. 
+  A lawless <b>good-for-nothing prowler</b> from the fringes. A traitorous brigand that delights in the silent ecstasy of bitter wounds inflicted. Silver and gold bring their cold heart a sick comfort.
+  A <b>dog-blooded mongrel</b> known as an earthbound; a foul and disloyal mutant unworthy of either lineage. They are used to getting by with nothing but the scraps. They have something to prove, violently if possible.
+  A <b>local nobody</b>, notable only for their coattail chasing lust for clout. They steal stories from the dead braggarts who never return to {the Paunchy Swine|the Grey Galth Inn}. They must live any life but their own.
+  A <b>red-shriven vicar</b> who has embraced the profane truth: all vestments, be it fine silk or one's own born skin, are abhorrent vanities. They defy such obscurement, seeking a flensed and gore-glistening truth.
+  A <b>scorned hoarder</b> so often dismissed with the title of <b>roach king</b>. A filth-dweller, a mimic of a real person. They are a being who seeks foremost to hoard, to fester surrounded by their prizes.
+  A <b>thief</b>, so common, so seldom pitiable. But this one stole from <b><i>Mikhael</b></i>, and now the Merchant wanders in search of a single coin so long ago spent; and the fool thief who dared take it.
+  A <b>bastardborn hostage</b>, one of <b><i>King Fathmu IX</b></i> far-flung and forsaken seed which took root and caused him narry a thought for all their trouble. They have dark dreams of a birthright which will see them broken upon the wrack in a Schleswig oubliette.
+  A <b>false basilisk</b>, a serpentine horror in mannish visage. A wretched usurper who seeks their own apotheosis at the End of All. Hunted by inquisitors, surely proof; they claim, that they are a threat to the "pretenders" <b>SHE</b> and <b>HE</b>.
+  A <b>gilded wolf</b>, a rake whose hungry mind and way with words sees them a butcher without equal in the pursuit of highborn, noble prey. With a tragic air of well-versed poetics and court livery, they stalk the world in search of scions and sovereigns to slay.
+  An <b>Heir to Südglans</b>, held in contempt and rancor by the remnant thrones of this dying world. Their dreams are haunted by the drowned screams of a nation rendered beneath sludge, beneath mud, beneath the waves. A pauper cursed by highborn blood.
+  A <b>poison-priest</b>, an inheritor of a devastating art now lost beneath the tides. Their fingers are stained with ghastly pollens, spores, and blood. They wheeze, a hacking pain; a worrisome cost for this occupation. But still, they keep the faith.
+  A <b>flesh-warped servant</b> of <b>the Mud Master of Targ-Dungel</b>, their body a rotted, malformed atrocity. Maggots breed in their wounds, under their tongue. They cackle, for all the world shall soon be little more than a bloated corpse; akin in apotheosis to their fetid godling.
+  A <b>scion of the <i>Floating Basilica</i></b>, a depraved and seditious bastard collaborator seeking dominion over a world of lessers. They bare brands and chain lashes; for despite their high birth, one higher will always seek to abuse those beneath them.
+  A <b>fungal infested wayfarer</b>, with bracket shelf like goiter upon their neck, and puffballs clustering within a rotting eye socket. They are joyous, for death can no longer claim them in any meaningful way. In time, they shall know this as little more than a new tragedy.
+  
+warband_name
+  [group] of [adjective] [occupation]
+  the [adjective] [group] of [occupation]
+  the [occupation]' [group]
+  the [adjective] [occupation]
+  the [adjective] [group]
+  the [adjective] [occupation] [location]
+  [occupation] [location]
+  the [adjective] [group] of [occupation]
+  the [adjective] [group] of [adjective] [occupation]^0.2
+  the [adjective]^0.1 //now we're getting into punk band name territory
+  the [occupation]^0.2
+  the [atmosphere] [group]^0.2
+
+group
+  Union
+  Band
+  Choir
+  Gang
+  Corps
+  Bunch
+  Council
+  Ensemble
+  Orchestra
+  Carneval
+  Guild
+  Circle
+  Nobility
+  Club
+  Elite
+  Host
+  Horde
+  Legion
+  Crew
+  Family
+  Clan
+  Nation
+  Society
+  Brigade
+  Rabble
+  Squad
+  Retinue
+  Pentad
+  Coven
+  Sons
+  Children
+  Mob
+  Order
+  Pack
+  Circus
+  Embrace
+  Alliance
+
+occupation
+  Swineherds
+  Peddlers
+  Fathers
+  Seekers
+  Beggars
+  Barbers
+  Babies
+  Ones
+  Bakers
+  Whisperers
+  Murderers
+  Hobos
+  Gongfarmers
+  Sailors
+  Poets
+  Fools
+  Nobles
+  Pilgrims
+  Singers
+  Collectors
+  Wanderers
+  Merchants
+  Children
+  Corpses
+  Thinkers
+  Knights
+  Devils
+  Blokes
+  Wizards
+  Doctors
+  Servants
+  Lovers
+  Defenders
+  Men
+  Apostles
+  Goons
+  Zealots
+  Women
+  Butchers
+  Idiots
+  Scavengers
+  Witches
+  Pirates
+  Sons
+  Hunters
+  Hats
+  Eyes
+  Hands
+  Gazers
+  Giants
+  Husks
+  Guardians
+  Watchers
+  Clerks
+  Scribes
+  Journeymen
+  Acolytes
+  
+adjective
+  Merry
+  Smelly
+  Naked
+  Unclean
+  Musty
+  Tattered
+  Desperate
+  Blinded
+  Bloodthirsty
+  Enraged
+  Fleshy
+  Unlikely
+  Sweaty
+  Howling
+  Worried
+  Hollow
+  Aroused
+  Forgotten
+  Humble
+  Excentric
+  Deadly
+  Misguided
+  Bloddied
+  Aimless
+  Bloody
+  Illuminated
+  Drunk
+  Hairy
+  Lost
+  Soft
+  Lucky
+  Tentacled
+  Black
+  Festering
+  Rotting
+  Shunned
+  Amorphous
+  Irritated
+  Pestilent
+  Bloated
+  Naughty
+  Flayed
+  Wild
+  Iron
+  Hateful
+  Horny
+  Spiteful
+  Friendly
+  Godless
+  Holy
+  Festering
+  Moist
+  Wasted
+  Hungry
+  Thrustworthy
+  Tongueless
+  Withered
+  Noble
+  Pointy
+  Polychromatic
+  {import:adjective}
+  [atmosphere]
+  
+
+location
+  of the Woods
+  of the Hills
+  of the Vale
+  of the Swamp
+  of the [atmosphere] Swamp ^0.5
+  of the Path
+  of the [atmosphere] Path
+  of Madness
+  of Love^0.2
+  of the Void
+  of the Abyss
+  of the [atmosphere] Peak
+  of the Light
+  of the [atmosphere] Lake
+  of the Starless Sea
+  of the [adjective] Fire
+  of the Goat
+  of the End
+  of the [adjective] Citadel
+  of the Worm
+  of the {import:color} {import:animal}
+  of the [adjective] God
+  of the [adjective] Godess
+  of the [adjective] [shape]
+  
+shape
+  Dodecahedron
+  Cube
+  Sphere
+  Trapezoid
+  Pyramid
+  Cloud
+  Crystal
+  Helix
+  
+atmosphere //okay, i'll stop now
+  Verdant
+  Silver
+  Toxic
+  Acid
+  Endless
+  Screeching
+  Screaming
+  Howling
+  Smoking
+  Silent
+  Flickering
+  Shimmering
+  Fragrant
+  Whispering
+
+legalese
+  <i>Legalese/Disclaimer:</i><p><b>Warband Roster Generator for Forbidden Psalm</b> is an independent production by Jay Denis and is not affiliated with Ockult Örtmästare Games or Stockholm Kartell. It is published under the MÖRK BORG Third Party License. MÖRK BORG is copyright Ockult Örtmästare Games and Stockholm Kartell. <p> Support your favorite <b>MÖRK BORG</b> creators and content by purchasing official copies of the book, or third party material. 
