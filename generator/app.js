@@ -17,16 +17,19 @@ const STAT_KEYS = [
 ];
 
 const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const NAMES = [ 'Danbert','Nifehl','Doodlplex','El Bobo','Hald','Pannoyed','Dugnutt','Tauk','Kvali','Gride','Dug','Saint','Andrew','Tim','Vlan Bator','Esheg','Abathur','Jack','Sven','Anja','Toomas','Marek','Storm','Reed','Nohr' ];
-const TYPES = ['Mercenary','Zealot','Brute','Acolyte','Scoundrel'];
 const TRAITS_PATH = 'traits.json';
 const SCROLLS_PATH = 'scrolls.json';
+const NAMES_PATH = 'names.json';
 const SPELLCASTER_COST = 5;
 
 let traitData = { feats: [], flaws: [] };
 let traitsLoaded = false;
 let scrollData = { clean: [], unclean: [] };
 let scrollsLoaded = false;
+let nameParts = { first: [], second: [] };
+let namesLoaded = false;
+const FALLBACK_FIRST = ['Nohr', 'Ash', 'Saint', 'Dire'];
+const FALLBACK_SECOND = ['the Wanderer', 'the Dire', 'the Returned', 'the Merciful'];
 let seedCatalog = [];
 let catalogLoaded = false;
 let stashFilter = 'all';
@@ -319,6 +322,24 @@ function loadScrollData() {
     });
 }
 
+function loadNameData() {
+  fetch(NAMES_PATH)
+    .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Failed to load names: ${res.status}`))))
+    .then((data) => {
+      if (data && Array.isArray(data.first) && Array.isArray(data.second)) {
+        nameParts = {
+          first: data.first.filter(Boolean),
+          second: data.second.filter(Boolean),
+        };
+      }
+      namesLoaded = true;
+    })
+    .catch((err) => {
+      console.error(err);
+      namesLoaded = true;
+    });
+}
+
 function loadState() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || null; } catch { return null; }
 }
@@ -364,6 +385,9 @@ function normalizeState() {
     if (ch.tragedies < 0) ch.tragedies = 0;
     ensureTraitArrays(ch);
     ensureScrollLibrary(ch);
+    ch.experience = Number(ch.experience || 0);
+    if (ch.experience < 0) ch.experience = 0;
+    if ('type' in ch) delete ch.type;
     if (ch.isMage) {
       if (mageOwner && mageOwner !== ch.id) {
         ch.isMage = false;
@@ -419,11 +443,11 @@ function removeFromStash(itemId, qty) {
 function newCharacter(name) {
   const char = {
     id: uid(),
-    name: name || randomFrom(NAMES),
-    type: randomFrom(TYPES),
+    name: name || randomName(),
     stats: { agi: 0, pre: 0, str: 0, tou: 0 },
     armor: 0,
     hp: 8,
+    experience: 0,
     feats: [],
     flaws: [],
     weapons: [], // [{itemId}]
@@ -465,6 +489,12 @@ function slotUsage(c) {
   }
   const total = Math.max(0, base + bonus);
   return { used, total, base, bonus };
+}
+
+function randomName() {
+  const first = nameParts.first.length ? nameParts.first : FALLBACK_FIRST;
+  const second = nameParts.second.length ? nameParts.second : FALLBACK_SECOND;
+  return `${randomFrom(first)} ${randomFrom(second)}`.replace(/\s+/g, ' ').trim();
 }
 
 const isShieldItem = (item) => !!item && /shield/i.test(item.name || '');
@@ -1124,14 +1154,15 @@ function render() {
     btn.textContent = c.name || '(unnamed)';
     btn.onclick = () => { state.selectedId = c.id; saveState(); };
     left.appendChild(btn);
-    left.appendChild(tag(`${c.type || ''}`));
     const right = document.createElement('div');
     right.className = 'row';
     const slots = slotUsage(c);
     const slotTag = tag(`Slots ${slots.used}/${slots.total}`);
     if (slots.used > slots.total) slotTag.classList.add('warn');
     slotTag.title = `Base ${slots.base}, Bonus ${slots.bonus}`;
+    const xpTag = tag(`XP ${Number(c.experience || 0)}`);
     right.appendChild(slotTag);
+    right.appendChild(xpTag);
     right.appendChild(tag(`${charPoints(c)} g`));
     const del = document.createElement('button');
     del.className = 'danger';
@@ -1164,6 +1195,11 @@ function render() {
     }
     const tragediesLabel = el('tragediesLabel');
     if (tragediesLabel) tragediesLabel.style.display = 'none';
+    const xpInput = el('edXP');
+    if (xpInput) {
+      xpInput.value = 0;
+      xpInput.disabled = true;
+    }
   }
   renderTraitControls();
   renderScrollControls();
@@ -1381,7 +1417,6 @@ function setOptions(sel, list) {
     c.armor = av;
   }
   el('edName').value = c.name||'';
-  el('edType').value = c.type||'';
   const mageToggle = el('isMageToggle');
   if (mageToggle) {
     mageToggle.checked = !!c.isMage;
@@ -1391,6 +1426,11 @@ function setOptions(sel, list) {
   if (tragediesInput) {
     tragediesInput.value = Number(c.tragedies || 0);
     tragediesInput.disabled = !c.isMage;
+  }
+  const xpInput = el('edXP');
+  if (xpInput) {
+    xpInput.value = Number(c.experience || 0);
+    xpInput.disabled = false;
   }
   const tragediesLabel = el('tragediesLabel');
   if (tragediesLabel) {
@@ -1531,10 +1571,14 @@ function bindEditorInput(id, apply) {
   input.addEventListener('input', (e)=>{ const c=state.chars.find(x=>x.id===state.selectedId); if(!c) return; apply(c, e); saveState(); });
 }
 bindEditorInput('edName', (c,e)=> c.name = e.target.value);
-bindEditorInput('edType', (c,e)=> c.type = e.target.value);
 bindEditorInput('edArmor', (c,e)=> c.armor = Number(e.target.value)||0);
 bindEditorInput('edHP', (c,e)=> c.hp = Number(e.target.value)||0);
 bindEditorInput('edNotes', (c,e)=> c.notes = e.target.value);
+bindEditorInput('edXP', (c,e)=> {
+  const val = Math.max(0, Number(e.target.value) || 0);
+  c.experience = val;
+  e.target.value = val;
+});
 
 function bindCustomStatChange(id, key) {
   const input = el(id);
@@ -1667,4 +1711,5 @@ function download(name, text) {
 loadCatalogData();
 loadTraitData();
 loadScrollData();
+loadNameData();
 render();

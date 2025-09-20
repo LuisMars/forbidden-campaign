@@ -16,41 +16,64 @@
       <h1>Forbidden Psalm – Warband Builder</h1>
       <div class="sub">Editable warband roster with stash and gold costs. Data persists locally.</div>
       <div class="grid">
-        <!-- Left: Warband + Characters -->
-        <section class="card" id="warbandCard">
-          <h2>Warband</h2>
-          <div class="row">
-            <input id="wbName" type="text" placeholder="Warband name" />
-          </div>
-          <div class="row">
-            <label class="pill">Gold Limit <input id="wbLimit" type="number" min="0" step="1" style="width:100px"/></label>
-            <span id="wbPoints" class="tag">0 g</span>
-          </div>
-          <div class="sep"></div>
-          <div class="row">
-            <input id="charName" type="text" placeholder="Add character name"/>
-            <button id="addChar">Add</button>
-            <button id="randChar" class="ghost" title="Randomize a quick template">Random</button>
-          </div>
-          <div id="charList" class="list" style="margin-top:8px"></div>
-          <div class="sep"></div>
-          <div class="row">
-            <button id="exportBtn">Export JSON</button>
-            <label class="pill" for="importFile" style="cursor:pointer">Import <input id="importFile" type="file" accept="application/json" style="display:none"></label>
-            <button id="clearAll" class="danger">Clear All</button>
-          </div>
-        </section>
+        <div class="column-left">
+          <!-- Left: Warband + Stash -->
+          <section class="card" id="warbandCard">
+            <h2>Warband</h2>
+            <div class="row">
+              <input id="wbName" type="text" placeholder="Warband name" />
+            </div>
+            <div class="row">
+              <label class="pill">Gold Limit <input id="wbLimit" type="number" min="0" step="1" style="width:100px"/></label>
+              <span id="wbPoints" class="tag">0 g</span>
+            </div>
+            <div class="sep"></div>
+            <div class="row">
+              <input id="charName" type="text" placeholder="Add character name"/>
+              <button id="addChar">Add</button>
+              <button id="randChar" class="ghost" title="Randomize a quick template">Random</button>
+            </div>
+            <div id="charList" class="list" style="margin-top:8px"></div>
+            <div class="sep"></div>
+            <div class="row">
+              <button id="exportBtn">Export JSON</button>
+              <label class="pill" for="importFile" style="cursor:pointer">Import <input id="importFile" type="file" accept="application/json" style="display:none"></label>
+              <button id="clearAll" class="danger">Clear All</button>
+            </div>
+          </section>
 
-        <!-- Middle: Character Editor -->
-        <section class="card" id="editorCard">
+          <section class="card" id="stashCard">
+            <h2>Warband Stash</h2>
+            <div class="row">
+              <label class="pill">Type
+                <select id="stashTypeFilter">
+                  <option value="all">All Items</option>
+                  <option value="weapon">Weapons</option>
+                  <option value="equipment">Equipment</option>
+                  <option value="armor">Armor</option>
+                  <option value="scroll">Scrolls</option>
+                </select>
+              </label>
+              <select id="stashItemSelect" aria-label="Available catalog items"></select>
+              <button id="stashAddBtn" type="button">Add to Stash</button>
+            </div>
+            <div class="sep"></div>
+            <div id="stashList" class="stash-list"></div>
+            <div class="sep"></div>
+          </section>
+        </div>
+
+        <div class="column-right">
+          <!-- Character Editor -->
+          <section class="card" id="editorCard">
           <h2>Character Editor</h2>
           <div id="noSelection" class="muted">Select a character to edit.</div>
           <div id="editor" style="display:none">
             <div class="row">
               <input id="edName" type="text" placeholder="Name"/>
-              <input id="edType" type="text" placeholder="Type / Class"/>
               <label class="pill" style="gap:6px"><input type="checkbox" id="isMageToggle" /> <span class="small">Spellcaster (5 g)</span></label>
               <label class="pill" id="tragediesLabel" style="display:none">Tragedies <input id="edTragedies" type="number" min="0" step="1"/></label>
+              <label class="pill">Experience <input id="edXP" type="number" min="0" step="1"/></label>
               <label class="pill">Armor <input id="edArmor" type="number" step="1" min="0"/></label>
               <label class="pill" style="gap:6px"><input type="checkbox" id="autoArmor" checked /><span class="small">Auto from equipment</span></label>
               <label class="pill">HP <input id="edHP" type="number" step="1" min="1"/></label>
@@ -157,28 +180,8 @@
               </div>
             </div>
           </div>
-        </section>
-
-        <!-- Right: Stash & Points -->
-        <section class="card" id="stashCard">
-          <h2>Warband Stash</h2>
-          <div class="row">
-            <label class="pill">Type
-              <select id="stashTypeFilter">
-                <option value="all">All Items</option>
-                <option value="weapon">Weapons</option>
-                <option value="equipment">Equipment</option>
-                <option value="armor">Armor</option>
-                <option value="scroll">Scrolls</option>
-              </select>
-            </label>
-            <select id="stashItemSelect" aria-label="Available catalog items"></select>
-            <button id="stashAddBtn" type="button">Add to Stash</button>
-          </div>
-          <div class="sep"></div>
-          <div id="stashList" class="stash-list"></div>
-          <div class="sep"></div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
 

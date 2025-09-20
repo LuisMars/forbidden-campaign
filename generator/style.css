@@ -71,18 +71,30 @@ h4 {
 }
 
 .grid {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 18px;
-  align-items: start;
-  grid-template-columns: minmax(260px, 1fr) minmax(480px, 2fr);
-  grid-template-areas:
-    'warband editor'
-    'stash editor';
+  align-items: flex-start;
 }
 
-#stashCard { grid-area: stash; }
-#warbandCard { grid-area: warband; }
-#editorCard { grid-area: editor; }
+.column-left,
+.column-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.column-left {
+  flex: 0 1 360px;
+  min-width: 260px;
+  gap: 24px;
+}
+
+.column-right {
+  flex: 1 1 520px;
+  min-width: 320px;
+  gap: 24px;
+}
 
 .card {
   background: var(--panel);
@@ -520,21 +532,18 @@ details > summary {
 
 @media (max-width: 1200px) {
   .grid {
-    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    flex-direction: column;
+  }
+
+  .column-left,
+  .column-right {
+    flex: 1 1 auto;
   }
 }
 
 @media (max-width: 900px) {
   .wrap {
     padding: 20px 16px;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      'warband'
-      'stash'
-      'editor';
   }
 
   button,
