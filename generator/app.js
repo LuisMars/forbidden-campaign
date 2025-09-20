@@ -463,6 +463,20 @@ function newCharacter(name) {
   return char;
 }
 
+function randomizeBaselineStats(char) {
+  if (!char || !char.stats) return;
+  char.stats.agi = randomFrom([-1, 0, 0, 1]);
+  char.stats.pre = randomFrom([-1, 0, 0, 1]);
+  char.stats.str = randomFrom([-1, 0, 0, 1, 1]);
+  char.stats.tou = randomFrom([0, 0, 1, 1]);
+}
+
+function createRandomCharacter() {
+  const char = newCharacter();
+  randomizeBaselineStats(char);
+  return char;
+}
+
 function charPoints(c) {
   let gold = 0;
   for (const w of c.weapons || []) { const it = resolveItem(w.itemId); if (it) gold += Number(it.cost || 0); }
@@ -1549,20 +1563,15 @@ function setOptions(sel, list) {
 el('wbName').addEventListener('input', (e)=>{ state.warband.name = e.target.value; saveState(); });
 el('wbLimit').addEventListener('input', (e)=>{ state.warband.limit = Number(e.target.value)||0; render(); saveState(); });
 
-el('addChar').onclick = () => {
-  const name = el('charName').value.trim();
-  const c = newCharacter(name || undefined);
-  state.chars.push(c); state.selectedId = c.id; el('charName').value=''; saveState();
-};
-el('randChar').onclick = () => {
-  const c = newCharacter();
-  // Simple random stats around 0
-  c.stats.agi = [-1,0,0,1][Math.floor(Math.random()*4)];
-  c.stats.pre = [-1,0,0,1][Math.floor(Math.random()*4)];
-  c.stats.str = [-1,0,0,1,1][Math.floor(Math.random()*5)];
-  c.stats.tou = [0,0,1,1][Math.floor(Math.random()*4)];
-  state.chars.push(c); state.selectedId = c.id; saveState();
-};
+const addCharBtn = el('addChar');
+if (addCharBtn) {
+  addCharBtn.onclick = () => {
+    const c = createRandomCharacter();
+    state.chars.push(c);
+    state.selectedId = c.id;
+    saveState();
+  };
+}
 
 // Editor bindings
 function bindEditorInput(id, apply) {
