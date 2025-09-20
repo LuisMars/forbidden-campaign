@@ -3,13 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Forbidden Psalm — Async League Helper (No Backend)</title>
+    <title>League Helper</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="wrap">
-      <h1>Forbidden Psalm — League Helper</h1>
-      <div class="sub">Track a 26‑scenario campaign. Suggest matchups. Record results.</div>
+      <h1>League Helper</h1>
+      <div class="sub">Track campaigns. Suggest matchups. Record results.</div>
 
       <div class="grid">
         <!-- Left column: roster & scenarios -->
@@ -24,9 +26,18 @@
           <div class="sep"></div>
 
           <h2>Scenarios</h2>
+          <div class="row">
+            <label>Campaign
+              <select id="campaignMode">
+                <option value="endtimes">End Times</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <span id="campaignNote" class="muted"></span>
+          </div>
           <div id="scenarioAddRow" class="row">
-            <input id="scenarioName" type="text" placeholder="(locked)" />
-            <button id="addScenario" disabled>Add Scenario</button>
+            <input id="scenarioName" type="text" placeholder="Add scenario…" />
+            <button id="addScenario" type="button">Add</button>
           </div>
           <details id="scenariosPanel" class="collapsible" closed>
             <summary>

@@ -38,6 +38,7 @@ const state = loadState() || {
   scenarios: [],
   plays: {},
   lockOrder: true,
+  mode: 'endtimes', // 'endtimes' | 'custom'
 };
 
 function saveState() {
@@ -78,7 +79,18 @@ function ensureDefault26() {
   saveState();
 }
 
-ensureDefault26();
+function ensureModeSetup() {
+  if (!state.mode) state.mode = 'endtimes';
+  if (state.mode === 'endtimes') {
+    ensureDefault26();
+  } else {
+    // custom mode: ensure idx fields exist
+    state.scenarios = (state.scenarios || []).map((s, i) => ({ ...s, idx: s.idx ?? i + 1 }));
+    saveState();
+  }
+}
+
+ensureModeSetup();
 
 // ======================
 // Rendering
@@ -109,11 +121,8 @@ function renderScenarios() {
     );
     const row = document.createElement("div");
     row.className = "pill";
-    row.innerHTML = `<span class="scenario-badge">#${String(
-      s.idx
-    ).padStart(2, "0")} · ${esc(
-      s.name
-    )}</span> <small class="muted">total plays: ${totalPlays}</small>`;
+    const delBtn = state.mode === 'custom' ? `<button class="danger" data-role="del-scn" data-id="${s.id}">Remove</button>` : '';
+    row.innerHTML = `<span class="scenario-badge">#${String(s.idx).padStart(2, "0")} · ${esc(s.name)}</span> <small class="muted">plays: ${totalPlays}</small> ${delBtn}`;
     box.appendChild(row);
   });
   const cnt = $("#scnCount");
@@ -157,6 +166,15 @@ function renderScenarioDropdown() {
   sel.innerHTML = "";
   const list = [...state.scenarios].sort((a, b) => a.idx - b.idx);
   list.forEach((s) => sel.add(new Option(`#${s.idx} ${s.name}`, s.id)));
+}
+
+function applyModeClass() {
+  document.body.classList.toggle('mode-endtimes', state.mode === 'endtimes');
+  document.body.classList.toggle('mode-custom', state.mode === 'custom');
+  const note = $("#campaignNote");
+  if (note) {
+    note.textContent = state.mode === 'endtimes' ? 'End Times campaign (26 scenarios).' : 'Custom campaign. Add and manage scenarios.';
+  }
 }
 
 function renderCoverage() {
@@ -468,30 +486,34 @@ function importJson(file) {
         throw new Error("Invalid file: expected 'players' and 'plays' sections");
       }
       // Restore canonical scenarios first (immutable), then remap plays by scenario name if provided
-      ensureDefault26();
       state.players = obj.players;
       state.plays = {};
-      if (Array.isArray(obj.scenarios)) {
-        // Build oldId->name and name->newId
-        const oldIdToName = new Map(
-          obj.scenarios.map((s) => [s.id, s.name])
-        );
-        const nameToNewId = new Map(
-          state.scenarios.map((s) => [s.name, s.id])
-        );
+      // Mode-aware import
+      if (obj.mode === 'custom' && Array.isArray(obj.scenarios)) {
+        state.mode = 'custom';
+        state.scenarios = obj.scenarios.map((s, i) => ({ id: s.id || uid(), name: s.name, idx: s.idx ?? i + 1 }));
+        // Copy plays as-is
         for (const [k, v] of Object.entries(obj.plays || {})) {
-          const [pid, oldSid] = k.split("::");
-          const name = oldIdToName.get(oldSid);
-          const newSid = nameToNewId.get(name);
-          if (!newSid) continue; // skip unknown
-          const newKey = pid + "::" + newSid;
-          state.plays[newKey] = (state.plays[newKey] | 0) + (v | 0);
+          state.plays[k] = v | 0;
         }
       } else {
-        // No scenario list provided; keep plays empty to avoid mismatches
-        console.warn(
-          "Import: no scenario list to map plays; keeping plays empty to preserve integrity."
-        );
+        state.mode = 'endtimes';
+        ensureDefault26();
+        if (Array.isArray(obj.scenarios)) {
+          // Build oldId->name and name->newId
+          const oldIdToName = new Map(obj.scenarios.map((s) => [s.id, s.name]));
+          const nameToNewId = new Map(state.scenarios.map((s) => [s.name, s.id]));
+          for (const [k, v] of Object.entries(obj.plays || {})) {
+            const [pid, oldSid] = k.split("::");
+            const name = oldIdToName.get(oldSid);
+            const newSid = nameToNewId.get(name);
+            if (!newSid) continue;
+            const newKey = pid + "::" + newSid;
+            state.plays[newKey] = (state.plays[newKey] | 0) + (v | 0);
+          }
+        } else {
+          console.warn("Import: no scenario list to map plays; keeping plays empty.");
+        }
       }
       saveState();
       toast("Imported league data");
@@ -501,6 +523,9 @@ function importJson(file) {
       renderCoverage();
       renderPlayerDropdowns();
       renderScenarioDropdown();
+      applyModeClass();
+      const modeSel = document.querySelector('#campaignMode');
+      if (modeSel) modeSel.value = state.mode;
     } catch (e) {
       alert("Import failed: " + e.message);
     }
@@ -517,6 +542,70 @@ $("#addPlayer").onclick = () => {
   addPlayer(v);
   $("#playerName").value = "";
 };
+// Campaign mode select
+const modeSel = $("#campaignMode");
+if (modeSel) {
+  modeSel.value = state.mode || 'endtimes';
+  applyModeClass();
+  modeSel.onchange = () => {
+    const next = modeSel.value;
+    if (next === state.mode) return;
+    if (!confirm("Switch campaign mode? This resets scenarios and plays. Players are kept.")) {
+      modeSel.value = state.mode;
+      return;
+    }
+    state.mode = next;
+    // Reset scenarios and plays; keep players
+    state.plays = {};
+    if (state.mode === 'endtimes') {
+      ensureDefault26();
+    } else {
+      state.scenarios = [];
+      saveState();
+    }
+    applyModeClass();
+    renderScenarios();
+    renderCoverage();
+    renderScenarioDropdown();
+    toast("Campaign mode switched.");
+  };
+}
+// Add scenario (custom mode only)
+const addScnBtn = $("#addScenario");
+if (addScnBtn) {
+  addScnBtn.onclick = () => {
+    if (state.mode !== 'custom') return;
+    const inp = $("#scenarioName");
+    const name = inp.value.trim();
+    if (!name) return;
+    state.scenarios.push({ id: uid(), name, idx: state.scenarios.length + 1 });
+    inp.value = '';
+    saveState();
+    renderScenarios();
+    renderScenarioDropdown();
+  };
+}
+// Delete scenario (custom mode only)
+const scnList = $("#scenarios");
+if (scnList) {
+  scnList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-role="del-scn"]');
+    if (!btn) return;
+    if (state.mode !== 'custom') return;
+    const sid = btn.dataset.id;
+    // Remove plays for this scenario
+    for (const k of Object.keys(state.plays)) {
+      if (k.endsWith('::' + sid) || k.split('::')[1] === sid) {
+        delete state.plays[k];
+      }
+    }
+    state.scenarios = state.scenarios.filter((s) => s.id !== sid).map((s, i) => ({ ...s, idx: i + 1 }));
+    saveState();
+    renderScenarios();
+    renderScenarioDropdown();
+    renderCoverage();
+  });
+}
 $("#export").onclick = exportJson;
 $("#importFile").addEventListener("change", (e) => {
   const f = e.target.files?.[0];
@@ -779,3 +868,4 @@ renderSelector();
 renderCoverage();
 renderPlayerDropdowns();
 renderScenarioDropdown();
+applyModeClass();
