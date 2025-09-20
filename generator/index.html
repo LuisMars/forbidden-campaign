@@ -163,44 +163,20 @@
         <section class="card">
           <h2>Warband Stash</h2>
           <div class="row">
-            <input id="newItemName" type="text" placeholder="Item name"/>
-            <select id="newItemType">
-              <option value="weapon">Weapon</option>
-              <option value="equipment">Equipment</option>
-              <option value="armor">Armor</option>
-              <option value="scroll">Scroll</option>
-            </select>
-            <input id="newItemCost" type="number" step="1" min="0" placeholder="Cost"/>
-            <button id="addItem">Add to Stash</button>
+            <label class="pill">Type
+              <select id="stashTypeFilter">
+                <option value="all">All Items</option>
+                <option value="weapon">Weapons</option>
+                <option value="equipment">Equipment</option>
+                <option value="armor">Armor</option>
+                <option value="scroll">Scrolls</option>
+              </select>
+            </label>
+            <select id="stashItemSelect" aria-label="Available catalog items"></select>
+            <button id="stashAddBtn" type="button">Add to Stash</button>
           </div>
-          <table class="table" style="margin-top:8px">
-            <thead><tr><th>Name</th><th>Type</th><th>Attrs</th><th class="right">Qty</th><th class="right">Cost</th><th></th></tr></thead>
-            <tbody id="stash"></tbody>
-          </table>
-
           <div class="sep"></div>
-          <details>
-            <summary>Catalog Editor</summary>
-            <div class="small o" style="margin:6px 0 10px">Edit item types and gold costs. These apply to all characters.</div>
-            <table class="table">
-              <thead><tr><th>Name</th><th>Type</th><th>DMG</th><th>Attr</th><th>Traits</th><th>Slots</th><th>Slot Bonus</th><th>AV</th><th>Notes</th><th class="right">Cost (g)</th><th></th></tr></thead>
-              <tbody id="catalog"></tbody>
-            </table>
-            <div class="sep"></div>
-            <div class="row">
-              <button id="exportCatalog" class="ghost">Export Catalog</button>
-              <label class="pill" for="importCatalogFile" style="cursor:pointer">Import Catalog <input id="importCatalogFile" type="file" accept="application/json" style="display:none"></label>
-              <button id="resetCatalog" class="danger">Reset to Seed</button>
-            </div>
-            <div class="sep"></div>
-            <details>
-              <summary>Bulk Import/Update (CSV)</summary>
-              <div class="small o" style="margin:6px 0 10px">Columns: name,type,cost,dmg,attr,traits,slots,slotBonus,av,notes. Existing items update by name.</div>
-              <textarea id="bulkCsv" placeholder="Shortsword,weapon,5,D6,Agi,,1,0,,\nLight Armor,armor,10,,,,1,0,1,"></textarea>
-              <div class="row"><button id="applyBulk">Apply CSV</button></div>
-            </details>
-          </details>
-
+          <div id="stashList" class="stash-list"></div>
           <div class="sep"></div>
         </section>
       </div>

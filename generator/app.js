@@ -2,59 +2,8 @@
 // Data model & helpers
 // =====================
 const STORE_KEY = 'fp_warband_builder_v1';
-const CATALOG_VERSION = 1;
-const DEFAULT_ITEMS = [];
-const SEED_ITEMS = [
-  { name: 'Bandages', cost: 1, traits: 'Cures Bleeding (pg. 22).', slots: 1, type: 'equipment', id: 'bandages' },
-  { name: 'Lantern', cost: 3, traits: 'Required for models to see in the dark.', slots: 1, type: 'equipment', id: 'lantern' },
-  { name: 'Torch', cost: 1, traits: 'As a lantern but only lasts 3 rounds. Can be used as a One-Handed Makeshift Weapon.', slots: 1, type: 'equipment', id: 'torch' },
-  { name: 'Backpack', cost: 1, traits: 'Takes up one slot, but provides +2 additional Equipment slots.', slots: 1, slotBonus: 2, type: 'equipment', id: 'backpack' },
-  { name: 'Potion', cost: 6, traits: 'Heals D6. Then the drinker makes a Toughness test or becomes Dazed (pg. 22).', slots: 1, type: 'equipment', id: 'potion' },
-  { name: 'Ammo', cost: 1, traits: 'Five shots per stack of Ammo.', slots: 1, type: 'equipment', id: 'ammo' },
-  { name: 'Antidote', cost: 7, traits: 'Cures Poisoned (pg. 23).', slots: 1, type: 'equipment', id: 'antidote' },
-  { name: 'Tincture', cost: 7, traits: 'Cures Diseased (pg. 22).', slots: 1, type: 'equipment', id: 'tincture' },
-  { name: 'Cannonball', cost: 2, traits: 'One shot of Cannon ammo.', slots: 1, type: 'equipment', id: 'cannonball' },
-  { name: 'Whisky', cost: 2, traits: 'After drinking, auto-pass Morale tests for the remainder of the Scenario.', slots: 1, type: 'equipment', id: 'whisky' },
-  { name: 'Flintlock Pistol', dmg: 'D8', attr: 'Presence', traits: 'Ranged; Explode; Reload', cost: 15, slots: 1, type: 'weapon', id: 'flintlock-pistol' },
-  { name: 'Sling', dmg: 'D4', attr: 'Agility', traits: 'Ranged', cost: 1, slots: 1, type: 'weapon', id: 'sling' },
-  { name: 'Musket', dmg: 'D10', attr: 'Presence', traits: 'Ranged; Explode; Reload', cost: 20, slots: 2, type: 'weapon', id: 'musket' },
-  { name: 'Cannon', dmg: 'D20', attr: 'Strength', traits: 'Ranged; Explode; Reload', cost: 100, slots: 2, type: 'weapon', id: 'cannon' },
-  { name: 'Crossbow', dmg: 'D6', attr: 'Presence', traits: 'Ranged; Cruel; Reload', cost: 8, slots: 2, type: 'weapon', id: 'crossbow' },
-  { name: 'Bow', dmg: 'D6', attr: 'Presence', traits: 'Ranged', cost: 5, slots: 2, type: 'weapon', id: 'bow' },
-  { name: 'One-Handed Makeshift Melee Weapon', dmg: 'D4', attr: 'Strength', traits: '', cost: 0, slots: 1, type: 'weapon', id: 'one-handed-makeshift-melee-weapon' },
-  { name: 'Staff', dmg: 'D4', attr: 'Strength', traits: '', cost: 1, slots: 1, type: 'weapon', id: 'staff' },
-  { name: 'Shortsword', dmg: 'D6', attr: 'Agility', traits: '', cost: 2, slots: 1, type: 'weapon', id: 'shortsword' },
-  { name: 'Dagger', dmg: 'D4', attr: 'Agility', traits: 'Thrown', cost: 1, slots: 1, type: 'weapon', id: 'dagger' },
-  { name: 'Hand Axe', dmg: 'D8', attr: 'Strength', traits: 'Thrown', cost: 3, slots: 1, type: 'weapon', id: 'hand-axe' },
-  { name: 'Ulfberht Sword', dmg: 'D8', attr: 'Strength', traits: 'Criticals cause Bleeding (pg. 22)', cost: 5, slots: 1, type: 'weapon', id: 'ulfberht-sword' },
-  { name: 'Morning Star', dmg: 'D8', attr: 'Strength', traits: 'Criticals cause Dazed (pg. 22); Cruel', cost: 7, slots: 1, type: 'weapon', id: 'morning-star' },
-  { name: "Horseman's Pick", dmg: 'D6', attr: 'Strength', traits: 'Cruel', cost: 4, slots: 1, type: 'weapon', id: 'horsemans-pick' },
-  { name: 'Flail', dmg: 'D8', attr: 'Strength', traits: 'Criticals cause Bleeding (pg. 22)', cost: 5, slots: 1, type: 'weapon', id: 'flail' },
-  { name: 'Brass Knuckles', dmg: '2', attr: 'Agility', traits: 'Takes up no Equipment slot; Criticals cause Dazed (pg. 22)', cost: 2, slots: 0, type: 'weapon', id: 'brass-knuckles' },
-  { name: 'Bone Flail', dmg: 'D8', attr: 'Strength', traits: 'Criticals cause Dazed and Bleeding (pg. 22)', cost: 9, slots: 1, type: 'weapon', id: 'bone-flail' },
-  { name: 'Net', dmg: '-', attr: 'Agility', traits: 'Thrown; target must pass an Agility test or lose all movement until freed. Models can spend an action to attempt an Agility or Strength test to escape.', cost: 3, slots: 1, type: 'weapon', id: 'net' },
-  { name: 'Warhammer', dmg: 'D6', attr: 'Strength', traits: 'Criticals cause Dazed (pg. 22)', cost: 4, slots: 1, type: 'weapon', id: 'warhammer' },
-  { name: 'Sword', dmg: 'D6', attr: 'Strength', traits: '', cost: 3, slots: 1, type: 'weapon', id: 'sword' },
-  { name: 'Rapier', dmg: 'D6', attr: 'Agility', traits: 'Criticals disarm enemy', cost: 4, slots: 1, type: 'weapon', id: 'rapier' },
-  { name: 'Two-Handed Makeshift Melee Weapon', dmg: 'D6', attr: 'Strength', traits: '', cost: 0, slots: 2, type: 'weapon', id: 'two-handed-makeshift-melee-weapon' },
-  { name: 'Bastard Sword', dmg: 'D10', attr: 'Strength', traits: 'Criticals destroy enemy Weapons', cost: 10, slots: 2, type: 'weapon', id: 'bastard-sword' },
-  { name: 'Great Axe', dmg: 'D10', attr: 'Strength', traits: 'Criticals destroy Shields and deal damage', cost: 10, slots: 2, type: 'weapon', id: 'great-axe' },
-  { name: 'Glaive', dmg: 'D8', attr: 'Strength', traits: 'Reach', cost: 8, slots: 2, type: 'weapon', id: 'glaive' },
-  { name: 'Spear', dmg: 'D6', attr: 'Agility', traits: 'Reach; Thrown', cost: 8, slots: 2, type: 'weapon', id: 'spear' },
-  { name: 'Trident', dmg: 'D6', attr: 'Agility', traits: 'Thrown; Criticals disarm enemy', cost: 7, slots: 2, type: 'weapon', id: 'trident' },
-  { name: 'Unholy Hand Grenades of Apameia', dmg: 'D10', attr: 'Agility', traits: 'Thrown; Explode; Called Shot', cost: 6, slots: 1, type: 'weapon', id: 'unholy-hand-grenades-of-apameia' },
-  { name: "Bag o' Rats", dmg: '-', attr: 'Agility', traits: 'Thrown; target must pass a Toughness test or become Diseased (pg. 22); on a Fumble the user becomes Diseased instead', cost: 1, slots: 1, type: 'weapon', id: 'bag-o-rats' },
-  { name: 'Light Armor', armorVal: 1, cost: 2, slots: 1, traits: '', type: 'armor', id: 'light-armor' },
-  { name: 'Medium Armor', armorVal: 2, cost: 5, slots: 1, traits: '', type: 'armor', id: 'medium-armor' },
-  { name: 'Heavy Armor', armorVal: 3, cost: 20, slots: 2, traits: 'Takes up two Equipment slots.', type: 'armor', id: 'heavy-armor' },
-  { name: 'Helm', armorVal: 0, cost: 5, slots: 1, traits: 'Ignores Dazed (pg. 22).', type: 'armor', id: 'helm' },
-  { name: 'Shield', armorVal: 0, cost: 2, slots: 1, traits: 'If an attack would deal damage, the bearer may destroy the Shield to ignore it.', type: 'armor', id: 'shield' },
-  { name: 'Tower Shield', armorVal: 0, cost: 10, slots: 2, traits: 'Acts as cover; all ranged attacks suffer -3 to hit the bearer; takes up two Equipment slots.', type: 'armor', id: 'tower-shield' },
-  { name: 'Full Plate', armorVal: 4, cost: 50, slots: 2, traits: '+2 Strength required to use or wearer suffers -1 Agility; takes up two Equipment slots.', type: 'armor', id: 'full-plate' },
-  { name: 'Pet Armor', armorVal: 1, cost: 10, slots: 1, traits: 'Can be used on any pet.', type: 'armor', id: 'pet-armor' },
-  { name: 'Improvised Armor', armorVal: 1, cost: 0, slots: 1, traits: '-1 Agility.', type: 'armor', id: 'improvised-armor' },
-  { name: 'Comfy Socks', armorVal: 0, cost: 15, slots: 0, traits: 'Armor Value 1 if the model has at least one Scroll; takes up no Equipment slots.', type: 'armor', id: 'comfy-socks' }
-];
+const CATALOG_VERSION = 2;
+const CATALOG_PATH = 'endtimes-catalog.json';
 
 const STAT_SETS = [
   { id: 'setA', label: '+3, +1, 0, -3', values: [3, 1, 0, -3] },
@@ -78,6 +27,9 @@ let traitData = { feats: [], flaws: [] };
 let traitsLoaded = false;
 let scrollData = { clean: [], unclean: [] };
 let scrollsLoaded = false;
+let seedCatalog = [];
+let catalogLoaded = false;
+let stashFilter = 'all';
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
@@ -100,6 +52,11 @@ function formatSlotBonus(val) {
   if (!num) return null;
   const label = Math.abs(num) === 1 ? 'slot' : 'slots';
   return `${num > 0 ? '+' : ''}${num} ${label}`;
+}
+
+function capitalize(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function countValues(values) {
@@ -260,6 +217,58 @@ function computeTemplateAssignments(char, setId, seedAssignments) {
   return { assignments: cloneAssignments(assignments), counts, locked };
 }
 
+function loadCatalogData() {
+  fetch(CATALOG_PATH)
+    .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Failed to load catalog: ${res.status}`))))
+    .then((data) => {
+      seedCatalog = Array.isArray(data) ? data : [];
+      catalogLoaded = true;
+      syncCatalogWithSeed();
+      normalizeState();
+      render();
+    })
+    .catch((err) => {
+      console.error(err);
+      catalogLoaded = true;
+      syncCatalogWithSeed();
+      normalizeState();
+      render();
+    });
+}
+
+function syncCatalogWithSeed() {
+  if (!catalogLoaded) return;
+  const seeds = Array.isArray(seedCatalog) ? seedCatalog : [];
+  const seedIds = new Set(seeds.filter((item) => item && item.id).map((item) => item.id));
+
+  if (!Array.isArray(state.catalog)) {
+    state.catalog = seeds.map((item) => JSON.parse(JSON.stringify(item)));
+    state.catalogVersion = CATALOG_VERSION;
+    return;
+  }
+
+  if (state.catalogVersion !== CATALOG_VERSION) {
+    const custom = state.catalog.filter((item) => item && !seedIds.has(item.id));
+    state.catalog = [
+      ...seeds.map((item) => JSON.parse(JSON.stringify(item))),
+      ...custom,
+    ];
+    state.catalogVersion = CATALOG_VERSION;
+    return;
+  }
+
+  const existingById = new Map(state.catalog.filter((item) => item && item.id).map((item) => [item.id, item]));
+  seeds.forEach((seed) => {
+    if (!seed || !seed.id) return;
+    const current = existingById.get(seed.id);
+    if (!current) {
+      state.catalog.push(JSON.parse(JSON.stringify(seed)));
+    } else {
+      Object.assign(current, JSON.parse(JSON.stringify(seed)));
+    }
+  });
+}
+
 function ensureStatTemplate(char, setId) {
   const result = computeTemplateAssignments(
     char,
@@ -317,10 +326,9 @@ function loadState() {
 function normalizeState() {
   state = state || {};
   state.warband = state.warband || { name: '', limit: 50 };
-  if (!Array.isArray(state.catalog) || state.catalogVersion !== CATALOG_VERSION) {
-    state.catalog = JSON.parse(JSON.stringify(SEED_ITEMS));
-    state.catalogVersion = CATALOG_VERSION;
-  }
+  state.catalogVersion = Number.isFinite(state.catalogVersion) ? state.catalogVersion : 0;
+  state.catalog = Array.isArray(state.catalog) ? state.catalog : [];
+  syncCatalogWithSeed();
   state.stash = Array.isArray(state.stash) ? state.stash : [];
   state.chars = Array.isArray(state.chars) ? state.chars : [];
   state.settings = state.settings || { autoArmor: true };
@@ -379,12 +387,12 @@ function saveState() { normalizeState(); localStorage.setItem(STORE_KEY, JSON.st
 
 let state = loadState() || {
   warband: { name: '', limit: 50 },
-  catalog: JSON.parse(JSON.stringify(SEED_ITEMS)),
+  catalog: [],
   stash: [],
   chars: [],
   selectedId: null,
   settings: { autoArmor: true },
-  catalogVersion: CATALOG_VERSION,
+  catalogVersion: 0,
 };
 
 normalizeState();
@@ -393,24 +401,6 @@ normalizeState();
 // Catalog helpers
 // =====================
 function resolveItem(itemId) { return state.catalog.find(i => i.id === itemId); }
-function ensureItemInCatalog(name, type, cost) {
-  // create id from name
-  const id = name.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') || uid();
-  let it = state.catalog.find(i => i.id === id || i.name.toLowerCase() === name.toLowerCase());
-  if (!it) {
-    it = { id, name, type, cost: Number(cost)||0 };
-    if (type !== 'scroll') it.slots = /two-handed/i.test(name) ? 2 : 1;
-    it.slotBonus = 0;
-    state.catalog.push(it);
-  } else {
-    it.type = type;
-    it.cost = Number(cost)||0;
-    it.name = name;
-  }
-  if (it.slots == null && type !== 'scroll') it.slots = /two-handed/i.test(it.name) ? 2 : 1;
-  if (it.slotBonus == null) it.slotBonus = 0;
-  return it;
-}
 function addToStash(itemId, qty) {
   const row = state.stash.find(s => s.itemId === itemId);
   if (row) row.qty += qty; else state.stash.push({ itemId, qty });
@@ -1177,131 +1167,185 @@ function render() {
   renderScrollControls();
 
   // Stash
-  const tbody = el('stash');
-  tbody.innerHTML = '';
-  for (const row of state.stash) {
-    const it = resolveItem(row.itemId);
-    if (!it) continue;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(it.name)}</td><td>${it.type}</td><td>${escapeHtml(summarizeItem(it))}</td><td class="right">${row.qty}</td><td class="right">${it.cost} g</td>`;
-    const td = document.createElement('td');
-    td.className = 'right';
-    const useBtn = document.createElement('button');
-    useBtn.textContent = 'Assign';
-    useBtn.onclick = () => {
-      if (!state.selectedId) return alert('Select a character first.');
-      if (!removeFromStash(it.id, 1)) return;
-      const ch = state.chars.find(c=>c.id===state.selectedId);
-      if (!ch) return;
-      if (it.type === 'weapon') { ch.weapons.push({ itemId: it.id }); }
-      else if (it.type === 'equipment' || it.type === 'armor') { ch.equipment.push({ itemId: it.id }); }
-      else if (it.type === 'scroll') {
-        ch.scrolls = ch.scrolls || { clean: 0, unclean: 0 };
-        if (/unclean/i.test(it.name) || it.id.includes('unclean')) ch.scrolls.unclean++;
-        else ch.scrolls.clean++;
-      }
-      saveState();
+  const filterSel = el('stashTypeFilter');
+  if (filterSel) {
+    if (filterSel.value !== stashFilter) filterSel.value = stashFilter;
+    filterSel.onchange = (e) => {
+      stashFilter = e.target.value || 'all';
+      renderStashPicker();
     };
-    const stowBtn = document.createElement('button');
-    stowBtn.className = 'ghost';
-    stowBtn.textContent = 'Stow';
-    stowBtn.title = 'Move to personal stash';
-    stowBtn.onclick = () => {
-      if (!state.selectedId) return alert('Select a character first.');
-      if (!removeFromStash(it.id, 1)) return;
-      const ch = state.chars.find(c=>c.id===state.selectedId);
-      if (!ch) return;
-      ensurePackArray(ch).push(it.id);
-      saveState();
-    };
-    const addBtn = document.createElement('button');
-    addBtn.className = 'ghost';
-    addBtn.textContent = '+';
-    addBtn.title = 'Increase qty';
-    addBtn.onclick = () => { addToStash(it.id, 1); saveState(); };
-    const subBtn = document.createElement('button');
-    subBtn.className = 'ghost';
-    subBtn.textContent = '−';
-    subBtn.title = 'Decrease qty';
-    subBtn.onclick = () => { removeFromStash(it.id, 1); saveState(); };
-    td.appendChild(useBtn); td.appendChild(stowBtn); td.appendChild(addBtn); td.appendChild(subBtn);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
   }
+  renderStashPicker();
 
-  // Catalog editor
-  const cbody = document.getElementById('catalog');
-  if (cbody) {
-    cbody.innerHTML = '';
-    const sorted = [...state.catalog].sort((a,b)=> (a.type||'').localeCompare(b.type||'') || a.name.localeCompare(b.name));
-    for (const it of sorted) {
-      const tr = document.createElement('tr');
-      const typeSel = document.createElement('select');
-      ['weapon','equipment','armor','scroll'].forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; if (it.type===t) o.selected=true; typeSel.appendChild(o); });
-      typeSel.onchange = ()=>{ it.type = typeSel.value; saveState(); };
-      const dmgIn = document.createElement('input'); dmgIn.type='text'; dmgIn.value=it.dmg||''; dmgIn.placeholder='d6'; dmgIn.style.width='60px'; dmgIn.oninput=()=>{ it.dmg = dmgIn.value.trim(); saveState(); };
-      const attrIn = document.createElement('input'); attrIn.type='text'; attrIn.value=it.attr||''; attrIn.placeholder='Agi/Str/Pre'; attrIn.style.width='90px'; attrIn.oninput=()=>{ it.attr = attrIn.value.trim(); saveState(); };
-      const traitsIn = document.createElement('input'); traitsIn.type='text'; traitsIn.value=it.traits||''; traitsIn.placeholder='traits'; traitsIn.style.width='160px'; traitsIn.oninput=()=>{ it.traits = traitsIn.value; saveState(); };
-      const slotsIn = document.createElement('input'); slotsIn.type='number'; slotsIn.step='1'; slotsIn.min='0'; slotsIn.value = it.slots != null ? Number(it.slots) : 1; slotsIn.style.width='70px'; slotsIn.oninput=()=>{ const val = Number(slotsIn.value); it.slots = Number.isFinite(val) ? val : 0; saveState(); };
-      const slotBonusIn = document.createElement('input'); slotBonusIn.type='number'; slotBonusIn.step='1'; slotBonusIn.value=Number(it.slotBonus||0); slotBonusIn.style.width='90px'; slotBonusIn.oninput=()=>{ const val = Number(slotBonusIn.value); it.slotBonus = Number.isFinite(val) ? val : 0; saveState(); };
-      const avIn = document.createElement('input'); avIn.type='number'; avIn.step='1'; avIn.min='0'; avIn.value=Number(it.armorVal||0); avIn.style.width='70px'; avIn.oninput=()=>{ it.armorVal=Number(avIn.value)||0; saveState(); };
-      const notesIn = document.createElement('input'); notesIn.type='text'; notesIn.value=it.notes||''; notesIn.placeholder='notes'; notesIn.style.width='160px'; notesIn.oninput=()=>{ it.notes=notesIn.value; saveState(); };
-      const costIn = document.createElement('input'); costIn.type='number'; costIn.step='1'; costIn.value=Number(it.cost||0); costIn.style.width='90px'; costIn.oninput = ()=>{ it.cost = Number(costIn.value)||0; saveState(); };
-      const del = document.createElement('button'); del.className='ghost'; del.textContent='Remove'; del.onclick=()=>{ if(confirm('Remove from catalog?')) { state.catalog = state.catalog.filter(x=>x!==it); saveState(); } };
-      tr.innerHTML = `<td>${escapeHtml(it.name)}</td>`;
-      let td = document.createElement('td'); td.appendChild(typeSel); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(dmgIn); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(attrIn); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(traitsIn); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(slotsIn); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(slotBonusIn); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(avIn); tr.appendChild(td);
-      td = document.createElement('td'); td.appendChild(notesIn); tr.appendChild(td);
-      td = document.createElement('td'); td.className='right'; td.appendChild(costIn); tr.appendChild(td);
-      td = document.createElement('td'); td.className='right'; td.appendChild(del); tr.appendChild(td);
-      cbody.appendChild(tr);
+  const stashList = el('stashList');
+  if (stashList) {
+    stashList.innerHTML = '';
+    for (const row of state.stash) {
+      const it = resolveItem(row.itemId);
+      if (!it) continue;
+
+      const card = document.createElement('div');
+      card.className = 'stash-row';
+
+      const header = document.createElement('div');
+      header.className = 'stash-row-header';
+
+      const infoBlock = document.createElement('div');
+      infoBlock.className = 'stash-info';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'stash-name';
+      nameEl.textContent = it.name;
+      infoBlock.appendChild(nameEl);
+
+      const meta = document.createElement('div');
+      meta.className = 'stash-meta';
+      const typeSpan = document.createElement('span');
+      typeSpan.textContent = capitalize(it.type || 'equipment');
+      const qtySpan = document.createElement('span');
+      qtySpan.textContent = `Qty ${row.qty}`;
+      const costSpan = document.createElement('span');
+      costSpan.textContent = `${it.cost} g`;
+      meta.append(typeSpan, qtySpan, costSpan);
+      infoBlock.appendChild(meta);
+
+      header.appendChild(infoBlock);
+
+      const controls = document.createElement('div');
+      controls.className = 'stash-controls';
+
+      const infoBtn = document.createElement('button');
+      infoBtn.type = 'button';
+      infoBtn.className = 'ghost info-btn';
+      infoBtn.textContent = 'Info';
+      controls.appendChild(infoBtn);
+
+      const useBtn = document.createElement('button');
+      useBtn.textContent = 'Assign';
+      useBtn.onclick = () => {
+        if (!state.selectedId) return alert('Select a character first.');
+        if (!removeFromStash(it.id, 1)) return;
+        const ch = state.chars.find(c=>c.id===state.selectedId);
+        if (!ch) return;
+        if (it.type === 'weapon') { ch.weapons.push({ itemId: it.id }); }
+        else if (it.type === 'equipment' || it.type === 'armor') { ch.equipment.push({ itemId: it.id }); }
+        else if (it.type === 'scroll') {
+          ch.scrolls = ch.scrolls || { clean: 0, unclean: 0 };
+          if (/unclean/i.test(it.name) || it.id.includes('unclean')) ch.scrolls.unclean++;
+          else ch.scrolls.clean++;
+        }
+        saveState();
+      };
+      controls.appendChild(useBtn);
+
+      const stowBtn = document.createElement('button');
+      stowBtn.className = 'ghost';
+      stowBtn.textContent = 'Stow';
+      stowBtn.title = 'Move to personal stash';
+      stowBtn.onclick = () => {
+        if (!state.selectedId) return alert('Select a character first.');
+        if (!removeFromStash(it.id, 1)) return;
+        const ch = state.chars.find(c=>c.id===state.selectedId);
+        if (!ch) return;
+        ensurePackArray(ch).push(it.id);
+        saveState();
+      };
+      controls.appendChild(stowBtn);
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'ghost';
+      addBtn.textContent = '+';
+      addBtn.title = 'Increase qty';
+      addBtn.onclick = () => { addToStash(it.id, 1); saveState(); };
+      controls.appendChild(addBtn);
+
+      const subBtn = document.createElement('button');
+      subBtn.className = 'ghost';
+      subBtn.textContent = '−';
+      subBtn.title = 'Decrease qty';
+      subBtn.onclick = () => { removeFromStash(it.id, 1); saveState(); };
+      controls.appendChild(subBtn);
+
+      header.appendChild(controls);
+      card.appendChild(header);
+
+      const details = document.createElement('div');
+      details.className = 'stash-details';
+      const infoText = summarizeItem(it);
+      details.textContent = infoText || 'No additional info available.';
+      card.appendChild(details);
+
+      infoBtn.onclick = () => {
+        const open = card.classList.toggle('open');
+        infoBtn.classList.toggle('active', open);
+      };
+
+      stashList.appendChild(card);
     }
-    // Catalog import/export/reset
-    const expCat = document.getElementById('exportCatalog');
-    const impCat = document.getElementById('importCatalogFile');
-    const resetCat = document.getElementById('resetCatalog');
-    if (expCat) expCat.onclick = ()=>{ download('catalog.json', JSON.stringify(state.catalog, null, 2)); };
-    if (impCat) impCat.onchange = (e)=>{
-      const f = e.target.files?.[0]; if (!f) return;
-      const rd = new FileReader(); rd.onload = () => { try { state.catalog = JSON.parse(rd.result); saveState(); } catch(e){ alert('Invalid JSON'); } }; rd.readAsText(f);
-    };
-    if (resetCat) resetCat.onclick = ()=>{ if (confirm('Reset catalog to seed list?')) { state.catalog = [...DEFAULT_ITEMS, ...SEED_ITEMS]; saveState(); } };
-    // Bulk CSV hook
-    const bulk = document.getElementById('bulkCsv');
-    const applyBulk = document.getElementById('applyBulk');
-    if (applyBulk) applyBulk.onclick = () => {
-      const txt = (bulk?.value||'').trim(); if (!txt) return;
-      const rows = txt.split(/\n+/).map(r=>r.split(/\s*,\s*/));
-      for (const r of rows) {
-        const [name,type,cost,dmg,attr,traits,slots,slotBonus,av,notes] = r;
-        if (!name) continue;
-        const id = name.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-        let it = state.catalog.find(i=>i.name.toLowerCase()===name.toLowerCase()||i.id===id);
-        if (!it) { it = { id, name, type: (type||'equipment').toLowerCase(), cost: 0 }; state.catalog.push(it); }
-        if (type) it.type = type.toLowerCase();
-        if (cost!==undefined && cost!=='') it.cost = Number(cost)||0;
-        if (dmg!==undefined) it.dmg = dmg||'';
-        if (attr!==undefined) it.attr = attr||'';
-        if (traits!==undefined) it.traits = traits||'';
-        if (slots!==undefined && slots!=='') it.slots = Number(slots)||0;
-        if (slotBonus!==undefined && slotBonus!=='') it.slotBonus = Number(slotBonus)||0;
-        if (av!==undefined && av!=='') it.armorVal = Number(av)||0;
-        if (notes!==undefined) it.notes = notes||'';
-      }
-      saveState();
-    };
   }
-
   // Catalog selects
   const weapons = state.catalog.filter(i => i.type==='weapon');
   const equips = state.catalog.filter(i => i.type==='equipment' || i.type==='armor');
   setOptions(el('addWeaponSel'), weapons);
   setOptions(el('addEquipSel'), equips);
+}
+
+function renderStashPicker() {
+  const select = el('stashItemSelect');
+  const addBtn = el('stashAddBtn');
+  if (!select || !addBtn) return;
+
+  const prevValue = select.value;
+  select.innerHTML = '';
+
+  const filterSel = el('stashTypeFilter');
+  if (filterSel && filterSel.value !== stashFilter) {
+    filterSel.value = stashFilter;
+  }
+
+  if (!catalogLoaded) {
+    select.disabled = true;
+    addBtn.disabled = true;
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'Loading catalog…';
+    select.appendChild(option);
+    return;
+  }
+
+  let items = Array.isArray(state.catalog) ? [...state.catalog] : [];
+  if (stashFilter !== 'all') {
+    items = items.filter((item) => (item.type || 'equipment') === stashFilter);
+  }
+  items.sort((a, b) => (a.type || '').localeCompare(b.type || '') || (a.name || '').localeCompare(b.name || ''));
+
+  if (!items.length) {
+    select.disabled = true;
+    addBtn.disabled = true;
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'No items available';
+    select.appendChild(option);
+    return;
+  }
+
+  items.forEach((item) => {
+    const option = document.createElement('option');
+    option.value = item.id;
+    option.textContent = item.name;
+    const typeLabel = (item.type || 'equipment');
+    const parts = [typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)];
+    const summary = summarizeItem(item);
+    if (summary) parts.push(summary);
+    parts.push(`${Number(item.cost || 0)} g`);
+    option.title = parts.join(' · ');
+    select.appendChild(option);
+  });
+
+  const hasPrev = items.some((item) => item.id === prevValue);
+  select.value = hasPrev ? prevValue : items[0].id;
+  select.disabled = false;
+  addBtn.disabled = false;
 }
 
 function tag(text) { const span = document.createElement('span'); span.className='tag'; span.textContent=text; return span; }
@@ -1557,17 +1601,17 @@ document.getElementById('autoArmor').addEventListener('change', (e)=>{ state.set
 el('addWeaponBtn').onclick = () => { const id = el('addWeaponSel').value; if(!id) return; const c=state.chars.find(x=>x.id===state.selectedId); if(!c) return; if(removeFromStash(id,1)) c.weapons.push({ itemId:id }); else c.weapons.push({ itemId:id }); saveState(); };
 el('addEquipBtn').onclick = () => { const id = el('addEquipSel').value; if(!id) return; const c=state.chars.find(x=>x.id===state.selectedId); if(!c) return; if(removeFromStash(id,1)) c.equipment.push({ itemId:id }); else c.equipment.push({ itemId:id }); saveState(); };
 
-// Stash operations
-el('addItem').onclick = () => {
-  const name = el('newItemName').value.trim();
-  const type = el('newItemType').value;
-  const cost = Number(el('newItemCost').value)||0;
-  if (!name) return alert('Enter item name');
-  const it = ensureItemInCatalog(name, type, cost);
-  addToStash(it.id, 1);
-  el('newItemName').value = ''; el('newItemCost').value = '';
-  saveState();
-};
+const stashAddBtn = el('stashAddBtn');
+if (stashAddBtn) {
+  stashAddBtn.onclick = () => {
+    const select = el('stashItemSelect');
+    if (!select) return;
+    const id = select.value;
+    if (!id) return;
+    addToStash(id, 1);
+    saveState();
+  };
+}
 
 // Export/Import warband
 el('exportBtn').onclick = () => {
@@ -1581,7 +1625,7 @@ el('importFile').addEventListener('change', (e)=>{
 el('clearAll').onclick = () => {
   if (!confirm('Clear all data?')) return;
   localStorage.removeItem(STORE_KEY);
-  state = { warband:{name:'',limit:50}, catalog: JSON.parse(JSON.stringify(SEED_ITEMS)), stash: [], chars: [], selectedId: null, settings:{autoArmor:true}, catalogVersion: CATALOG_VERSION };
+  state = { warband:{name:'',limit:50}, catalog: [], stash: [], chars: [], selectedId: null, settings:{autoArmor:true}, catalogVersion: 0 };
   normalizeState();
   render();
 };
@@ -1614,14 +1658,7 @@ function download(name, text) {
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
 
-// Initialize defaults into catalog once
-if (!state._seeded) {
-  // merge DEFAULT_ITEMS by id if missing
-  for (const it of DEFAULT_ITEMS) { if (!state.catalog.find(i=>i.id===it.id)) state.catalog.push(it); }
-  for (const it of SEED_ITEMS) { if (!state.catalog.find(i=>i.id===it.id)) state.catalog.push(JSON.parse(JSON.stringify(it))); }
-  state._seeded = true;
-}
-
+loadCatalogData();
 loadTraitData();
 loadScrollData();
 render();

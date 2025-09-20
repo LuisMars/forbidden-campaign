@@ -88,6 +88,86 @@ h4 {
   flex-wrap: wrap;
 }
 
+#stashItemSelect {
+  flex: 1 1 280px;
+  min-width: 220px;
+}
+
+.stash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stash-row {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stash-row-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stash-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stash-name {
+  font-weight: 600;
+}
+
+.stash-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.stash-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.stash-controls button {
+  padding: 6px 9px;
+  font-size: 0.75rem;
+}
+
+.info-btn {
+  padding: 4px 6px;
+  font-size: 0.7rem;
+}
+
+.info-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.stash-details {
+  display: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.stash-row.open .stash-details {
+  display: block;
+}
+
 .row + .row {
   margin-top: 10px;
 }
