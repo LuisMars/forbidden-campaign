@@ -3,112 +3,37 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>League Helper</title>
+    <title>Forbidden Campaign Toolkit</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="home.css" />
   </head>
   <body>
     <div class="wrap">
-      <h1>League Helper</h1>
-      <div class="sub">Track campaigns. Suggest matchups. Record results.</div>
+      <header class="hero">
+        <h1>Forbidden Campaign Toolkit</h1>
+        <p class="tagline">Utilities for running campaigns, tracking warbands, and conjuring the strange.</p>
+      </header>
 
-      <div class="grid">
-        <!-- Left column: roster & scenarios -->
-        <section class="card">
-          <h2>Roster</h2>
-          <div class="row">
-            <input id="playerName" type="text" placeholder="Add player" />
-            <button id="addPlayer">Add Player</button>
-          </div>
-          <div id="players" class="list"></div>
+      <main class="grid">
+        <article class="card">
+          <h2>Campaign Helper</h2>
+          <p>Manage rosters, pair players, and keep your narrative arcs intact across sessions.</p>
+          <a class="btn" href="campaign/">Open Campaign Helper</a>
+        </article>
 
-          <div class="sep"></div>
+        <article class="card">
+          <h2>Warband Builder</h2>
+          <p>Craft and tune warbands, balance gear and tragedies, and export loadouts in seconds.</p>
+          <a class="btn" href="generator/">Launch Warband Builder</a>
+        </article>
+      </main>
 
-          <h2>Scenarios</h2>
-          <div class="row">
-            <label>Campaign
-              <select id="campaignMode">
-                <option value="endtimes">End Times</option>
-                <option value="custom">Custom</option>
-              </select>
-            </label>
-            <span id="campaignNote" class="muted"></span>
-          </div>
-          <div id="scenarioAddRow" class="row">
-            <input id="scenarioName" type="text" placeholder="Add scenario…" />
-            <button id="addScenario" type="button">Add</button>
-          </div>
-          <details id="scenariosPanel" class="collapsible" closed>
-            <summary>
-              <span class="caret">▶</span> Scenarios
-              <span id="scnCount" class="tag">0</span>
-            </summary>
-            <div id="scenarios" class="list"></div>
-          </details>
-
-          <div class="sep"></div>
-          <div class="row">
-            <button id="export">Export</button>
-            <label class="pill" for="importFile" style="cursor: pointer"
-              >Import
-              <input
-                id="importFile"
-                type="file"
-                accept="application/json"
-                style="display: none"
-            /></label>
-            <button id="reset" class="ghost" type="button">Reset Plays</button>
-            <button id="wipe" class="danger" type="button">Clear All</button>
-          </div>
-        </section>
-
-        <!-- Right column: selection & suggestion -->
-        <section class="card">
-          <h2>Available Players</h2>
-          <div id="selector" class="checkbox-grid"></div>
-          <div class="spacer"></div>
-          <div class="row">
-            <label>Mode
-              <select id="filterMode">
-                <option value="best">Fair</option>
-                <option value="unplayed">Unplayed</option>
-                <option value="any">Any</option>
-              </select>
-            </label>
-            <label class="pill" style="gap: 8px; align-items: center">
-              <input type="checkbox" id="lateBoost" checked />
-              <span>Late-Join Priority</span>
-            </label>
-            <label class="pill" style="gap: 8px; align-items: center">
-              <input type="checkbox" id="uniqueScenarios" />
-              <span>No Scenario Repeats</span>
-            </label>
-            <button id="suggest">Suggest</button>
-            <button id="recordAllMatches" type="button">Record All</button>
-          </div>
-          <div id="matchSuggestions" class="list"></div>
-
-          <div class="sep"></div>
-          <details id="manualRecord" class="collapsible">
-            <summary><span class="caret">▶</span> Manually Record</summary>
-            <div class="row">
-              <select id="playedScenario"></select>
-              <select id="pA"></select>
-              <select id="pB"></select>
-              <button id="log">Record</button>
-            </div>
-            <div class="muted">Adds one play for each selected player.</div>
-          </details>
-
-          <div class="sep"></div>
-          <h2>Coverage</h2>
-          <div id="coverage"></div>
-        </section>
-      </div>
+      <section class="card credits">
+        <h2>Credits</h2>
+        <p>Forbidden Psalm is created by <a href="https://www.forbiddenpsalm.com" target="_blank" rel="noopener">Kevin Ferrone</a>.</p>
+        <p>Toolkit crafted by <a href="https://github.com/luismars" target="_blank" rel="noopener">luismars</a>.</p>
+      </section>
     </div>
-
-    <div id="toast" class="muted"></div>
-    <script src="main.js"></script>
   </body>
 </html>
