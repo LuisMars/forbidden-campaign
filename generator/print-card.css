@@ -1,5 +1,11 @@
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=New+Rocker&family=Open+Sans:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Germania+One&display=swap');
+
+/* Font Variables */
+:root {
+  --font-heading: "Germania One", fantasy;
+  --font-body: "IM Fell English", serif;
+}
 
 /* CSS Reset for Print */
 * {
@@ -19,7 +25,7 @@
 body {
   background: #ffffff !important;
   color: #000000 !important;
-  font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 12pt;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
@@ -28,7 +34,7 @@ body {
 .print-preview {
   background: #ffffff !important;
   color: #000000 !important;
-  font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 12pt;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
@@ -85,7 +91,7 @@ body {
   font-size: 1.5em;
   font-weight: 700;
   letter-spacing: 0.04em;
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
   color: #000000;
 }
 
@@ -132,7 +138,7 @@ body {
   page-break-inside: avoid;
   orphans: 1;
   widows: 1;
-  font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
 }
 
 .print-card.print-card--placeholder {
@@ -160,7 +166,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.035em;
   margin: 0;
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -245,7 +251,7 @@ body {
 }
 
 .print-meta-kv strong {
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
 }
 
 .print-stat-item {
@@ -260,7 +266,7 @@ body {
   font-weight: 700;
   font-size: 2.2em;
   color: #000000;
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
   margin-bottom: 0.02in;
 }
 
@@ -270,7 +276,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #666666;
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
 }
 
 .print-content {
@@ -293,7 +299,7 @@ body {
   font-size: 0.92em;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
 }
 
 .print-list {
@@ -309,7 +315,7 @@ body {
 }
 
 .print-list strong {
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
 }
 
 .print-description {
@@ -347,7 +353,7 @@ body {
   font-size: 1.1em;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-family: 'New Rocker', serif;
+  font-family: var(--font-heading);
 }
 
 .print-stash-list {

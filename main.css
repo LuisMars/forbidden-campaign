@@ -1,27 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Germania+One&display=swap');
+
 :root {
-  --bg: #0a0a0a;
-  --panel: #141413;
-  --panel-alt: #1d1c1a;
-  --ink: #f2ede6;
-  --muted: #a49a90;
-  --border: #3a3430;
-  --accent: #d58a2a;
-  --bad: #c24f3a;
-  --good: #5a9c6b;
+  /* Core surfaces */
+  --bg: #0a0a0a;          /* app background (near-black) */
+  --panel: #141413;       /* primary panel */
+  --panel-alt: #1d1c1a;   /* alt panel (lists/cards) */
+  --surface-field: #1a1a19;   /* inputs */
+  --surface-subtle: #222221;  /* table rows / hover */
+  --surface-tag: #2a2927;     /* chips/tags */
+
+  /* Text */
+  --ink: #f2ede6;         /* primary text on dark (AA/Aaa on all surfaces) */
+  --ink-inverse: #ffffff; /* text on strong accents */
+  --muted: #a49a90;       /* secondary text (AA on bg/panel) */
+
+  /* Dividers & borders */
+  --border: #3a3430;          /* low-contrast separators (intentional) */
+  --border-field: #50504b;    /* ↑ slightly lighter for clearer inputs/focus */
+  --accent-border: #8b5a1b;   /* accent edge (cards, section titles) */
+
+  /* Accents (actions, links, highlights) */
+  --accent: #d58a2a;      /* primary action (buttons/links, AA on panels) */
+  --accent-warn: #ffd1a3; /* info/warn backgrounds & badges */
+  --highlight: #f5f000;   /* selection cursor / hotkey hints */
+
+  /* State colors */
+  --good: #5a9c6b;        /* success (AA on panels) */
+  --bad: #c75844;         /* error text/icons (AA on bg; large text on panels) */
+  --danger: #d15648;      /* destructive CTAs (AA on panels) */
+  --danger-border: #7a271b; /* outline for destructive elements */
+
+  /* Utility radii */
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
   --radius-pill: 999px;
-  --surface-field: #1a1a19;
-  --surface-subtle: #222221;
-  --surface-tag: #2a2927;
-  --border-field: #40403d;
-  --accent-border: #8b5a1b;
-  --danger: #b53b2d;
-  --danger-border: #7a271b;
-  --accent-warn: #ffd1a3;
-  --ink-inverse: #ffffff;
-  --highlight: #f5f000;
+
+  /* Typography */
+  --font-heading: "Germania One", fantasy;
+  --font-body: "IM Fell English", serif;
 }
 
 * {
@@ -37,7 +54,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 16px/1.55 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', Helvetica, Arial, sans-serif;
+  font: 16px/1.55 var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -62,7 +79,7 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: 'New Rocker', 'UnifrakturMaguntia', 'Cinzel', Georgia, serif;
+  font-family: var(--font-heading);
   letter-spacing: 0.4px;
   margin: 0 0 6px;
 }

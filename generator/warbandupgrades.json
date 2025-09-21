@@ -1,24 +1,56 @@
-Hogs Head Inn Upgrades 
-50 Gold each
-
-Recruitment Poster
-When recruiting a new warband member they now come equipped with one random
-Weapon and Light Armor for free.
-
-Beds 
-You can expand your warband by one member per bed. You still only take five
-warband members into each Scenario. You can buy up to five additional beds.
-Each bed counts as one upgrade and costs 50 Gold.
-
-Better Grub
-You can give one member of your warband +1 HP. This upgrade can be purchased
-once per warband member.
-
-Ritual Circle 
-You can attempt to resurrect a Dead member of your warband. Choose a surviving
-member to perform the ritual. They make a Presence test. On success the resurrected
-member replaces their Flaw with a new random Flaw. Failed rituals reduce the
-performing model’s Toughness by 1. Fumbling the test kills the performing model.
-
-Whittling Knife 
-Your warband can make 5 Ammo or 1 Cannon Ball per Scenario.
+{
+  "upgrades": [
+    {
+      "id": "recruitment-poster",
+      "name": "Recruitment Poster",
+      "cost": 50,
+      "description": "When recruiting a new warband member they now come equipped with one random Weapon and Light Armor for free.",
+      "type": "warband",
+      "effects": {
+        "recruitment": true
+      }
+    },
+    {
+      "id": "beds",
+      "name": "Beds",
+      "cost": 50,
+      "description": "You can expand your warband by one member per bed. You still only take five warband members into each Scenario. You can buy up to five additional beds. Each bed counts as one upgrade and costs 50 Gold.",
+      "type": "warband",
+      "maxQuantity": 5,
+      "effects": {
+        "maxMembers": 1
+      }
+    },
+    {
+      "id": "better-grub",
+      "name": "Better Grub",
+      "cost": 50,
+      "description": "You can give one member of your warband +1 HP. This upgrade can be purchased once per warband member.",
+      "type": "character",
+      "maxQuantity": 10,
+      "effects": {
+        "hp": 1
+      }
+    },
+    {
+      "id": "ritual-circle",
+      "name": "Ritual Circle",
+      "cost": 50,
+      "description": "You can attempt to resurrect a Dead member of your warband. Choose a surviving member to perform the ritual. They make a Presence test. On success the resurrected member replaces their Flaw with a new random Flaw. Failed rituals reduce the performing model's Toughness by 1. Fumbling the test kills the performing model.",
+      "type": "warband",
+      "effects": {
+        "resurrection": true
+      }
+    },
+    {
+      "id": "whittling-knife",
+      "name": "Whittling Knife",
+      "cost": 50,
+      "description": "Your warband can make 5 Ammo or 1 Cannon Ball per Scenario.",
+      "type": "warband",
+      "effects": {
+        "crafting": true
+      }
+    }
+  ]
+}

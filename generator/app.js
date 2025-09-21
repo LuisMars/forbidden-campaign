@@ -21,6 +21,7 @@ const TRAITS_PATH = "traits.json";
 const SCROLLS_PATH = "scrolls.json";
 const NAMES_PATH = "names.json";
 const INJURIES_PATH = "injuries.json";
+const UPGRADES_PATH = "warbandupgrades.json";
 const PERCHANCE_PATH = "perchance.txt";
 const SPELLCASTER_COST = 5;
 
@@ -35,6 +36,9 @@ let scrollData = { clean: [], unclean: [] };
 let scrollsLoaded = false;
 let injuryData = { injuries: [] };
 let injuriesLoaded = false;
+
+let upgradeData = { upgrades: [] };
+let upgradesLoaded = false;
 let nameParts = { first: [], second: [] };
 let namesLoaded = false;
 let warbandNameData = null;
@@ -403,6 +407,26 @@ function loadInjuryData() {
     });
 }
 
+function loadUpgradeData() {
+  fetch(UPGRADES_PATH)
+    .then((res) =>
+      res.ok
+        ? res.json()
+        : Promise.reject(new Error(`Failed to load upgrades: ${res.status}`))
+    )
+    .then((data) => {
+      upgradeData = {
+        upgrades: Array.isArray(data?.upgrades) ? data.upgrades : [],
+      };
+      upgradesLoaded = true;
+      render();
+    })
+    .catch((err) => {
+      console.error(err);
+      upgradesLoaded = true;
+    });
+}
+
 function loadNameData() {
   fetch(NAMES_PATH)
     .then((res) =>
@@ -535,7 +559,15 @@ function loadState() {
 
 function normalizeState() {
   state = state || {};
-  state.warband = state.warband || { name: "", limit: 50, experience: 0, gold: 50 };
+  state.warband = state.warband || {
+    name: "",
+    limit: 50,
+    experience: 0,
+    gold: 50,
+    upgrades: [],
+    beds: 0,
+    maxMembers: 5
+  };
   // Ensure warband has experience field
   if (typeof state.warband.experience !== 'number') {
     state.warband.experience = 0;
@@ -543,6 +575,18 @@ function normalizeState() {
   // Ensure warband has gold field with default of 50
   if (typeof state.warband.gold !== 'number') {
     state.warband.gold = 50;
+  }
+  // Ensure warband has upgrades array
+  if (!Array.isArray(state.warband.upgrades)) {
+    state.warband.upgrades = [];
+  }
+  // Ensure warband has beds count
+  if (typeof state.warband.beds !== 'number') {
+    state.warband.beds = 0;
+  }
+  // Ensure warband has maxMembers field
+  if (typeof state.warband.maxMembers !== 'number') {
+    state.warband.maxMembers = 5 + (state.warband.beds || 0);
   }
   state.catalogVersion = Number.isFinite(state.catalogVersion)
     ? state.catalogVersion
@@ -1279,6 +1323,7 @@ function ensureTraitArrays(char) {
   if (!Array.isArray(char.feats)) char.feats = [];
   if (!Array.isArray(char.flaws)) char.flaws = [];
   if (!Array.isArray(char.injuries)) char.injuries = [];
+  if (typeof char.betterGrub !== 'boolean') char.betterGrub = false;
 }
 
 // =====================
@@ -1418,8 +1463,9 @@ function getEffectiveHP(char) {
 
   const baseHP = char.hp || 0;
   const modifiers = calculateTraitModifiers(char);
+  const betterGrubBonus = char.betterGrub ? 1 : 0;
 
-  return Math.max(1, baseHP + modifiers.hp);
+  return Math.max(1, baseHP + modifiers.hp + betterGrubBonus);
 }
 
 function getWeaponModifier(char, weapon, context = {}) {
@@ -2099,6 +2145,7 @@ function render() {
       noteBits.push(tragedies === 1 ? "1 tragedy" : `${tragedies} tragedies`);
     const armor = Number(c.armor || 0);
     if (armor > 0) noteBits.push(`Armor ${armor}`);
+    if (c.betterGrub) noteBits.push("Better Grub (+1 HP)");
     if (noteBits.length) {
       const notes = document.createElement("div");
       notes.className = "char-card-notes";
@@ -2370,6 +2417,11 @@ function render() {
       stashList.appendChild(card);
     }
   }
+
+  // Upgrades
+  renderUpgradePicker();
+  renderUpgradeList();
+
   // Catalog selects
   const weapons = state.catalog.filter((i) => i.type === "weapon");
   const equips = state.catalog.filter(
@@ -2394,6 +2446,7 @@ function render() {
       getEffectiveArmor,
       getEffectiveHP,
       calculateTraitModifiers,
+      getUpgradeData: () => upgradeData,
     };
     window.PrintModule.renderPrintRoster(state, printHelpers);
   }
@@ -2459,6 +2512,167 @@ function renderStashPicker() {
   select.value = hasPrev ? prevValue : items[0].id;
   select.disabled = false;
   addBtn.disabled = false;
+}
+
+function renderUpgradePicker() {
+  const select = el("upgradeSelect");
+  const buyBtn = el("buyUpgradeBtn");
+  if (!select || !buyBtn) return;
+
+  const prevValue = select.value;
+  select.innerHTML = "";
+
+  if (!upgradesLoaded) {
+    select.disabled = true;
+    buyBtn.disabled = true;
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Loading upgrades…";
+    select.appendChild(option);
+    return;
+  }
+
+  const upgrades = Array.isArray(upgradeData.upgrades) ? [...upgradeData.upgrades] : [];
+
+  if (!upgrades.length) {
+    select.disabled = true;
+    buyBtn.disabled = true;
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No upgrades available";
+    select.appendChild(option);
+    return;
+  }
+
+  // Add default option
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "Select upgrade...";
+  select.appendChild(defaultOption);
+
+  upgrades.forEach((upgrade) => {
+    const option = document.createElement("option");
+    option.value = upgrade.id;
+    option.textContent = `${upgrade.name} (${upgrade.cost}g)`;
+    option.title = upgrade.description;
+    select.appendChild(option);
+  });
+
+  const hasPrev = upgrades.some((upgrade) => upgrade.id === prevValue);
+  select.value = hasPrev ? prevValue : "";
+  select.disabled = false;
+  buyBtn.disabled = !select.value || state.warband.gold < 50;
+}
+
+function renderUpgradeList() {
+  const upgradeList = el("upgradeList");
+  if (!upgradeList) return;
+
+  upgradeList.innerHTML = "";
+  const purchasedUpgrades = state.warband.upgrades || [];
+
+  if (!purchasedUpgrades.length) {
+    const empty = document.createElement("div");
+    empty.className = "muted small";
+    empty.textContent = "No upgrades purchased yet.";
+    upgradeList.appendChild(empty);
+    return;
+  }
+
+  // Group upgrades by type
+  const upgradeGroups = {};
+  purchasedUpgrades.forEach(upgradeId => {
+    const upgrade = (upgradeData.upgrades || []).find(u => u.id === upgradeId);
+    if (!upgrade) return;
+
+    if (!upgradeGroups[upgrade.id]) {
+      upgradeGroups[upgrade.id] = { upgrade, count: 0 };
+    }
+    upgradeGroups[upgrade.id].count++;
+  });
+
+  Object.values(upgradeGroups).forEach(({ upgrade, count }) => {
+    const card = document.createElement("div");
+    card.className = "upgrade-row";
+
+    const header = document.createElement("div");
+    header.className = "upgrade-row-header";
+
+    const infoBlock = document.createElement("div");
+    infoBlock.className = "upgrade-info";
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "upgrade-name";
+    nameEl.textContent = upgrade.name + (count > 1 ? ` (x${count})` : "");
+    infoBlock.appendChild(nameEl);
+
+    const desc = document.createElement("div");
+    desc.className = "upgrade-desc small";
+    desc.textContent = upgrade.description;
+    infoBlock.appendChild(desc);
+
+    header.appendChild(infoBlock);
+    card.appendChild(header);
+    upgradeList.appendChild(card);
+  });
+}
+
+function buyUpgrade(upgradeId) {
+  if (!upgradeId) return false;
+
+  const upgrade = (upgradeData.upgrades || []).find(u => u.id === upgradeId);
+  if (!upgrade) return false;
+
+  if (state.warband.gold < upgrade.cost) {
+    alert("Not enough gold!");
+    return false;
+  }
+
+  // Check quantity limits
+  const currentCount = (state.warband.upgrades || []).filter(id => id === upgradeId).length;
+  if (upgrade.maxQuantity && currentCount >= upgrade.maxQuantity) {
+    alert(`Maximum ${upgrade.maxQuantity} of this upgrade already purchased.`);
+    return false;
+  }
+
+  // Special checks for certain upgrades
+  if (upgradeId === "better-grub") {
+    const charactersWithoutGrub = state.chars.filter(c => !c.betterGrub);
+    if (charactersWithoutGrub.length === 0) {
+      alert("All characters already have Better Grub!");
+      return false;
+    }
+
+    // Show character selection dialog
+    const charNames = charactersWithoutGrub.map((c, idx) => `${idx + 1}. ${c.name || "(unnamed)"}`).join("\n");
+    const choice = prompt(`Which character should receive Better Grub?\n\n${charNames}\n\nEnter the number (1-${charactersWithoutGrub.length}):`);
+
+    if (choice === null) return false; // User cancelled
+
+    const choiceNum = parseInt(choice);
+    if (isNaN(choiceNum) || choiceNum < 1 || choiceNum > charactersWithoutGrub.length) {
+      alert("Invalid choice!");
+      return false;
+    }
+
+    // Apply Better Grub to selected character
+    const selectedChar = charactersWithoutGrub[choiceNum - 1];
+    selectedChar.betterGrub = true;
+  }
+
+  // Purchase the upgrade
+  state.warband.upgrades = state.warband.upgrades || [];
+  state.warband.upgrades.push(upgradeId);
+  state.warband.gold -= upgrade.cost;
+
+  // Apply upgrade effects
+  if (upgradeId === "beds") {
+    state.warband.beds = (state.warband.beds || 0) + 1;
+    state.warband.maxMembers = 5 + state.warband.beds;
+  }
+
+  saveState();
+  return true;
 }
 
 function tag(text) {
@@ -2948,6 +3162,29 @@ el("addGoldBtn").addEventListener("click", () => {
     }
   }
 });
+
+// Upgrade system event listeners
+el("upgradeSelect").addEventListener("change", (e) => {
+  const buyBtn = el("buyUpgradeBtn");
+  if (buyBtn) {
+    buyBtn.disabled = !e.target.value || state.warband.gold < 50;
+  }
+});
+
+el("buyUpgradeBtn").addEventListener("click", () => {
+  const select = el("upgradeSelect");
+  if (!select || !select.value) return;
+
+  if (buyUpgrade(select.value)) {
+    // Reset selection and update displays
+    select.value = "";
+    const wbGoldEl = el("wbGold");
+    if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+    renderUpgradePicker();
+    renderUpgradeList();
+  }
+});
+
 el("wbXP").addEventListener("input", (e) => {
   state.warband.experience = Math.max(0, Number(e.target.value) || 0);
   updateLevelUpButton();
@@ -3596,6 +3833,7 @@ loadCatalogData();
 loadTraitData();
 loadScrollData();
 loadInjuryData();
+loadUpgradeData();
 loadNameData();
 ensureWarbandNameData();
 
@@ -3613,6 +3851,7 @@ if (window.PrintModule) {
     getTraitData: () => traitData,
     getScrollData: () => scrollData,
     getInjuryData: () => injuryData,
+    getUpgradeData: () => upgradeData,
     getEffectiveStats,
     getEffectiveMovement,
     getEffectiveArmor,
