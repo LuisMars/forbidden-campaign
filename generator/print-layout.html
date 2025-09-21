@@ -9,26 +9,40 @@
       <section class="print-page print-page--primary">
         <header class="print-page-header">
           <div class="print-page-title">{{TITLE}}</div>
-          <div class="print-page-summary">{{SUMMARY}}</div>
+          <div class="print-page-summary">Page 1</div>
         </header>
-        <div class="print-grid print-grid--primary">
+        <div class="print-grid print-grid--dual">
           {{CHAR_SLOT_1}}
           {{CHAR_SLOT_2}}
-          {{CHAR_SLOT_3}}
-          {{CHAR_SLOT_4}}
         </div>
       </section>
       <section class="print-page print-page--secondary">
         <header class="print-page-header">
           <div class="print-page-title">{{TITLE}}</div>
-          <div class="print-page-summary">{{SUMMARY}}</div>
+          <div class="print-page-summary">Page 2</div>
         </header>
-        <div class="print-grid print-grid--primary">
+        <div class="print-grid print-grid--dual">
+          {{CHAR_SLOT_3}}
+          {{CHAR_SLOT_4}}
+        </div>
+      </section>
+      <section class="print-page print-page--tertiary">
+        <header class="print-page-header">
+          <div class="print-page-title">{{TITLE}}</div>
+          <div class="print-page-summary">Page 3</div>
+        </header>
+        <div class="print-grid print-grid--dual">
           {{CHAR_SLOT_5}}
           {{CHAR_SLOT_6}}
         </div>
+      </section>
+      <section class="print-page print-page--warband">
+        <header class="print-page-header">
+          <div class="print-page-title">{{TITLE}}</div>
+          <div class="print-page-summary">{{WARBAND_INFO}}</div>
+        </header>
         <section class="print-stash">
-          <h2 class="print-stash-title">Warband Stash</h2>
+          <h2 class="print-stash-title">Warband</h2>
           {{STASH}}
         </section>
       </section>

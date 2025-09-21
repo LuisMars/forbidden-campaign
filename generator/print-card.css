@@ -59,7 +59,13 @@ body {
 }
 
 .print-page--secondary {
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto;
+}
+.print-page--tertiary {
+  grid-template-rows: auto auto;
+}
+.print-page--warband {
+  grid-template-rows: auto 1fr;
 }
 
 .print-layout:last-of-type .print-page:last-child {
@@ -76,15 +82,17 @@ body {
 }
 
 .print-page-title {
-  font-size: 1.35em;
+  font-size: 1.5em;
   font-weight: 700;
   letter-spacing: 0.04em;
   font-family: 'New Rocker', serif;
+  color: #000000;
 }
 
 .print-page-summary {
-  font-size: 0.85em;
-  color: #444444;
+  font-size: 1.1em;
+  color: #000000;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   text-align: right;
@@ -97,6 +105,15 @@ body {
 
 .print-grid--primary {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.print-grid--dual {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.print-grid--six {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
 }
 
 .print-grid--single {
@@ -349,4 +366,12 @@ body {
 .print-loading {
   font-size: 0.9em;
   color: #555555;
+}
+
+.print-page--stash {
+  grid-template-rows: auto 1fr;
+}
+
+.print-stash-content {
+  padding: 0.25in;
 }

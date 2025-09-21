@@ -79,11 +79,9 @@ function renderPrintRoster(state, helpers) {
     const warbandName = escapeHtml((state.warband?.name || '').trim() || 'Unnamed Warband');
     const warbandXP = state.warband?.experience || 0;
     const data = {
-      PAGE_NUMBER: pageIdx + 1,
-      TOTAL_PAGES: pages,
       STASH: buildStashMarkup(state, helpers),
       TITLE: warbandName,
-      SUMMARY: `Page ${pageIdx + 1} of ${pages} • ${chars.length} Character${chars.length === 1 ? '' : 's'} • Warband XP: ${warbandXP}`,
+      WARBAND_INFO: `Warband XP: ${warbandXP}`,
     };
 
     group.forEach((char, idx) => {
@@ -130,6 +128,7 @@ function compilePrintCard(char, helpers) {
   // Lists for injection
   const feats = buildTraitLines(char.feats || [], 'feats', helpers);
   const flaws = buildTraitLines(char.flaws || [], 'flaws', helpers);
+  const injuries = buildInjuryLines(char.injuries || [], helpers);
   const scrollData = buildScrollLines(char, helpers);
 
   const weapons = aggregateItemLines(resolveEntries(char.weapons, resolveItem), helpers);
@@ -174,6 +173,7 @@ function compilePrintCard(char, helpers) {
     // Lists
     FEATS_LIST: renderItemList(feats, 'None'),
     FLAWS_LIST: renderItemList(flaws, 'None'),
+    INJURIES_LIST: renderItemList(injuries, 'None'),
     CLEAN_SCROLLS_LIST: renderItemList(scrollData.clean, 'None'),
     UNCLEAN_SCROLLS_LIST: renderItemList(scrollData.unclean, 'None'),
     WEAPONS_LIST: renderItemList(weapons, 'None'),
@@ -186,6 +186,7 @@ function compilePrintCard(char, helpers) {
     // Individual counts for display
     FEATS_COUNT: feats.length,
     FLAWS_COUNT: flaws.length,
+    INJURIES_COUNT: injuries.length,
     CLEAN_SCROLLS_COUNT: scrollData.clean.length,
     UNCLEAN_SCROLLS_COUNT: scrollData.unclean.length,
     SHIELDS_COUNT: armorGroups.shields.length,
@@ -224,6 +225,31 @@ function buildTraitLines(traitNames, type, helpers) {
         );
         if (trait && trait.description) {
           items.push({ name: trait.name, description: trait.description });
+          return;
+        }
+      }
+    }
+    // Fallback to just the name if no description found
+    items.push(name);
+  });
+
+  return items;
+}
+
+function buildInjuryLines(injuryNames, helpers) {
+  if (!Array.isArray(injuryNames)) return [];
+
+  const items = [];
+  injuryNames.filter(Boolean).forEach(name => {
+    // Try to find injury description
+    if (helpers.getInjuryData) {
+      const injuryData = helpers.getInjuryData();
+      if (injuryData && injuryData.injuries) {
+        const injury = injuryData.injuries.find(
+          i => i.name.toLowerCase() === name.toLowerCase()
+        );
+        if (injury && injury.description) {
+          items.push({ name: injury.name, description: injury.description });
           return;
         }
       }

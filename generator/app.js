@@ -20,6 +20,7 @@ const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const TRAITS_PATH = "traits.json";
 const SCROLLS_PATH = "scrolls.json";
 const NAMES_PATH = "names.json";
+const INJURIES_PATH = "injuries.json";
 const PERCHANCE_PATH = "perchance.txt";
 const SPELLCASTER_COST = 5;
 
@@ -32,6 +33,8 @@ let traitData = { feats: [], flaws: [] };
 let traitsLoaded = false;
 let scrollData = { clean: [], unclean: [] };
 let scrollsLoaded = false;
+let injuryData = { injuries: [] };
+let injuriesLoaded = false;
 let nameParts = { first: [], second: [] };
 let namesLoaded = false;
 let warbandNameData = null;
@@ -380,6 +383,26 @@ function loadScrollData() {
     });
 }
 
+function loadInjuryData() {
+  fetch(INJURIES_PATH)
+    .then((res) =>
+      res.ok
+        ? res.json()
+        : Promise.reject(new Error(`Failed to load injuries: ${res.status}`))
+    )
+    .then((data) => {
+      injuryData = {
+        injuries: Array.isArray(data?.injuries) ? data.injuries : [],
+      };
+      injuriesLoaded = true;
+      render();
+    })
+    .catch((err) => {
+      console.error(err);
+      injuriesLoaded = true;
+    });
+}
+
 function loadNameData() {
   fetch(NAMES_PATH)
     .then((res) =>
@@ -429,6 +452,16 @@ function getRandomFlaw() {
   const flaws = traitData?.flaws || [];
   if (flaws.length === 0) return null;
   return randomFrom(flaws).name;
+}
+
+function getRandomInjury() {
+  const injuries = injuryData?.injuries || [];
+  if (injuries.length === 0) return null;
+  return randomFrom(injuries).name;
+}
+
+function getInjuryData() {
+  return injuryData;
 }
 
 function getLevelUpCost() {
@@ -1241,6 +1274,7 @@ function renderStatTemplate(char) {
 function ensureTraitArrays(char) {
   if (!Array.isArray(char.feats)) char.feats = [];
   if (!Array.isArray(char.flaws)) char.flaws = [];
+  if (!Array.isArray(char.injuries)) char.injuries = [];
 }
 
 // =====================
@@ -1248,6 +1282,10 @@ function ensureTraitArrays(char) {
 // =====================
 
 function getTraitByName(traitName, type) {
+  if (type === 'injuries') {
+    const injuries = injuryData?.injuries || [];
+    return injuries.find(t => t.name.toLowerCase() === traitName.toLowerCase()) || null;
+  }
   const traits = traitData?.[type] || [];
   return traits.find(t => t.name.toLowerCase() === traitName.toLowerCase()) || null;
 }
@@ -1269,6 +1307,14 @@ function getAllCharacterTraits(char) {
     char.flaws.forEach(flawName => {
       const trait = getTraitByName(flawName, 'flaws');
       if (trait) allTraits.push(trait);
+    });
+  }
+
+  // Add injuries
+  if (char.injuries) {
+    char.injuries.forEach(injuryName => {
+      const injury = getTraitByName(injuryName, 'injuries');
+      if (injury) allTraits.push(injury);
     });
   }
 
@@ -1477,6 +1523,21 @@ function applyTrait(type, trait) {
     char[key].push(trait.name);
   }
   renderTraitLists(char);
+  fillEditor(char); // Update stats display
+  saveState();
+}
+
+function applyInjury(injury) {
+  const char = getSelectedChar();
+  if (!char || !injury) return;
+  ensureTraitArrays(char);
+  if (
+    !char.injuries.some((name) => name.toLowerCase() === injury.name.toLowerCase())
+  ) {
+    char.injuries.push(injury.name);
+  }
+  renderTraitLists(char);
+  fillEditor(char); // Update stats display
   saveState();
 }
 
@@ -1493,6 +1554,12 @@ function renderTraitLists(char) {
       key: "flaws",
       containerId: "flawList",
       empty: "No flaws selected.",
+    },
+    {
+      type: "injuries",
+      key: "injuries",
+      containerId: "injuryList",
+      empty: "No injuries sustained.",
     },
   ];
 
@@ -1525,17 +1592,20 @@ function renderTraitLists(char) {
       title.textContent = name;
       header.appendChild(title);
 
-      const trait =
-        (traitData?.[type] || []).find(
-          (t) => t.name.toLowerCase() === name.toLowerCase()
-        ) || null;
+      const trait = getTraitByName(name, type);
 
       const removeBtn = document.createElement("button");
       removeBtn.className = "ghost";
       removeBtn.type = "button";
-      removeBtn.textContent = "Remove";
+
+      // For injuries, check if it's temporary ("for the next scenario only")
+      const isTemporaryInjury = type === "injuries" && trait?.description?.includes("for the next Scenario only");
+      removeBtn.textContent = isTemporaryInjury ? "Scenario Complete" : "Remove";
+
       removeBtn.onclick = () => {
         char[key].splice(idx, 1);
+        renderTraitLists(char);
+        fillEditor(char); // Update stats display
         saveState();
       };
       header.appendChild(removeBtn);
@@ -1568,6 +1638,13 @@ function renderTraitControls() {
       randId: "randFlawBtn",
       detailsId: "flawDetails",
     },
+    {
+      type: "injuries",
+      pickerId: "injuryPicker",
+      addId: "addInjuryBtn",
+      randId: "randInjuryBtn",
+      detailsId: "injuryDetails",
+    },
   ];
   const selectedChar = getSelectedChar();
 
@@ -1576,20 +1653,23 @@ function renderTraitControls() {
     const addBtn = el(addId);
     const randBtn = el(randId);
     const details = el(detailsId);
-    const list = traitData?.[type] || [];
+    const list = type === "injuries" ? injuryData?.injuries || [] : traitData?.[type] || [];
 
     if (!picker || !addBtn || !randBtn || !details) return;
 
     const disable = !selectedChar;
 
+    const isLoaded = type === "injuries" ? injuriesLoaded : traitsLoaded;
+    const dataType = type === "injuries" ? "Injuries" : "Traits";
+
     if (!list.length) {
       picker.innerHTML = `<option value="">${
-        traitsLoaded ? "Unavailable" : "Loading..."
+        isLoaded ? "Unavailable" : "Loading..."
       }</option>`;
       picker.disabled = true;
       addBtn.disabled = true;
       randBtn.disabled = true;
-      details.textContent = traitsLoaded ? "Traits unavailable." : "Loading...";
+      details.textContent = isLoaded ? `${dataType} unavailable.` : "Loading...";
       return;
     }
 
@@ -1616,22 +1696,29 @@ function renderTraitControls() {
 
     if (!picker.dataset.bound) {
       picker.addEventListener("change", () => {
-        const pool = traitData?.[type] || [];
+        const pool = type === "injuries" ? injuryData?.injuries || [] : traitData?.[type] || [];
         const trait = pool.find((t) => t.id === picker.value) || null;
         updateTraitDetails(detailsId, trait);
       });
       addBtn.addEventListener("click", () => {
-        const pool = traitData?.[type] || [];
+        const pool = type === "injuries" ? injuryData?.injuries || [] : traitData?.[type] || [];
         const trait = pool.find((t) => t.id === picker.value) || null;
-        if (trait) applyTrait(type, trait);
+        if (trait) {
+          if (type === "injuries") {
+            applyInjury(trait);
+          } else {
+            applyTrait(type, trait);
+          }
+        }
       });
       randBtn.addEventListener("click", () => {
         const char = getSelectedChar();
         if (!char) return;
-        const pool = traitData?.[type] || [];
+        const pool = type === "injuries" ? injuryData?.injuries || [] : traitData?.[type] || [];
         if (!pool.length) return;
+        const key = type === "injuries" ? "injuries" : type;
         const existing = new Set(
-          (Array.isArray(char[type]) ? char[type] : []).map((name) =>
+          (Array.isArray(char[key]) ? char[key] : []).map((name) =>
             name.toLowerCase()
           )
         );
@@ -1643,7 +1730,11 @@ function renderTraitControls() {
           : randomFrom(pool);
         picker.value = trait.id;
         updateTraitDetails(detailsId, trait);
-        applyTrait(type, trait);
+        if (type === "injuries") {
+          applyInjury(trait);
+        } else {
+          applyTrait(type, trait);
+        }
       });
       picker.dataset.bound = "true";
     }
@@ -3287,6 +3378,7 @@ function download(name, text) {
 loadCatalogData();
 loadTraitData();
 loadScrollData();
+loadInjuryData();
 loadNameData();
 ensureWarbandNameData();
 
@@ -3303,6 +3395,7 @@ if (window.PrintModule) {
     summarizeItem,
     getTraitData: () => traitData,
     getScrollData: () => scrollData,
+    getInjuryData: () => injuryData,
     getEffectiveStats,
     getEffectiveMovement,
     getEffectiveArmor,

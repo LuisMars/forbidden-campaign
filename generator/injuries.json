@@ -1,0 +1,165 @@
+{
+  "injuries": [
+    {
+      "id": "lasting-injury",
+      "name": "Lasting Injury",
+      "roll": 1,
+      "description": "Roll for a new Flaw (in addition to any other Flaws you might have). Reroll duplicates."
+    },
+    {
+      "id": "weak-immune-system",
+      "name": "Weak Immune System",
+      "roll": 2,
+      "description": "Model auto-fails tests against Diseased and Poisoned."
+    },
+    {
+      "id": "internal-bleeding",
+      "name": "Internal Bleeding",
+      "roll": 3,
+      "description": "If model is Downed in the next Scenario they auto-fail their Death Save."
+    },
+    {
+      "id": "broken-bones",
+      "name": "Broken Bones",
+      "roll": 4,
+      "description": "-1 Agility.",
+      "effects": {
+        "statModifiers": {
+          "agi": -1
+        }
+      }
+    },
+    {
+      "id": "saddened",
+      "name": "Saddened",
+      "roll": 5,
+      "description": "-1 Presence.",
+      "effects": {
+        "statModifiers": {
+          "pre": -1
+        }
+      }
+    },
+    {
+      "id": "weak",
+      "name": "Weak",
+      "roll": 6,
+      "description": "-1 Strength.",
+      "effects": {
+        "statModifiers": {
+          "str": -1
+        }
+      }
+    },
+    {
+      "id": "malaise",
+      "name": "Malaise",
+      "roll": 7,
+      "description": "-1 Toughness (can be cured with Tincture).",
+      "effects": {
+        "statModifiers": {
+          "tou": -1
+        }
+      }
+    },
+    {
+      "id": "maimed",
+      "name": "Maimed",
+      "roll": 8,
+      "description": "-1 HP.",
+      "effects": {
+        "hpModifier": -1
+      }
+    },
+    {
+      "id": "lost-limb",
+      "name": "Lost Limb",
+      "roll": 9,
+      "description": "Can only use One-Handed Weapons and has 1 fewer Equipment slot.",
+      "effects": {
+        "slotModifier": -1
+      }
+    },
+    {
+      "id": "missing-eye",
+      "name": "Missing Eye",
+      "roll": 10,
+      "description": "Maximum range for ranged attacks and spells is reduced by 3 inches."
+    },
+    {
+      "id": "afraid",
+      "name": "Afraid",
+      "roll": 11,
+      "description": "Auto-fails Morale during the next Scenario."
+    },
+    {
+      "id": "concussed",
+      "name": "Concussed",
+      "roll": 12,
+      "description": "-1 to all rolls for the next Scenario only."
+    },
+    {
+      "id": "sprained-ankle",
+      "name": "Sprained Ankle",
+      "roll": 13,
+      "description": "-1 Agility for the next Scenario only.",
+      "effects": {
+        "statModifiers": {
+          "agi": -1
+        }
+      }
+    },
+    {
+      "id": "bruised-eye",
+      "name": "Bruised Eye",
+      "roll": 14,
+      "description": "-1 Presence for the next Scenario only.",
+      "effects": {
+        "statModifiers": {
+          "pre": -1
+        }
+      }
+    },
+    {
+      "id": "bruised-ribs",
+      "name": "Bruised Ribs",
+      "roll": 15,
+      "description": "-1 Toughness for the next Scenario only.",
+      "effects": {
+        "statModifiers": {
+          "tou": -1
+        }
+      }
+    },
+    {
+      "id": "discombobulated",
+      "name": "Discombobulated",
+      "roll": 16,
+      "description": "Swap two Stats at random."
+    },
+    {
+      "id": "forgetful",
+      "name": "Forgetful",
+      "roll": 17,
+      "description": "Model immediately misplaces one random piece of Equipment or Weapon (permanently lost)."
+    },
+    {
+      "id": "flesh-wound",
+      "name": "Only a Flesh Wound",
+      "roll": 18,
+      "description": "No Injury."
+    },
+    {
+      "id": "learn-through-failure",
+      "name": "Learn through Failure",
+      "roll": 19,
+      "description": "Roll for one extra Feat."
+    },
+    {
+      "id": "what-doesnt-kill-you",
+      "name": "What Doesn't Kill You Only Makes You Stronger",
+      "roll": 20,
+      "description": "Remove one Flaw from this warband member."
+    }
+  ]
+}
