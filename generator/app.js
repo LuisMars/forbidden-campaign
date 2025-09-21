@@ -535,10 +535,14 @@ function loadState() {
 
 function normalizeState() {
   state = state || {};
-  state.warband = state.warband || { name: "", limit: 50, experience: 0 };
+  state.warband = state.warband || { name: "", limit: 50, experience: 0, gold: 50 };
   // Ensure warband has experience field
   if (typeof state.warband.experience !== 'number') {
     state.warband.experience = 0;
+  }
+  // Ensure warband has gold field with default of 50
+  if (typeof state.warband.gold !== 'number') {
+    state.warband.gold = 50;
   }
   state.catalogVersion = Number.isFinite(state.catalogVersion)
     ? state.catalogVersion
@@ -1818,8 +1822,7 @@ function renderScrollLists(char) {
     }
 
     if (!char.isMage) {
-      container.innerHTML =
-        '<div class="muted small">Only mages can prepare scrolls.</div>';
+      container.innerHTML = "";
       return;
     }
 
@@ -2048,13 +2051,11 @@ function render() {
   }
   const wbNameInput = el("wbName");
   if (wbNameInput) wbNameInput.value = state.warband.name || "";
-  el("wbLimit").value = state.warband.limit || 0;
   el("wbXP").value = state.warband.experience || 0;
-  const total = warbandPoints();
-  el("wbPoints").textContent =
-    `${total} g` + (state.warband.limit ? ` / ${state.warband.limit} g` : "");
-  el("wbPoints").className =
-    "tag" + (state.warband.limit && total > state.warband.limit ? " warn" : "");
+
+  // Update warband gold display
+  const wbGoldEl = el("wbGold");
+  if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold || 50} g`;
 
   // Character list
   const list = el("charList");
@@ -2181,13 +2182,15 @@ function render() {
       mageToggle.checked = false;
       mageToggle.disabled = true;
     }
-    const tragediesInput = el("edTragedies");
-    if (tragediesInput) {
-      tragediesInput.value = 0;
-      tragediesInput.disabled = true;
+    const tragediesEl = el("edTragedies");
+    if (tragediesEl) {
+      tragediesEl.textContent = "0";
     }
-    const tragediesLabel = el("tragediesLabel");
-    if (tragediesLabel) tragediesLabel.style.display = "none";
+    const tragediesGroup = el("tragediesGroup");
+    if (tragediesGroup) tragediesGroup.style.display = "none";
+
+    const tragedyControls = el("tragedyControls");
+    if (tragedyControls) tragedyControls.style.display = "none";
   }
   renderTraitControls();
   renderScrollControls();
@@ -2300,6 +2303,55 @@ function render() {
         saveState();
       };
       controls.appendChild(subBtn);
+
+      const sellBtn = document.createElement("button");
+      sellBtn.className = "ghost danger";
+      sellBtn.textContent = "Sell";
+      sellBtn.title = "Sell item for gold";
+      sellBtn.onclick = () => {
+        if (confirm(`Sell ${it.name}?`)) {
+          if (confirm(`Sell to merchant for ${it.cost + 1} gold? (Cancel to sell to Vriprix the mad wizard for ${it.cost} gold)`)) {
+            // Sell to merchant
+            const sellPrice = it.cost + 1;
+            if (removeFromStash(it.id, 1)) {
+              state.warband.gold = (state.warband.gold || 50) + sellPrice;
+              // Only update the gold display and refresh stash
+              const wbGoldEl = el("wbGold");
+              if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+              // Check if item still exists in stash
+              const remainingItem = state.stash.find(s => s.itemId === it.id);
+              if (remainingItem) {
+                // Update quantity display
+                qtySpan.textContent = `Qty ${remainingItem.qty}`;
+              } else {
+                // Remove the card entirely if no more items
+                card.remove();
+              }
+              saveState();
+            }
+          } else {
+            // Sell to mad wizard
+            const wizardPrice = it.cost;
+            if (removeFromStash(it.id, 1)) {
+              state.warband.gold = (state.warband.gold || 50) + wizardPrice;
+              // Only update the gold display and refresh stash
+              const wbGoldEl = el("wbGold");
+              if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+              // Check if item still exists in stash
+              const remainingItem = state.stash.find(s => s.itemId === it.id);
+              if (remainingItem) {
+                // Update quantity display
+                qtySpan.textContent = `Qty ${remainingItem.qty}`;
+              } else {
+                // Remove the card entirely if no more items
+                card.remove();
+              }
+              saveState();
+            }
+          }
+        }
+      };
+      controls.appendChild(sellBtn);
 
       header.appendChild(controls);
       card.appendChild(header);
@@ -2613,14 +2665,21 @@ function fillEditor(c) {
     mageToggle.checked = !!c.isMage;
     mageToggle.disabled = false;
   }
-  const tragediesInput = el("edTragedies");
-  if (tragediesInput) {
-    tragediesInput.value = Number(c.tragedies || 0);
-    tragediesInput.disabled = !c.isMage;
+  const tragediesEl = el("edTragedies");
+  if (tragediesEl) {
+    tragediesEl.textContent = Number(c.tragedies || 0);
   }
   const tragediesGroup = el("tragediesGroup");
   if (tragediesGroup) {
     tragediesGroup.style.display = c.isMage ? "" : "none";
+  }
+
+  // Update tragedy controls
+  const tragedyControls = el("tragedyControls");
+  const tragedyValue = el("tragedyValue");
+  if (tragedyControls && tragedyValue) {
+    tragedyControls.style.display = c.isMage ? "" : "none";
+    tragedyValue.textContent = Number(c.tragedies || 0);
   }
   el("edArmor").textContent = getEffectiveArmor(c);
   el("edHP").textContent = getEffectiveHP(c);
@@ -2631,14 +2690,12 @@ function fillEditor(c) {
   el("edStr").textContent = formatStatValue(effectiveStats.str);
   el("edTou").textContent = formatStatValue(effectiveStats.tou);
   el("edNotes").value = c.notes || "";
-  el("edPoints").textContent = charPoints(c);
   const slotsInfo = slotUsage(c);
   const slotsEl = document.getElementById("edSlots");
-  if (slotsEl) slotsEl.textContent = `${slotsInfo.used}/${slotsInfo.total}`;
-  const slotsBadge = document.getElementById("edSlotsBadge");
-  if (slotsBadge) {
-    slotsBadge.classList.toggle("warn", slotsInfo.used > slotsInfo.total);
-    slotsBadge.title = `Base ${slotsInfo.base}, Bonus ${slotsInfo.bonus}`;
+  if (slotsEl) {
+    slotsEl.textContent = `${slotsInfo.used}/${slotsInfo.total}`;
+    slotsEl.classList.toggle("warn", slotsInfo.used > slotsInfo.total);
+    slotsEl.title = `Base ${slotsInfo.base}, Bonus ${slotsInfo.bonus}`;
   }
 
 
@@ -2673,6 +2730,34 @@ function fillEditor(c) {
       )}</span><span class="space"></span><span class="small">${escapeHtml(
         summarizeItem(it)
       )} · ${it.cost} g</span>`;
+      const sell = document.createElement("button");
+      sell.className = "ghost";
+      sell.textContent = "Sell";
+      sell.onclick = () => {
+        if (confirm(`Sell ${it.name}?`)) {
+          if (confirm(`Sell to merchant for ${it.cost + 1} gold? (Cancel to sell to Vriprix the mad wizard for ${it.cost} gold)`)) {
+            // Sell to merchant
+            const sellPrice = it.cost + 1;
+            c.weapons.splice(idx, 1);
+            state.warband.gold = (state.warband.gold || 50) + sellPrice;
+            saveState();
+            const wbGoldEl = el("wbGold");
+            if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+            fillEditor(c);
+          } else {
+            // Sell to mad wizard
+            const wizardPrice = it.cost;
+            c.weapons.splice(idx, 1);
+            state.warband.gold = (state.warband.gold || 50) + wizardPrice;
+            saveState();
+            const wbGoldEl = el("wbGold");
+            if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+            fillEditor(c);
+          }
+        }
+      };
+      row.appendChild(sell);
+
       const rm = document.createElement("button");
       rm.className = "ghost";
       rm.textContent = "Unequip";
@@ -2681,6 +2766,7 @@ function fillEditor(c) {
         ensurePackArray(c);
         c.pack.push(it.id);
         saveState();
+        fillEditor(c);
       };
       row.appendChild(rm);
       listW.appendChild(row);
@@ -2720,6 +2806,34 @@ function fillEditor(c) {
       )}</span><span class="space"></span><span class="small">${escapeHtml(
         summarizeItem(item)
       )} · ${item.cost} g</span>`;
+      const sell = document.createElement("button");
+      sell.className = "ghost";
+      sell.textContent = "Sell";
+      sell.onclick = () => {
+        if (confirm(`Sell ${item.name}?`)) {
+          if (confirm(`Sell to merchant for ${item.cost + 1} gold? (Cancel to sell to Vriprix the mad wizard for ${item.cost} gold)`)) {
+            // Sell to merchant
+            const sellPrice = item.cost + 1;
+            c.equipment.splice(idx, 1);
+            state.warband.gold = (state.warband.gold || 50) + sellPrice;
+            saveState();
+            const wbGoldEl = el("wbGold");
+            if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+            fillEditor(c);
+          } else {
+            // Sell to mad wizard
+            const wizardPrice = item.cost;
+            c.equipment.splice(idx, 1);
+            state.warband.gold = (state.warband.gold || 50) + wizardPrice;
+            saveState();
+            const wbGoldEl = el("wbGold");
+            if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+            fillEditor(c);
+          }
+        }
+      };
+      row.appendChild(sell);
+
       const rm = document.createElement("button");
       rm.className = "ghost";
       rm.textContent = "Remove";
@@ -2727,6 +2841,7 @@ function fillEditor(c) {
         c.equipment.splice(idx, 1);
         addToStash(item.id, 1);
         saveState();
+        fillEditor(c);
       };
       row.appendChild(rm);
       elTarget.appendChild(row);
@@ -2759,6 +2874,32 @@ function fillEditor(c) {
         )}</span><span class="space"></span><span class="small">${escapeHtml(
           summarizeItem(item)
         )} · ${item.cost} g</span>`;
+        const sellBtn = document.createElement("button");
+        sellBtn.className = "ghost";
+        sellBtn.textContent = "Sell";
+        sellBtn.onclick = () => {
+          if (confirm(`Sell ${item.name}?`)) {
+            if (confirm(`Sell to merchant for ${item.cost + 1} gold? (Cancel to sell to Vriprix the mad wizard for ${item.cost} gold)`)) {
+              // Sell to merchant
+              const sellPrice = item.cost + 1;
+              removeFromPack(c, itemId);
+              state.warband.gold = (state.warband.gold || 50) + sellPrice;
+              saveState();
+              const wbGoldEl = el("wbGold");
+              if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+              fillEditor(c);
+            } else {
+              // Sell to mad wizard
+              const wizardPrice = item.cost;
+              removeFromPack(c, itemId);
+              state.warband.gold = (state.warband.gold || 50) + wizardPrice;
+              saveState();
+              const wbGoldEl = el("wbGold");
+              if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+              fillEditor(c);
+            }
+          }
+        };
         const equipBtn = document.createElement("button");
         equipBtn.className = "ghost";
         equipBtn.textContent = "Equip";
@@ -2772,7 +2913,9 @@ function fillEditor(c) {
           removeFromPack(c, itemId);
           addToStash(item.id, 1);
           saveState();
+          fillEditor(c);
         };
+        row.appendChild(sellBtn);
         row.appendChild(equipBtn);
         row.appendChild(returnBtn);
         packList.appendChild(row);
@@ -2791,10 +2934,19 @@ el("wbName").addEventListener("input", (e) => {
   state.warband.name = e.target.value;
   saveState();
 });
-el("wbLimit").addEventListener("input", (e) => {
-  state.warband.limit = Number(e.target.value) || 0;
-  render();
-  saveState();
+// Add Gold button functionality
+el("addGoldBtn").addEventListener("click", () => {
+  const amount = prompt("How much gold to add?", "10");
+  if (amount !== null) {
+    const goldToAdd = Number(amount) || 0;
+    if (goldToAdd > 0) {
+      state.warband.gold = (state.warband.gold || 50) + goldToAdd;
+      // Only update the gold display instead of full render
+      const wbGoldEl = el("wbGold");
+      if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+      saveState();
+    }
+  }
 });
 el("wbXP").addEventListener("input", (e) => {
   state.warband.experience = Math.max(0, Number(e.target.value) || 0);
@@ -3257,21 +3409,30 @@ if (mageToggleCtrl) {
   });
 }
 
-const tragediesCtrl = el("edTragedies");
-if (tragediesCtrl) {
-  tragediesCtrl.addEventListener("change", (e) => {
-    const char = getSelectedChar();
-    const value = Math.max(0, Number(e.target.value) || 0);
-    if (!char || !char.isMage) {
-      e.target.value = char ? Number(char.tragedies || 0) : 0;
-      return;
-    }
-    char.tragedies = value;
-    e.target.value = value;
-    saveState();
-  });
-}
+// Tragedy controls
+el("tragedyPlusBtn").onclick = () => {
+  const char = getSelectedChar();
+  if (!char || !char.isMage) return;
+  char.tragedies = Math.max(0, Number(char.tragedies || 0)) + 1;
+  saveState();
+  fillEditor(char);
+};
 
+el("tragedyMinusBtn").onclick = () => {
+  const char = getSelectedChar();
+  if (!char || !char.isMage) return;
+  char.tragedies = Math.max(0, Number(char.tragedies || 0) - 1);
+  saveState();
+  fillEditor(char);
+};
+
+el("tragedyResetBtn").onclick = () => {
+  const char = getSelectedChar();
+  if (!char || !char.isMage) return;
+  char.tragedies = 0;
+  saveState();
+  fillEditor(char);
+};
 
 // Add weapons/equipment from selects
 el("addWeaponBtn").onclick = () => {
@@ -3291,6 +3452,62 @@ el("addEquipBtn").onclick = () => {
   if (removeFromStash(id, 1)) c.equipment.push({ itemId: id });
   else c.equipment.push({ itemId: id });
   saveState();
+};
+
+// Buy Weapon button - costs gold
+el("buyWeaponBtn").onclick = () => {
+  const id = el("addWeaponSel").value;
+  if (!id) return;
+  const c = state.chars.find((x) => x.id === state.selectedId);
+  if (!c) return;
+
+  const weapon = resolveItem(id);
+  if (!weapon) return;
+
+  const cost = weapon.cost || 0;
+  if (cost > (state.warband.gold || 0)) {
+    alert(`Not enough gold! Need ${cost} g, have ${state.warband.gold || 0} g.`);
+    return;
+  }
+
+  if (confirm(`Buy ${weapon.name} for ${cost} gold?`)) {
+    state.warband.gold = (state.warband.gold || 0) - cost;
+    c.weapons.push({ itemId: id });
+
+    // Update gold display
+    const wbGoldEl = el("wbGold");
+    if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+
+    saveState();
+  }
+};
+
+// Buy Equipment button - costs gold
+el("buyEquipBtn").onclick = () => {
+  const id = el("addEquipSel").value;
+  if (!id) return;
+  const c = state.chars.find((x) => x.id === state.selectedId);
+  if (!c) return;
+
+  const equipment = resolveItem(id);
+  if (!equipment) return;
+
+  const cost = equipment.cost || 0;
+  if (cost > (state.warband.gold || 0)) {
+    alert(`Not enough gold! Need ${cost} g, have ${state.warband.gold || 0} g.`);
+    return;
+  }
+
+  if (confirm(`Buy ${equipment.name} for ${cost} gold?`)) {
+    state.warband.gold = (state.warband.gold || 0) - cost;
+    c.equipment.push({ itemId: id });
+
+    // Update gold display
+    const wbGoldEl = el("wbGold");
+    if (wbGoldEl) wbGoldEl.textContent = `${state.warband.gold} g`;
+
+    saveState();
+  }
 };
 
 const stashAddBtn = el("stashAddBtn");

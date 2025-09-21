@@ -22,6 +22,14 @@
               <div class="print-stat-value">{{MOVEMENT}}</div>
               <div class="print-stat-label">Mov</div>
             </div>
+            <div class="print-stat-item">
+              <div class="print-stat-value">{{SLOTS_USED}}/{{SLOTS_TOTAL}}</div>
+              <div class="print-stat-label">Slots</div>
+            </div>
+            <div class="print-stat-item print-meta-tragedies {{IS_MAGE}}">
+              <div class="print-stat-value">{{TRAGEDIES}}</div>
+              <div class="print-stat-label">TRG</div>
+            </div>
           </div>
         </div>
       </header>
@@ -47,13 +55,7 @@
         </div>
         <div class="print-meta-column">
           <div class="print-meta-kv">
-            <strong>Slots:</strong> {{SLOTS_USED}}/{{SLOTS_TOTAL}}
-          </div>
-          <div class="print-meta-kv">
             <strong>Gold:</strong> {{GOLD}} g
-          </div>
-          <div class="print-meta-kv print-meta-tragedies {{IS_MAGE}}">
-            <strong>Tragedies:</strong> {{TRAGEDIES}}
           </div>
         </div>
       </div>

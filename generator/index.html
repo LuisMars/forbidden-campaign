@@ -43,16 +43,10 @@
               </button>
             </div>
             <div class="row">
-              <label class="pill"
-                >Gold Limit
-                <input
-                  id="wbLimit"
-                  type="number"
-                  min="0"
-                  step="1"
-                  style="width: 100px"
-              /></label>
-              <span id="wbPoints" class="tag">0 g</span>
+              <div class="pill">
+                Warband Gold: <strong id="wbGold">50 g</strong>
+              </div>
+              <button id="addGoldBtn" type="button" class="ghost">Add Gold</button>
             </div>
             <div class="row">
               <label class="pill"
@@ -170,6 +164,14 @@
                       <div class="stat-value" id="edMovement">5</div>
                       <div class="stat-label">Movement</div>
                     </div>
+                    <div class="stat-item">
+                      <div class="stat-value" id="edSlots">0/0</div>
+                      <div class="stat-label">Slots</div>
+                    </div>
+                    <div class="stat-item tragedies-item" id="tragediesGroup" style="display: none">
+                      <div class="stat-value" id="edTragedies">0</div>
+                      <div class="stat-label">TRG</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -190,35 +192,6 @@
               </details>
               <div class="sep"></div>
 
-              <!-- Character Progress Grid -->
-              <div class="character-stats-grid">
-                <div class="stat-grid-item">
-                  <div class="character-type">
-                    <label class="type-toggle">
-                      <input type="checkbox" id="isMageToggle" />
-                      <span class="toggle-label">Spellcaster</span>
-                      <span class="toggle-cost">(+5g)</span>
-                    </label>
-                  </div>
-                </div>
-                <div class="stat-grid-item">
-                  <div class="resource-item" id="edSlotsBadge">
-                    <span class="resource-label">Equipment Slots</span>
-                    <span class="resource-value" id="edSlots">0/0</span>
-                  </div>
-                </div>
-                <div class="stat-grid-item">
-                  <div class="resource-item">
-                    <span class="resource-label">Total Cost</span>
-                    <span class="resource-value gold" id="edPoints">0g</span>
-                  </div>
-                </div>
-                <div class="progress-item tragedies-item" id="tragediesGroup" style="display: none">
-                  <label>Tragedies</label>
-                  <input id="edTragedies" type="number" min="0" step="1" class="progress-input" />
-                </div>
-              </div>
-              <div class="sep"></div>
 
               <div class="grid2">
                 <div>
@@ -266,7 +239,8 @@
                   <div id="edWeapons"></div>
                   <div class="row">
                     <select id="addWeaponSel"></select>
-                    <button id="addWeaponBtn">Add</button>
+                    <button id="addWeaponBtn" class="ghost">Add</button>
+                    <button id="buyWeaponBtn">Buy</button>
                   </div>
                   <div id="weaponDetails" class="muted small"></div>
                 </div>
@@ -281,7 +255,8 @@
                   <div id="edEquip"></div>
                   <div class="row">
                     <select id="addEquipSel"></select>
-                    <button id="addEquipBtn">Add</button>
+                    <button id="addEquipBtn" class="ghost">Add</button>
+                    <button id="buyEquipBtn">Buy</button>
                   </div>
                   <div id="equipmentDetails" class="muted small"></div>
                 </div>
@@ -292,51 +267,71 @@
                 <div id="edPack" class="list"></div>
               </div>
               <div class="sep"></div>
-              <div class="grid2">
-                <div>
+              <div>
+                <div class="row">
                   <h3>Scrolls</h3>
-                  <div class="trait-section">
-                    <h4>Clean Scrolls</h4>
-                    <div class="row trait-controls">
-                      <select id="cleanScrollPicker"></select>
-                      <button id="addCleanScrollBtn" type="button">Add</button>
-                      <button
-                        id="randCleanScrollBtn"
-                        class="ghost"
-                        type="button"
-                      >
-                        Random
-                      </button>
-                    </div>
-                    <div id="cleanScrollDetails" class="muted small"></div>
-                    <div id="cleanScrollList" class="trait-list"></div>
-                  </div>
-                  <div class="trait-section">
-                    <h4>Unclean Scrolls</h4>
-                    <div class="row trait-controls">
-                      <select id="uncleanScrollPicker"></select>
-                      <button id="addUncleanScrollBtn" type="button">
-                        Add
-                      </button>
-                      <button
-                        id="randUncleanScrollBtn"
-                        class="ghost"
-                        type="button"
-                      >
-                        Random
-                      </button>
-                    </div>
-                    <div id="uncleanScrollDetails" class="muted small"></div>
-                    <div id="uncleanScrollList" class="trait-list"></div>
+                  <label class="type-toggle">
+                    <input type="checkbox" id="isMageToggle" />
+                    <span class="toggle-label">Spellcaster</span>
+                    <span class="toggle-cost">(+5g)</span>
+                  </label>
+                  <div class="tragedy-controls" id="tragedyControls" style="display: none">
+                    <span class="tragedy-label">Tragedies:</span>
+                    <button type="button" id="tragedyMinusBtn" class="ghost small">-</button>
+                    <span id="tragedyValue">0</span>
+                    <button type="button" id="tragedyPlusBtn" class="ghost small">+</button>
+                    <button type="button" id="tragedyResetBtn" class="ghost small">Reset</button>
                   </div>
                 </div>
-                <div>
-                  <h3>Notes</h3>
-                  <textarea
-                    id="edNotes"
-                    placeholder="Freeform notes"
-                  ></textarea>
+                <div class="grid2">
+                  <div>
+                    <div class="trait-section">
+                      <h4>Clean Scrolls</h4>
+                      <div class="row trait-controls">
+                        <select id="cleanScrollPicker"></select>
+                        <button id="addCleanScrollBtn" type="button">Add</button>
+                        <button
+                          id="randCleanScrollBtn"
+                          class="ghost"
+                          type="button"
+                        >
+                          Random
+                        </button>
+                      </div>
+                      <div id="cleanScrollDetails" class="muted small"></div>
+                      <div id="cleanScrollList" class="trait-list"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="trait-section">
+                      <h4>Unclean Scrolls</h4>
+                      <div class="row trait-controls">
+                        <select id="uncleanScrollPicker"></select>
+                        <button id="addUncleanScrollBtn" type="button">
+                          Add
+                        </button>
+                        <button
+                          id="randUncleanScrollBtn"
+                          class="ghost"
+                          type="button"
+                        >
+                          Random
+                        </button>
+                      </div>
+                      <div id="uncleanScrollDetails" class="muted small"></div>
+                      <div id="uncleanScrollList" class="trait-list"></div>
+                    </div>
+                  </div>
                 </div>
+              </div>
+              <div class="sep"></div>
+              <div>
+                <h3>Notes</h3>
+                <textarea
+                  id="edNotes"
+                  placeholder="Freeform notes"
+                ></textarea>
+              </div>
               </div>
             </div>
           </section>
