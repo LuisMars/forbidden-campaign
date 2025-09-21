@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Forbidden Psalm – Warband Builder</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Open+Sans:wght@400;600;700&display=swap"
       rel="stylesheet"
-    >
+    />
     <link rel="stylesheet" href="../main.css" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="print-card.css" media="print" />
@@ -16,31 +16,63 @@
   <body>
     <div class="wrap screen-only">
       <h1>Forbidden Psalm – Warband Builder</h1>
-      <h2 id="warbandTitle" class="warband-title" style="display:none"></h2>
-      <div class="sub">Editable warband roster with stash and gold costs. Data persists locally.</div>
+      <h2 id="warbandTitle" class="warband-title" style="display: none"></h2>
+      <div class="sub">
+        Editable warband roster with stash and gold costs. Data persists
+        locally.
+      </div>
       <div class="grid">
         <div class="column-left">
           <!-- Left: Warband + Stash -->
           <section class="card" id="warbandCard">
             <h2>Warband</h2>
             <div class="row warband-row">
-              <input id="wbName" type="text" class="warband-input" placeholder="Warband name" />
-              <button id="randWbName" type="button" class="ghost warband-rand" title="Generate a random warband name">Random name</button>
+              <input
+                id="wbName"
+                type="text"
+                class="warband-input"
+                placeholder="Warband name"
+              />
+              <button
+                id="randWbName"
+                type="button"
+                class="ghost warband-rand"
+                title="Generate a random warband name"
+              >
+                Random name
+              </button>
             </div>
             <div class="row">
-              <label class="pill">Gold Limit <input id="wbLimit" type="number" min="0" step="1" style="width:100px"/></label>
+              <label class="pill"
+                >Gold Limit
+                <input
+                  id="wbLimit"
+                  type="number"
+                  min="0"
+                  step="1"
+                  style="width: 100px"
+              /></label>
               <span id="wbPoints" class="tag">0 g</span>
             </div>
             <div class="sep"></div>
             <div class="row">
               <button id="addChar" type="button">Add character</button>
             </div>
-            <div id="charList" class="list" style="margin-top:8px"></div>
+            <div id="charList" class="list" style="margin-top: 8px"></div>
             <div class="sep"></div>
             <div class="row">
               <button id="exportBtn">Export JSON</button>
-              <button id="printRosterBtn" class="ghost" type="button">Print roster</button>
-              <label class="pill" for="importFile" style="cursor:pointer">Import <input id="importFile" type="file" accept="application/json" style="display:none"></label>
+              <button id="printRosterBtn" class="ghost" type="button">
+                Print roster
+              </button>
+              <label class="pill" for="importFile" style="cursor: pointer"
+                >Import
+                <input
+                  id="importFile"
+                  type="file"
+                  accept="application/json"
+                  style="display: none"
+              /></label>
               <button id="clearAll" class="danger">Clear All</button>
             </div>
           </section>
@@ -48,7 +80,8 @@
           <section class="card" id="stashCard">
             <h2>Warband Stash</h2>
             <div class="row">
-              <label class="pill">Type
+              <label class="pill"
+                >Type
                 <select id="stashTypeFilter">
                   <option value="all">All Items</option>
                   <option value="weapon">Weapons</option>
@@ -57,7 +90,10 @@
                   <option value="scroll">Scrolls</option>
                 </select>
               </label>
-              <select id="stashItemSelect" aria-label="Available catalog items"></select>
+              <select
+                id="stashItemSelect"
+                aria-label="Available catalog items"
+              ></select>
               <button id="stashAddBtn" type="button">Add to Stash</button>
             </div>
             <div class="sep"></div>
@@ -69,135 +105,228 @@
         <div class="column-right">
           <!-- Character Editor -->
           <section class="card" id="editorCard">
-          <h2>Character Editor</h2>
-          <div id="noSelection" class="muted">Select a character to edit.</div>
-          <div id="editor" style="display:none">
-            <div class="row">
-              <input id="edName" type="text" placeholder="Name"/>
-              <label class="pill" style="gap:6px"><input type="checkbox" id="isMageToggle" /> <span class="small">Spellcaster (5 g)</span></label>
-              <label class="pill" id="tragediesLabel" style="display:none">Tragedies <input id="edTragedies" type="number" min="0" step="1"/></label>
-              <label class="pill">Experience <input id="edXP" type="number" min="0" step="1"/></label>
-              <label class="pill">Armor <input id="edArmor" type="number" step="1" min="0"/></label>
-              <label class="pill" style="gap:6px"><input type="checkbox" id="autoArmor" checked /><span class="small">Auto from equipment</span></label>
-              <label class="pill">HP <input id="edHP" type="number" step="1" min="1"/></label>
-              <span class="badge nowrap" id="edSlotsBadge">Slots <span id="edSlots">0/0</span></span>
-              <span class="badge nowrap">Movement <span id="edMovement">5</span></span>
-              <span class="badge nowrap">Gold <span id="edPoints">0</span></span>
+            <h2>Character Editor</h2>
+            <div id="noSelection" class="muted">
+              Select a character to edit.
             </div>
-            <div class="sep"></div>
-            <div class="stat-grid">
-              <label class="pill">Agi <input id="edAgi" type="number" step="1" min="-5" max="5" readonly/></label>
-              <label class="pill">Pre <input id="edPre" type="number" step="1" min="-5" max="5" readonly/></label>
-              <label class="pill">Str <input id="edStr" type="number" step="1" min="-5" max="5" readonly/></label>
-              <label class="pill">Tou <input id="edTou" type="number" step="1" min="-5" max="5" readonly/></label>
-            </div>
-            <div class="sep"></div>
-            <details id="statTemplateBox" class="stat-template-panel" open>
-              <summary class="collapsible-summary"><span class="summary-caret" aria-hidden="true"></span><span>Stat Template</span></summary>
-              <div class="stat-template-body">
-                <div class="row" id="statTemplateControls"></div>
-                <div class="stat-template-values" id="statTemplateValues"></div>
-                <div class="stat-template-grid" id="statAssignmentGrid"></div>
+            <div id="editor" style="display: none">
+              <div class="row">
+                <input id="edName" type="text" placeholder="Name" />
+                <label class="pill" style="gap: 6px"
+                  ><input type="checkbox" id="isMageToggle" />
+                  <span class="small">Spellcaster (5 g)</span></label
+                >
+                <label class="pill" id="tragediesLabel" style="display: none"
+                  >Tragedies
+                  <input id="edTragedies" type="number" min="0" step="1"
+                /></label>
+                <label class="pill"
+                  >Experience <input id="edXP" type="number" min="0" step="1"
+                /></label>
+                <label class="pill"
+                  >Armor <input id="edArmor" type="number" step="1" min="0"
+                /></label>
+                <label class="pill" style="gap: 6px"
+                  ><input type="checkbox" id="autoArmor" checked /><span
+                    class="small"
+                    >Auto from equipment</span
+                  ></label
+                >
+                <label class="pill"
+                  >HP <input id="edHP" type="number" step="1" min="1"
+                /></label>
+                <span class="badge nowrap" id="edSlotsBadge"
+                  >Slots <span id="edSlots">0/0</span></span
+                >
+                <span class="badge nowrap"
+                  >Movement <span id="edMovement">5</span></span
+                >
+                <span class="badge nowrap"
+                  >Gold <span id="edPoints">0</span></span
+                >
               </div>
-            </details>
-            <div class="sep"></div>
-            <div class="grid2">
-              <div>
-                <h3>Feats</h3>
-                <div class="row trait-controls">
-                  <select id="featPicker"></select>
-                  <button id="addFeatBtn" type="button">Add</button>
-                  <button id="randFeatBtn" class="ghost" type="button">Random</button>
+              <div class="sep"></div>
+              <div class="stat-grid">
+                <label class="pill"
+                  >Agi
+                  <input
+                    id="edAgi"
+                    type="number"
+                    step="1"
+                    min="-5"
+                    max="5"
+                    readonly
+                /></label>
+                <label class="pill"
+                  >Pre
+                  <input
+                    id="edPre"
+                    type="number"
+                    step="1"
+                    min="-5"
+                    max="5"
+                    readonly
+                /></label>
+                <label class="pill"
+                  >Str
+                  <input
+                    id="edStr"
+                    type="number"
+                    step="1"
+                    min="-5"
+                    max="5"
+                    readonly
+                /></label>
+                <label class="pill"
+                  >Tou
+                  <input
+                    id="edTou"
+                    type="number"
+                    step="1"
+                    min="-5"
+                    max="5"
+                    readonly
+                /></label>
+              </div>
+              <div class="sep"></div>
+              <details id="statTemplateBox" class="stat-template-panel" open>
+                <summary class="collapsible-summary">
+                  <span class="summary-caret" aria-hidden="true"></span
+                  ><span>Stat Template</span>
+                </summary>
+                <div class="stat-template-body">
+                  <div class="row" id="statTemplateControls"></div>
+                  <div
+                    class="stat-template-values"
+                    id="statTemplateValues"
+                  ></div>
+                  <div class="stat-template-grid" id="statAssignmentGrid"></div>
                 </div>
-                <div id="featDetails" class="muted small"></div>
-                <div id="featList" class="trait-list"></div>
-              </div>
-              <div>
-                <h3>Flaws</h3>
-                <div class="row trait-controls">
-                  <select id="flawPicker"></select>
-                  <button id="addFlawBtn" type="button">Add</button>
-                  <button id="randFlawBtn" class="ghost" type="button">Random</button>
-                </div>
-                <div id="flawDetails" class="muted small"></div>
-                <div id="flawList" class="trait-list"></div>
-              </div>
-            </div>
-            <div class="sep"></div>
-            <div class="grid2">
-              <div>
-                <h3>Weapons</h3>
-                <div id="edWeapons"></div>
-                <div class="row">
-                  <select id="addWeaponSel"></select>
-                  <button id="addWeaponBtn">Add</button>
-                </div>
-              </div>
-              <div>
-                <h3>Armor</h3>
-                <div id="edArmorList"></div>
-                <h3>Shields</h3>
-                <div id="edShieldList"></div>
-                <h3>Helmets</h3>
-                <div id="edHelmList"></div>
-                <h3>Other Gear</h3>
-                <div id="edEquip"></div>
-                <div class="row">
-                  <select id="addEquipSel"></select>
-                  <button id="addEquipBtn">Add</button>
-                </div>
-              </div>
-            </div>
-            <div class="sep"></div>
-            <div>
-              <h3>Personal Stash</h3>
-              <div id="edPack" class="list"></div>
-            </div>
-            <div class="sep"></div>
-            <div class="grid2">
-              <div>
-                <h3>Scrolls</h3>
-                <div class="trait-section">
-                  <h4>Clean Scrolls</h4>
+              </details>
+              <div class="sep"></div>
+              <div class="grid2">
+                <div>
+                  <h3>Feats</h3>
                   <div class="row trait-controls">
-                    <select id="cleanScrollPicker"></select>
-                    <button id="addCleanScrollBtn" type="button">Add</button>
-                    <button id="randCleanScrollBtn" class="ghost" type="button">Random</button>
+                    <select id="featPicker"></select>
+                    <button id="addFeatBtn" type="button">Add</button>
+                    <button id="randFeatBtn" class="ghost" type="button">
+                      Random
+                    </button>
                   </div>
-                  <div id="cleanScrollDetails" class="muted small"></div>
-                  <div id="cleanScrollList" class="trait-list"></div>
+                  <div id="featDetails" class="muted small"></div>
+                  <div id="featList" class="trait-list"></div>
                 </div>
-                <div class="trait-section">
-                  <h4>Unclean Scrolls</h4>
+                <div>
+                  <h3>Flaws</h3>
                   <div class="row trait-controls">
-                    <select id="uncleanScrollPicker"></select>
-                    <button id="addUncleanScrollBtn" type="button">Add</button>
-                    <button id="randUncleanScrollBtn" class="ghost" type="button">Random</button>
+                    <select id="flawPicker"></select>
+                    <button id="addFlawBtn" type="button">Add</button>
+                    <button id="randFlawBtn" class="ghost" type="button">
+                      Random
+                    </button>
                   </div>
-                  <div id="uncleanScrollDetails" class="muted small"></div>
-                  <div id="uncleanScrollList" class="trait-list"></div>
+                  <div id="flawDetails" class="muted small"></div>
+                  <div id="flawList" class="trait-list"></div>
                 </div>
               </div>
+              <div class="sep"></div>
+              <div class="grid2">
+                <div>
+                  <h3>Weapons</h3>
+                  <div id="edWeapons"></div>
+                  <div class="row">
+                    <select id="addWeaponSel"></select>
+                    <button id="addWeaponBtn">Add</button>
+                  </div>
+                </div>
+                <div>
+                  <h3>Armor</h3>
+                  <div id="edArmorList"></div>
+                  <h3>Shields</h3>
+                  <div id="edShieldList"></div>
+                  <h3>Helmets</h3>
+                  <div id="edHelmList"></div>
+                  <h3>Other Gear</h3>
+                  <div id="edEquip"></div>
+                  <div class="row">
+                    <select id="addEquipSel"></select>
+                    <button id="addEquipBtn">Add</button>
+                  </div>
+                </div>
+              </div>
+              <div class="sep"></div>
               <div>
-                <h3>Notes</h3>
-                <textarea id="edNotes" placeholder="Freeform notes"></textarea>
+                <h3>Personal Stash</h3>
+                <div id="edPack" class="list"></div>
+              </div>
+              <div class="sep"></div>
+              <div class="grid2">
+                <div>
+                  <h3>Scrolls</h3>
+                  <div class="trait-section">
+                    <h4>Clean Scrolls</h4>
+                    <div class="row trait-controls">
+                      <select id="cleanScrollPicker"></select>
+                      <button id="addCleanScrollBtn" type="button">Add</button>
+                      <button
+                        id="randCleanScrollBtn"
+                        class="ghost"
+                        type="button"
+                      >
+                        Random
+                      </button>
+                    </div>
+                    <div id="cleanScrollDetails" class="muted small"></div>
+                    <div id="cleanScrollList" class="trait-list"></div>
+                  </div>
+                  <div class="trait-section">
+                    <h4>Unclean Scrolls</h4>
+                    <div class="row trait-controls">
+                      <select id="uncleanScrollPicker"></select>
+                      <button id="addUncleanScrollBtn" type="button">
+                        Add
+                      </button>
+                      <button
+                        id="randUncleanScrollBtn"
+                        class="ghost"
+                        type="button"
+                      >
+                        Random
+                      </button>
+                    </div>
+                    <div id="uncleanScrollDetails" class="muted small"></div>
+                    <div id="uncleanScrollList" class="trait-list"></div>
+                  </div>
+                </div>
+                <div>
+                  <h3>Notes</h3>
+                  <textarea
+                    id="edNotes"
+                    placeholder="Freeform notes"
+                  ></textarea>
+                </div>
               </div>
             </div>
-          </div>
           </section>
         </div>
       </div>
       <footer class="site-footer">
         <p>
-          Forbidden Psalm is created by
-          <a href="https://www.forbiddenpsalm.com" target="_blank" rel="noopener">Kevin Ferrone</a>.
-          Builder and extras by
-          <a href="https://github.com/luismars" target="_blank" rel="noopener">luismars</a>.
-          Warband name tables adapted from
-          <a href="https://perchance.org/forbiddenwarbandgenerator" target="_blank" rel="noopener">Perchance</a>.
+          Independent production by
+          <a href="https://github.com/luismars" target="_blank" rel="noopener"
+            >luismars</a
+          >, not affiliated with Ockult Örtmästare Games, Stockholm Kartell, or
+          KRD Designs; published under the
+          <a href="https://morkborg.com/license/" target="_blank" rel="noopener"
+            >MÖRK BORG Third Party License</a
+          >. “Forbidden Psalm” referenced for compatibility only; no endorsement
+          implied.
         </p>
         <p>
-          <a href="../" class="back-link">Return to the Forbidden Campaign Toolkit home</a>
+          <a href="../" class="back-link"
+            >Return to the Forbidden Campaign Toolkit home</a
+          >
         </p>
       </footer>
     </div>
