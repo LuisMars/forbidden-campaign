@@ -70,19 +70,20 @@ function renderPrintRoster(state, helpers) {
     return;
   }
 
-  const chars = Array.isArray(state.chars) ? state.chars : [];
+  const chars = Array.isArray(state.chars) ? state.chars.filter(c => !c.isDead) : [];
   const pages = Math.ceil(chars.length / 6);
   const chunks = chunkArray(chars, 6);
 
   const layouts = [];
   chunks.forEach((group, pageIdx) => {
     const warbandName = escapeHtml((state.warband?.name || '').trim() || 'Unnamed Warband');
+    const warbandXP = state.warband?.experience || 0;
     const data = {
       PAGE_NUMBER: pageIdx + 1,
       TOTAL_PAGES: pages,
       STASH: buildStashMarkup(state, helpers),
       TITLE: warbandName,
-      SUMMARY: `Page ${pageIdx + 1} of ${pages} • ${chars.length} Character${chars.length === 1 ? '' : 's'}`,
+      SUMMARY: `Page ${pageIdx + 1} of ${pages} • ${chars.length} Character${chars.length === 1 ? '' : 's'} • Warband XP: ${warbandXP}`,
     };
 
     group.forEach((char, idx) => {
@@ -119,7 +120,6 @@ function compilePrintCard(char, helpers) {
   const movement = helpers.getEffectiveMovement ? helpers.getEffectiveMovement(char) : (5 + agility);
 
   // Meta information using effective values where available
-  const experience = Number(char.experience || 0);
   const hp = helpers.getEffectiveHP ? helpers.getEffectiveHP(char) : Number(char.hp || 0);
   const armor = helpers.getEffectiveArmor ? helpers.getEffectiveArmor(char) : Number(char.armor || 0);
   const slots = slotUsage(char);
@@ -141,7 +141,6 @@ function compilePrintCard(char, helpers) {
   return fillTemplate(printTemplates.card, {
     // Basic info
     NAME: safeName,
-    EXPERIENCE: experience,
     HP: hp,
     MOVEMENT: movement,
     ARMOR_VALUE: armor,

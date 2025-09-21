@@ -422,6 +422,76 @@ function ensureNameData() {
   });
 }
 
+// =====================
+// Level Up System
+// =====================
+function getRandomFlaw() {
+  const flaws = traitData?.flaws || [];
+  if (flaws.length === 0) return null;
+  return randomFrom(flaws).name;
+}
+
+function getLevelUpCost() {
+  const slowLearners = state.chars.filter(c => !c.isDead && c.flaws?.includes("Slow Learner")).length;
+  return 5 + slowLearners;
+}
+
+function levelUpImproveStat(character, statName) {
+  if (!character.stats[statName] && character.stats[statName] !== 0) return false;
+  const cost = getLevelUpCost(); // Calculate cost BEFORE changes
+  character.stats[statName]++;
+  state.warband.experience -= cost;
+  updateLevelUpButton();
+  return true;
+}
+
+function levelUpRemoveInjury(character, injuryName) {
+  const index = character.flaws.indexOf(injuryName);
+  if (index === -1) return false;
+  const cost = getLevelUpCost(); // Calculate cost BEFORE removing flaw
+  character.flaws.splice(index, 1);
+  state.warband.experience -= cost;
+  updateLevelUpButton();
+  return true;
+}
+
+function levelUpRerollFlaw(character, oldFlawName) {
+  const index = character.flaws.indexOf(oldFlawName);
+  if (index === -1) return false;
+  const newFlaw = getRandomFlaw();
+  if (!newFlaw) return false;
+  const cost = getLevelUpCost(); // Calculate cost BEFORE making changes
+  character.flaws[index] = newFlaw;
+  state.warband.experience -= cost;
+  updateLevelUpButton();
+  return true;
+}
+
+function levelUpGainFeat(character, featName) {
+  if (character.feats.includes(featName)) return false;
+  const cost = getLevelUpCost(); // Calculate cost BEFORE making changes
+  character.feats.push(featName);
+  state.warband.experience -= cost;
+  updateLevelUpButton();
+  return true;
+}
+
+function levelUpResurrect(deadCharacterId) {
+  const deadCharacter = state.chars.find(c => c.id === deadCharacterId && c.isDead);
+  if (!deadCharacter) return false;
+
+  const cost = getLevelUpCost(); // Calculate cost BEFORE resurrecting
+  deadCharacter.isDead = false;
+  const newFlaw = getRandomFlaw();
+  if (newFlaw && !deadCharacter.flaws.includes(newFlaw)) {
+    deadCharacter.flaws.push(newFlaw);
+  }
+
+  state.warband.experience -= cost;
+  updateLevelUpButton();
+  return true;
+}
+
 function loadState() {
   try {
     return JSON.parse(localStorage.getItem(STORE_KEY)) || null;
@@ -432,7 +502,11 @@ function loadState() {
 
 function normalizeState() {
   state = state || {};
-  state.warband = state.warband || { name: "", limit: 50 };
+  state.warband = state.warband || { name: "", limit: 50, experience: 0 };
+  // Ensure warband has experience field
+  if (typeof state.warband.experience !== 'number') {
+    state.warband.experience = 0;
+  }
   state.catalogVersion = Number.isFinite(state.catalogVersion)
     ? state.catalogVersion
     : 0;
@@ -441,6 +515,20 @@ function normalizeState() {
   state.stash = Array.isArray(state.stash) ? state.stash : [];
   state.chars = Array.isArray(state.chars) ? state.chars : [];
   state.settings = state.settings || {};
+
+  // Migration: Convert individual character XP to warband XP
+  if (state.chars.length > 0 && state.warband.experience === 0) {
+    let totalXP = 0;
+    state.chars.forEach(char => {
+      if (typeof char.experience === 'number' && char.experience > 0) {
+        totalXP += char.experience;
+        char.experience = 0; // Clear individual character XP
+      }
+    });
+    if (totalXP > 0) {
+      state.warband.experience = totalXP;
+    }
+  }
   const deprecatedIds = new Set([
     "armor-light",
     "armor-medium",
@@ -499,6 +587,7 @@ function normalizeState() {
     ensureScrollLibrary(ch);
     ch.experience = Number(ch.experience || 0);
     if (ch.experience < 0) ch.experience = 0;
+    ch.isDead = !!ch.isDead;
     if ("type" in ch) delete ch.type;
     if (ch.isMage) {
       if (mageOwner && mageOwner !== ch.id) {
@@ -526,7 +615,7 @@ function saveState() {
 }
 
 let state = loadState() || {
-  warband: { name: "", limit: 50 },
+  warband: { name: "", limit: 50, experience: 0 },
   catalog: [],
   stash: [],
   chars: [],
@@ -577,6 +666,7 @@ function newCharacter(name) {
     pack: [],
     isMage: false,
     tragedies: 0,
+    isDead: false,
     mageScrolls: { clean: [], unclean: [] },
     statTemplate: {
       id: "setA",
@@ -1868,6 +1958,7 @@ function render() {
   const wbNameInput = el("wbName");
   if (wbNameInput) wbNameInput.value = state.warband.name || "";
   el("wbLimit").value = state.warband.limit || 0;
+  el("wbXP").value = state.warband.experience || 0;
   const total = warbandPoints();
   el("wbPoints").textContent =
     `${total} g` + (state.warband.limit ? ` / ${state.warband.limit} g` : "");
@@ -1881,6 +1972,7 @@ function render() {
     const card = document.createElement("div");
     card.className = "char-card";
     if (c.id === state.selectedId) card.classList.add("active");
+    if (c.isDead) card.classList.add("dead");
 
     card.addEventListener("click", (ev) => {
       if (ev.target.closest(".char-card-actions")) return;
@@ -1927,6 +2019,34 @@ function render() {
     const actions = document.createElement("div");
     actions.className = "char-card-actions";
 
+    // Add Mark as Dead / Resurrect button
+    const deathBtn = document.createElement("button");
+    if (c.isDead) {
+      deathBtn.className = "ghost";
+      deathBtn.textContent = "Resurrect";
+      deathBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        if (!confirm("Resurrect character?")) return;
+        c.isDead = false;
+        updateLevelUpButton();
+        render();
+        saveState();
+      };
+    } else {
+      deathBtn.className = "danger";
+      deathBtn.textContent = "Mark Dead";
+      deathBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        if (!confirm("Mark character as dead?")) return;
+        c.isDead = true;
+        if (state.selectedId === c.id) state.selectedId = null; // Deselect if dead
+        updateLevelUpButton();
+        render();
+        saveState();
+      };
+    }
+    actions.appendChild(deathBtn);
+
     const del = document.createElement("button");
     del.className = "danger";
     del.textContent = "Delete";
@@ -1935,6 +2055,7 @@ function render() {
       if (!confirm("Delete character?")) return;
       state.chars = state.chars.filter((x) => x.id !== c.id);
       if (state.selectedId === c.id) state.selectedId = null;
+      updateLevelUpButton();
       saveState();
     };
     actions.appendChild(del);
@@ -1949,8 +2070,6 @@ function render() {
     if (slots.used > slots.total) slotTag.classList.add("warn");
     slotTag.title = `Base ${slots.base}, Bonus ${slots.bonus}`;
     meta.appendChild(slotTag);
-    const xpTag = tag(`XP ${Number(c.experience || 0)}`);
-    meta.appendChild(xpTag);
     meta.appendChild(tag(`${charPoints(c)} g`));
     card.appendChild(meta);
 
@@ -1978,11 +2097,6 @@ function render() {
     }
     const tragediesLabel = el("tragediesLabel");
     if (tragediesLabel) tragediesLabel.style.display = "none";
-    const xpInput = el("edXP");
-    if (xpInput) {
-      xpInput.value = 0;
-      xpInput.disabled = true;
-    }
   }
   renderTraitControls();
   renderScrollControls();
@@ -2413,11 +2527,6 @@ function fillEditor(c) {
     tragediesInput.value = Number(c.tragedies || 0);
     tragediesInput.disabled = !c.isMage;
   }
-  const xpInput = el("edXP");
-  if (xpInput) {
-    xpInput.value = Number(c.experience || 0);
-    xpInput.disabled = false;
-  }
   const tragediesGroup = el("tragediesGroup");
   if (tragediesGroup) {
     tragediesGroup.style.display = c.isMage ? "" : "none";
@@ -2579,6 +2688,9 @@ function fillEditor(c) {
       });
     }
   }
+
+  // Update level up button state
+  updateLevelUpButton();
 }
 
 // =====================
@@ -2591,6 +2703,11 @@ el("wbName").addEventListener("input", (e) => {
 el("wbLimit").addEventListener("input", (e) => {
   state.warband.limit = Number(e.target.value) || 0;
   render();
+  saveState();
+});
+el("wbXP").addEventListener("input", (e) => {
+  state.warband.experience = Math.max(0, Number(e.target.value) || 0);
+  updateLevelUpButton();
   saveState();
 });
 
@@ -2617,7 +2734,7 @@ if (randCharNameBtn) {
       const input = el("edName");
       if (input) input.value = name;
       char.name = name;
-      fillCharList();
+      render();
       saveState();
     });
   };
@@ -2629,8 +2746,354 @@ if (addCharBtn) {
     const c = createRandomCharacter();
     state.chars.push(c);
     state.selectedId = c.id;
+    updateLevelUpButton();
     saveState();
   };
+}
+
+// Level Up Modal handlers
+const levelUpBtn = el("levelUpBtn");
+const levelUpModal = el("levelUpModal");
+const levelUpClose = el("levelUpClose");
+const levelUpCancel = el("levelUpCancel");
+const levelUpApply = el("levelUpApply");
+const levelUpChoices = document.querySelectorAll('input[name="levelUpChoice"]');
+
+function updateLevelUpButton() {
+  if (levelUpBtn) {
+    const hasLivingChars = state.chars.some(c => !c.isDead);
+    const hasDeadChars = state.chars.some(c => c.isDead);
+    const hasAnyChars = hasLivingChars || hasDeadChars;
+    const xpRequired = getLevelUpCost();
+    levelUpBtn.disabled = !hasAnyChars || (state.warband.experience || 0) < xpRequired;
+
+    // Update button text to show actual XP cost
+    levelUpBtn.textContent = `Level Up (${xpRequired} XP)`;
+    levelUpBtn.title = `Spend ${xpRequired} XP to level up selected character or resurrect the dead`;
+  }
+}
+
+function populateLevelUpModal() {
+  const char = getSelectedChar();
+
+  // Update modal header with current XP cost
+  const modalHeader = document.querySelector("#levelUpModal h2");
+  if (modalHeader) {
+    const xpCost = getLevelUpCost();
+    modalHeader.textContent = `Level Up - Spend ${xpCost} XP`;
+  }
+
+  // Populate character selector
+  const charSelect = el("levelUpCharacterSelect");
+  if (charSelect) {
+    charSelect.innerHTML = '<option value="">Select a character...</option>';
+    state.chars.forEach(character => {
+      if (!character.isDead) { // Only show living characters
+        const option = document.createElement('option');
+        option.value = character.id;
+        option.textContent = character.name || '(unnamed)';
+        charSelect.appendChild(option);
+      }
+    });
+
+    // Default to currently selected character if available
+    if (char && !char.isDead) {
+      charSelect.value = char.id;
+    }
+  }
+
+  // If no character is selected, we'll populate selects based on first available character
+  const referenceChar = char || state.chars.find(c => !c.isDead);
+  if (!referenceChar) return;
+
+  // Populate injury/flaw selects
+  const injurySelect = el("injurySelect");
+  const flawSelect = el("flawSelect");
+  if (injurySelect && flawSelect) {
+    injurySelect.innerHTML = '<option value="">Select an injury to remove...</option>';
+    flawSelect.innerHTML = '<option value="">Select a flaw to reroll...</option>';
+
+    referenceChar.flaws.forEach(flaw => {
+      const option1 = document.createElement('option');
+      option1.value = flaw;
+      option1.textContent = flaw;
+      injurySelect.appendChild(option1);
+
+      const option2 = document.createElement('option');
+      option2.value = flaw;
+      option2.textContent = flaw;
+      flawSelect.appendChild(option2);
+    });
+  }
+
+  // Populate feat select
+  const featSelect = el("featSelect");
+  if (featSelect && traitData.feats) {
+    featSelect.innerHTML = '<option value="">Select a feat to gain...</option>';
+    traitData.feats.forEach(feat => {
+      if (!referenceChar.feats.includes(feat.name)) {
+        const option = document.createElement('option');
+        option.value = feat.name;
+        option.textContent = feat.name;
+        featSelect.appendChild(option);
+      }
+    });
+  }
+
+  // Populate resurrect select
+  const resurrectSelect = el("resurrectSelect");
+  if (resurrectSelect) {
+    resurrectSelect.innerHTML = '<option value="">Select a dead character...</option>';
+    state.chars.forEach(c => {
+      if (c.isDead) {
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = c.name;
+        resurrectSelect.appendChild(option);
+      }
+    });
+  }
+
+  // Add event handler to repopulate selects when character changes
+  if (charSelect) {
+    charSelect.onchange = () => {
+      const selectedCharId = charSelect.value;
+      const selectedChar = state.chars.find(c => c.id === selectedCharId);
+      if (selectedChar) {
+        // Repopulate injury/flaw selects for the new character
+        if (injurySelect && flawSelect) {
+          injurySelect.innerHTML = '<option value="">Select an injury to remove...</option>';
+          flawSelect.innerHTML = '<option value="">Select a flaw to reroll...</option>';
+
+          selectedChar.flaws.forEach(flaw => {
+            const option1 = document.createElement('option');
+            option1.value = flaw;
+            option1.textContent = flaw;
+            injurySelect.appendChild(option1);
+
+            const option2 = document.createElement('option');
+            option2.value = flaw;
+            option2.textContent = flaw;
+            flawSelect.appendChild(option2);
+          });
+        }
+
+        // Repopulate feat select for the new character
+        if (featSelect && traitData.feats) {
+          featSelect.innerHTML = '<option value="">Select a feat to gain...</option>';
+          traitData.feats.forEach(feat => {
+            if (!selectedChar.feats.includes(feat.name)) {
+              const option = document.createElement('option');
+              option.value = feat.name;
+              option.textContent = feat.name;
+              featSelect.appendChild(option);
+            }
+          });
+        }
+      }
+
+      // Update modal header with current XP cost (in case Slow Learner status changed)
+      const modalHeader = document.querySelector("#levelUpModal h2");
+      if (modalHeader) {
+        const xpCost = getLevelUpCost();
+        modalHeader.textContent = `Level Up - Spend ${xpCost} XP`;
+      }
+
+      updateLevelUpControls();
+    };
+  }
+}
+
+function updateLevelUpControls() {
+  const controls = {
+    statControls: false,
+    injuryControls: false,
+    flawControls: false,
+    featControls: false,
+    resurrectControls: false
+  };
+
+  levelUpChoices.forEach(choice => {
+    const label = choice.closest('.level-up-option');
+    if (choice.checked) {
+      if (label) label.classList.add('selected');
+      switch (choice.value) {
+        case 'improveStat':
+          controls.statControls = true;
+          break;
+        case 'removeInjury':
+          controls.injuryControls = true;
+          break;
+        case 'rerollFlaw':
+          controls.flawControls = true;
+          break;
+        case 'gainFeat':
+          controls.featControls = true;
+          break;
+        case 'resurrect':
+          controls.resurrectControls = true;
+          break;
+      }
+    } else {
+      if (label) label.classList.remove('selected');
+    }
+  });
+
+  Object.keys(controls).forEach(controlName => {
+    const element = el(controlName);
+    if (element) {
+      element.style.display = controls[controlName] ? 'block' : 'none';
+    }
+  });
+
+  // Update apply button state
+  if (levelUpApply) {
+    const charSelect = el("levelUpCharacterSelect");
+    const hasSelectedChar = charSelect?.value;
+    let canApply = false;
+
+    if (hasSelectedChar) {
+      levelUpChoices.forEach(choice => {
+        if (choice.checked) {
+          switch (choice.value) {
+            case 'improveStat':
+              canApply = true; // Stats can always be improved
+              break;
+            case 'removeInjury':
+              canApply = el("injurySelect")?.value;
+              break;
+            case 'rerollFlaw':
+              canApply = el("flawSelect")?.value;
+              break;
+            case 'gainFeat':
+              canApply = el("featSelect")?.value;
+              break;
+            case 'resurrect':
+              canApply = el("resurrectSelect")?.value;
+              break;
+          }
+        }
+      });
+    }
+
+    levelUpApply.disabled = !canApply;
+  }
+}
+
+if (levelUpBtn) {
+  levelUpBtn.onclick = () => {
+    const hasLivingChars = state.chars.some(c => !c.isDead);
+    const hasDeadChars = state.chars.some(c => c.isDead);
+    const hasAnyChars = hasLivingChars || hasDeadChars;
+    const xpRequired = getLevelUpCost();
+
+    if (!hasAnyChars || (state.warband.experience || 0) < xpRequired) return;
+
+    populateLevelUpModal();
+    if (levelUpModal) {
+      levelUpModal.style.display = 'flex';
+    }
+  };
+}
+
+if (levelUpClose || levelUpCancel) {
+  const closeModal = () => {
+    if (levelUpModal) {
+      levelUpModal.style.display = 'none';
+      // Reset form
+      levelUpChoices.forEach(choice => choice.checked = false);
+      updateLevelUpControls();
+    }
+  };
+
+  if (levelUpClose) levelUpClose.onclick = closeModal;
+  if (levelUpCancel) levelUpCancel.onclick = closeModal;
+}
+
+if (levelUpApply) {
+  levelUpApply.onclick = () => {
+    // Get character from modal selector instead of getSelectedChar()
+    const charSelect = el("levelUpCharacterSelect");
+    const selectedCharId = charSelect?.value;
+    const char = selectedCharId ? state.chars.find(c => c.id === selectedCharId) : null;
+
+    const xpRequired = getLevelUpCost();
+
+    if (!char || (state.warband.experience || 0) < xpRequired) return;
+
+    let success = false;
+    levelUpChoices.forEach(choice => {
+      if (choice.checked) {
+        switch (choice.value) {
+          case 'improveStat':
+            const statSelect = el("statSelect");
+            if (statSelect?.value) {
+              success = levelUpImproveStat(char, statSelect.value);
+            }
+            break;
+          case 'removeInjury':
+            const injurySelect = el("injurySelect");
+            if (injurySelect?.value) {
+              success = levelUpRemoveInjury(char, injurySelect.value);
+            }
+            break;
+          case 'rerollFlaw':
+            const flawSelect = el("flawSelect");
+            if (flawSelect?.value) {
+              success = levelUpRerollFlaw(char, flawSelect.value);
+            }
+            break;
+          case 'gainFeat':
+            const featSelect = el("featSelect");
+            if (featSelect?.value) {
+              success = levelUpGainFeat(char, featSelect.value);
+            }
+            break;
+          case 'resurrect':
+            const resurrectSelect = el("resurrectSelect");
+            if (resurrectSelect?.value) {
+              success = levelUpResurrect(resurrectSelect.value);
+            }
+            break;
+        }
+      }
+    });
+
+    if (success) {
+      saveState();
+      render(); // Use render() instead of separate calls
+
+      // Close modal
+      if (levelUpModal) {
+        levelUpModal.style.display = 'none';
+        levelUpChoices.forEach(choice => choice.checked = false);
+        updateLevelUpControls();
+      }
+    }
+  };
+}
+
+// Add event listeners for radio buttons and selects
+levelUpChoices.forEach(choice => {
+  choice.addEventListener('change', updateLevelUpControls);
+});
+
+['injurySelect', 'flawSelect', 'featSelect', 'resurrectSelect'].forEach(selectId => {
+  const select = el(selectId);
+  if (select) {
+    select.addEventListener('change', updateLevelUpControls);
+  }
+});
+
+// Close modal when clicking outside
+if (levelUpModal) {
+  levelUpModal.addEventListener('click', (e) => {
+    if (e.target === levelUpModal) {
+      levelUpModal.style.display = 'none';
+      levelUpChoices.forEach(choice => choice.checked = false);
+      updateLevelUpControls();
+    }
+  });
 }
 
 // Editor bindings
@@ -2648,11 +3111,6 @@ bindEditorInput("edName", (c, e) => (c.name = e.target.value));
 bindEditorInput("edArmor", (c, e) => (c.armor = Number(e.target.value) || 0));
 bindEditorInput("edHP", (c, e) => (c.hp = Number(e.target.value) || 0));
 bindEditorInput("edNotes", (c, e) => (c.notes = e.target.value));
-bindEditorInput("edXP", (c, e) => {
-  const val = Math.max(0, Number(e.target.value) || 0);
-  c.experience = val;
-  e.target.value = val;
-});
 
 function bindCustomStatChange(id, key) {
   const input = el(id);
@@ -2779,7 +3237,7 @@ el("clearAll").onclick = () => {
   if (!confirm("Clear all data?")) return;
   localStorage.removeItem(STORE_KEY);
   state = {
-    warband: { name: "", limit: 50 },
+    warband: { name: "", limit: 50, experience: 0 },
     catalog: [],
     stash: [],
     chars: [],
@@ -2853,5 +3311,8 @@ if (window.PrintModule) {
   };
   window.PrintModule.initializePrint(state, printHelpers);
 }
+
+// Alias functions for compatibility
+const fillCharList = render;
 
 render();

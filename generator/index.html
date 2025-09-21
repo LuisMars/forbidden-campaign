@@ -54,6 +54,20 @@
               /></label>
               <span id="wbPoints" class="tag">0 g</span>
             </div>
+            <div class="row">
+              <label class="pill"
+                >Warband XP
+                <input
+                  id="wbXP"
+                  type="number"
+                  min="0"
+                  step="1"
+                  style="width: 100px"
+              /></label>
+              <label class="pill">
+                <button id="levelUpBtn" type="button" class="level-up-btn" title="Spend 5 XP to level up selected character">Level Up (5 XP)</button>
+              </label>
+            </div>
             <div class="sep"></div>
             <div class="row">
               <button id="addChar" type="button">Add character</button>
@@ -185,12 +199,6 @@
                       <span class="toggle-label">Spellcaster</span>
                       <span class="toggle-cost">(+5g)</span>
                     </label>
-                  </div>
-                </div>
-                <div class="stat-grid-item">
-                  <div class="progress-item">
-                    <label>Experience</label>
-                    <input id="edXP" type="number" min="0" step="1" class="progress-input experience-input" />
                   </div>
                 </div>
                 <div class="stat-grid-item">
@@ -342,6 +350,100 @@
     </div>
 
     <div id="printRoster" class="print-only"></div>
+
+    <!-- Level Up Modal -->
+    <div id="levelUpModal" class="modal-overlay" style="display: none;">
+      <div class="modal-content level-up-modal">
+        <div class="modal-header">
+          <h2>Level Up - Spend 5 XP</h2>
+          <button class="modal-close" id="levelUpClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Choose one upgrade option:</p>
+
+          <div class="character-selector">
+            <label for="levelUpCharacterSelect">Apply to Character:</label>
+            <select id="levelUpCharacterSelect">
+              <option value="">Select a character...</option>
+            </select>
+          </div>
+
+          <div class="level-up-options">
+            <label class="level-up-option">
+              <input type="radio" name="levelUpChoice" value="improveStat">
+              <div class="option-content">
+                <strong>Improve 1 warband member's Stat by 1</strong>
+                <p>Select a stat to increase (no maximum limit)</p>
+                <div class="option-controls" id="statControls" style="display: none;">
+                  <select id="statSelect">
+                    <option value="agi">Agility</option>
+                    <option value="pre">Presence</option>
+                    <option value="str">Strength</option>
+                    <option value="tou">Toughness</option>
+                  </select>
+                </div>
+              </div>
+            </label>
+
+            <label class="level-up-option">
+              <input type="radio" name="levelUpChoice" value="removeInjury">
+              <div class="option-content">
+                <strong>Remove an Injury</strong>
+                <p>Remove a flaw from this character</p>
+                <div class="option-controls" id="injuryControls" style="display: none;">
+                  <select id="injurySelect">
+                    <option value="">Select an injury to remove...</option>
+                  </select>
+                </div>
+              </div>
+            </label>
+
+            <label class="level-up-option">
+              <input type="radio" name="levelUpChoice" value="rerollFlaw">
+              <div class="option-content">
+                <strong>Reroll a Flaw</strong>
+                <p>Replace an existing flaw with a new random one</p>
+                <div class="option-controls" id="flawControls" style="display: none;">
+                  <select id="flawSelect">
+                    <option value="">Select a flaw to reroll...</option>
+                  </select>
+                </div>
+              </div>
+            </label>
+
+            <label class="level-up-option">
+              <input type="radio" name="levelUpChoice" value="gainFeat">
+              <div class="option-content">
+                <strong>Gain a new Feat [pick]</strong>
+                <p>Choose a feat to add to this character</p>
+                <div class="option-controls" id="featControls" style="display: none;">
+                  <select id="featSelect">
+                    <option value="">Select a feat to gain...</option>
+                  </select>
+                </div>
+              </div>
+            </label>
+
+            <label class="level-up-option">
+              <input type="radio" name="levelUpChoice" value="resurrect">
+              <div class="option-content">
+                <strong>Bring 1 warband member back from the Dead</strong>
+                <p>Resurrect a dead character with a new random flaw</p>
+                <div class="option-controls" id="resurrectControls" style="display: none;">
+                  <select id="resurrectSelect">
+                    <option value="">Select a dead character...</option>
+                  </select>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" id="levelUpCancel">Cancel</button>
+          <button class="btn-primary" id="levelUpApply" disabled>Apply Level Up</button>
+        </div>
+      </div>
+    </div>
 
     <script src="print.js"></script>
     <script src="app.js"></script>
