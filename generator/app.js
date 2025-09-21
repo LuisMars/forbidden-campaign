@@ -2612,6 +2612,17 @@ function renderUpgradeList() {
     infoBlock.appendChild(desc);
 
     header.appendChild(infoBlock);
+
+    // Add undo button
+    const undoBtn = document.createElement("button");
+    undoBtn.type = "button";
+    undoBtn.className = "ghost";
+    undoBtn.style.padding = "6px 10px";
+    undoBtn.style.fontSize = "0.75rem";
+    undoBtn.textContent = "Undo";
+    undoBtn.onclick = () => undoUpgrade(upgrade.id);
+    header.appendChild(undoBtn);
+
     card.appendChild(header);
     upgradeList.appendChild(card);
   });
@@ -2672,6 +2683,65 @@ function buyUpgrade(upgradeId) {
   }
 
   saveState();
+  return true;
+}
+
+function undoUpgrade(upgradeId) {
+  if (!upgradeId) return false;
+
+  const upgrade = (upgradeData.upgrades || []).find(u => u.id === upgradeId);
+  if (!upgrade) return false;
+
+  const upgrades = state.warband.upgrades || [];
+  const upgradeIndex = upgrades.indexOf(upgradeId);
+
+  if (upgradeIndex === -1) {
+    alert("Upgrade not found!");
+    return false;
+  }
+
+  // Special handling for Better Grub - need to remove from a character
+  if (upgradeId === "better-grub") {
+    const charactersWithGrub = state.chars.filter(c => c.betterGrub);
+    if (charactersWithGrub.length === 0) {
+      alert("No characters have Better Grub!");
+      return false;
+    }
+
+    if (charactersWithGrub.length === 1) {
+      // Only one character has it, remove automatically
+      charactersWithGrub[0].betterGrub = false;
+    } else {
+      // Multiple characters have it, ask which one to remove
+      const charNames = charactersWithGrub.map((c, idx) => `${idx + 1}. ${c.name || "(unnamed)"}`).join("\n");
+      const choice = prompt(`Remove Better Grub from which character?\n\n${charNames}\n\nEnter the number (1-${charactersWithGrub.length}):`);
+
+      if (choice === null) return false; // User cancelled
+
+      const choiceNum = parseInt(choice);
+      if (isNaN(choiceNum) || choiceNum < 1 || choiceNum > charactersWithGrub.length) {
+        alert("Invalid choice!");
+        return false;
+      }
+
+      charactersWithGrub[choiceNum - 1].betterGrub = false;
+    }
+  }
+
+  // Remove upgrade and refund gold
+  state.warband.upgrades.splice(upgradeIndex, 1);
+  state.warband.gold += upgrade.cost;
+
+  // Reverse upgrade effects
+  if (upgradeId === "beds") {
+    state.warband.beds = Math.max(0, (state.warband.beds || 0) - 1);
+    state.warband.maxMembers = 5 + state.warband.beds;
+  }
+
+  saveState();
+  renderUpgradeList();
+  renderUpgradePicker();
+  render();
   return true;
 }
 

@@ -80,6 +80,7 @@ function renderPrintRoster(state, helpers) {
     const warbandXP = state.warband?.experience || 0;
     const data = {
       STASH: buildStashMarkup(state, helpers),
+      WARBAND_UPGRADES: buildWarbandUpgradesMarkup(state, helpers),
       TITLE: warbandName,
       WARBAND_INFO: `Warband XP: ${warbandXP}`,
     };
@@ -458,6 +459,41 @@ function buildStashMarkup(state, helpers) {
   }
 
   const items = lines.map((line) => `<li>${escapeHtml(line)}</li>`).join('');
+  return `<ul class="print-stash-list">${items}</ul>`;
+}
+
+function buildWarbandUpgradesMarkup(state, helpers) {
+  const purchasedUpgrades = state.warband?.upgrades || [];
+  if (!purchasedUpgrades.length) {
+    return '<div class="print-empty">No upgrades purchased.</div>';
+  }
+
+  // Get upgrade data
+  const upgradeData = helpers.getUpgradeData ? helpers.getUpgradeData() : { upgrades: [] };
+
+  // Group upgrades by type
+  const upgradeGroups = {};
+  purchasedUpgrades.forEach(upgradeId => {
+    const upgrade = (upgradeData.upgrades || []).find(u => u.id === upgradeId);
+    if (!upgrade) return;
+
+    if (!upgradeGroups[upgrade.id]) {
+      upgradeGroups[upgrade.id] = { upgrade, count: 0 };
+    }
+    upgradeGroups[upgrade.id].count++;
+  });
+
+  const lines = Object.values(upgradeGroups).map(({ upgrade, count }) => {
+    const name = escapeHtml(upgrade.name + (count > 1 ? ` (×${count})` : ''));
+    const desc = upgrade.description ? escapeHtml(upgrade.description) : '';
+    return desc ? `<strong>${name}</strong>: ${desc}` : `<strong>${name}</strong>`;
+  });
+
+  if (!lines.length) {
+    return '<div class="print-empty">No upgrades purchased.</div>';
+  }
+
+  const items = lines.map((line) => `<li>${line}</li>`).join('');
   return `<ul class="print-stash-list">${items}</ul>`;
 }
 

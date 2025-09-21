@@ -1181,6 +1181,41 @@ button.char-card-name:focus-visible {
   }
 }
 
+/* Upgrade rows */
+.upgrade-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.upgrade-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.upgrade-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.upgrade-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.upgrade-desc {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 /* Custom stat inputs in stat template */
 .custom-stat-inputs {
   display: flex;
