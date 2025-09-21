@@ -11,9 +11,10 @@
     >
     <link rel="stylesheet" href="../main.css" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="print-card.css" media="print" />
   </head>
   <body>
-    <div class="wrap">
+    <div class="wrap screen-only">
       <h1>Forbidden Psalm – Warband Builder</h1>
       <h2 id="warbandTitle" class="warband-title" style="display:none"></h2>
       <div class="sub">Editable warband roster with stash and gold costs. Data persists locally.</div>
@@ -38,6 +39,7 @@
             <div class="sep"></div>
             <div class="row">
               <button id="exportBtn">Export JSON</button>
+              <button id="printRosterBtn" class="ghost" type="button">Print roster</button>
               <label class="pill" for="importFile" style="cursor:pointer">Import <input id="importFile" type="file" accept="application/json" style="display:none"></label>
               <button id="clearAll" class="danger">Clear All</button>
             </div>
@@ -199,6 +201,9 @@
       </footer>
     </div>
 
+    <div id="printRoster" class="print-only"></div>
+
+    <script src="print.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

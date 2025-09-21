@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Forbidden Psalm – Character Card Template</title>
+  </head>
+  <body>
+    <article class="print-card">
+      <header class="print-card-header">
+        <h2 class="print-card-name">{{NAME}}</h2>
+        <div class="print-card-subtitle">
+          <span class="print-character-type">{{CHARACTER_TYPE}}</span>
+          <span class="print-stat-template">{{STAT_TEMPLATE}}</span>
+        </div>
+        <div class="print-card-meta">
+          <span class="print-tag">XP: {{EXPERIENCE}}</span>
+          <span class="print-tag">HP: {{HP}}</span>
+          <span class="print-tag">Armor: {{ARMOR_VALUE}}</span>
+          <span class="print-tag">Slots: {{SLOTS_USED}}/{{SLOTS_TOTAL}} ({{SLOTS_BASE}}+{{SLOTS_BONUS}})</span>
+          <span class="print-tag">Gold: {{GOLD}} g</span>
+          <span class="print-tag">{{IS_MAGE}}</span>
+          <span class="print-tag">Tragedies: {{TRAGEDIES}}</span>
+        </div>
+      </header>
+
+      <div class="print-stats">
+        <span class="print-stat">AGI {{AGILITY}}</span>
+        <span class="print-stat">PRE {{PRESENCE}}</span>
+        <span class="print-stat">STR {{STRENGTH}}</span>
+        <span class="print-stat">TOU {{TOUGHNESS}}</span>
+      </div>
+
+      <div class="print-columns">
+        <div class="print-column print-column--left">
+          <section class="print-section">
+            <h3>Feats <span class="print-count">({{FEATS_COUNT}})</span></h3>
+            {{FEATS_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Flaws <span class="print-count">({{FLAWS_COUNT}})</span></h3>
+            {{FLAWS_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Scrolls <span class="print-count">({{SCROLLS_COUNT}})</span></h3>
+            {{SCROLLS_LIST}}
+          </section>
+        </div>
+
+        <div class="print-column print-column--right">
+          <section class="print-section">
+            <h3>Weapons <span class="print-count">({{WEAPON_COUNT}})</span></h3>
+            {{WEAPONS_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Armor <span class="print-count">({{ARMOR_COUNT}})</span></h3>
+            {{ARMOR_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Shields</h3>
+            {{SHIELDS_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Helmets</h3>
+            {{HELMETS_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Gear <span class="print-count">({{GEAR_COUNT}})</span></h3>
+            {{GEAR_LIST}}
+          </section>
+
+          <section class="print-section">
+            <h3>Pack <span class="print-count">({{PACK_COUNT}})</span></h3>
+            {{PACK_LIST}}
+          </section>
+        </div>
+      </div>
+
+      <section class="print-section print-notes">
+        <h3>Notes</h3>
+        <div class="print-notes-body">{{NOTES}}</div>
+      </section>
+    </article>
+  </body>
+</html>

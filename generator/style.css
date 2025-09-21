@@ -527,3 +527,17 @@ button.char-card-name:focus-visible {
 .site-footer .back-link {
   font-weight: 600;
 }
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .screen-only {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}

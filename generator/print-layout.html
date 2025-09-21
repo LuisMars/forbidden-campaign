@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Forbidden Psalm – Print Layout Template</title>
+  </head>
+  <body>
+    <div class="print-layout">
+      <section class="print-page print-page--primary">
+        <header class="print-page-header">
+          <div class="print-page-title">{{TITLE}}</div>
+          <div class="print-page-summary">{{SUMMARY}}</div>
+        </header>
+        <div class="print-grid print-grid--primary">
+          {{CHAR_SLOT_1}}
+          {{CHAR_SLOT_2}}
+          {{CHAR_SLOT_3}}
+          {{CHAR_SLOT_4}}
+        </div>
+      </section>
+      <section class="print-page print-page--secondary">
+        <header class="print-page-header">
+          <div class="print-page-title">{{TITLE}}</div>
+          <div class="print-page-summary">{{SUMMARY}}</div>
+        </header>
+        <div class="print-grid print-grid--primary">
+          {{CHAR_SLOT_5}}
+          {{CHAR_SLOT_6}}
+        </div>
+        <section class="print-stash">
+          <h2 class="print-stash-title">Warband Stash</h2>
+          {{STASH}}
+        </section>
+      </section>
+    </div>
+  </body>
+</html>
