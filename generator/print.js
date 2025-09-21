@@ -40,7 +40,7 @@ function fetchTemplate(path) {
 function fillTemplate(template, data) {
   return Object.entries(data).reduce((result, [key, value]) => {
     const placeholder = `{{${key}}}`;
-    return result.replace(new RegExp(placeholder, 'g'), value || '');
+    return result.replace(new RegExp(placeholder, 'g'), value != null ? value : '');
   }, template);
 }
 
@@ -76,11 +76,13 @@ function renderPrintRoster(state, helpers) {
 
   const layouts = [];
   chunks.forEach((group, pageIdx) => {
+    const warbandName = escapeHtml((state.warband?.name || '').trim() || 'Unnamed Warband');
     const data = {
       PAGE_NUMBER: pageIdx + 1,
       TOTAL_PAGES: pages,
       STASH: buildStashMarkup(state, helpers),
-      WARBAND_NAME: escapeHtml((state.warband?.name || '').trim() || 'Unnamed Warband'),
+      TITLE: warbandName,
+      SUMMARY: `Page ${pageIdx + 1} of ${pages} • ${chars.length} Character${chars.length === 1 ? '' : 's'}`,
     };
 
     group.forEach((char, idx) => {
@@ -123,8 +125,8 @@ function compilePrintCard(char, helpers) {
   const tragedies = Number(char.tragedies || 0);
 
   // Lists for injection
-  const feats = (char.feats || []).filter(Boolean);
-  const flaws = (char.flaws || []).filter(Boolean);
+  const feats = buildTraitLines(char.feats || [], 'feats', helpers);
+  const flaws = buildTraitLines(char.flaws || [], 'flaws', helpers);
   const scrolls = buildScrollLines(char, helpers);
 
   const weapons = aggregateItemLines(resolveEntries(char.weapons, resolveItem), helpers);
@@ -140,8 +142,8 @@ function compilePrintCard(char, helpers) {
     HP: hp,
     ARMOR_VALUE: armor,
     GOLD: gold,
-    IS_MAGE: isMage ? 'Yes' : 'No',
-    TRAGEDIES: tragedies > 0 ? tragedies : '',
+    IS_MAGE: isMage ? 'is-mage' : 'is-not-mage',
+    TRAGEDIES: tragedies,
 
     // Stats
     AGILITY: formatStatValue(agility),
@@ -158,6 +160,7 @@ function compilePrintCard(char, helpers) {
     // Character summary tags
     CHARACTER_TYPE: isMage ? 'Spellcaster' : 'Fighter',
     STAT_TEMPLATE: char.statTemplate?.id ? getStatTemplateLabel(char.statTemplate.id) : 'Custom',
+    IS_MAGE: isMage ? 'is-mage' : 'is-not-mage',
 
     // Equipment counts
     WEAPON_COUNT: weapons.length,
@@ -180,9 +183,12 @@ function compilePrintCard(char, helpers) {
     FEATS_COUNT: feats.length,
     FLAWS_COUNT: flaws.length,
     SCROLLS_COUNT: scrolls.length,
+    SHIELDS_COUNT: armorGroups.shields.length,
+    HELMETS_COUNT: armorGroups.helms.length,
 
     // Notes
     NOTES: notes ? escapeHtml(notes).replace(/\n/g, '<br>') : '—',
+    NOTES_LENGTH: notes.length,
   });
 }
 
@@ -190,8 +196,38 @@ function renderItemList(items, emptyText) {
   if (!Array.isArray(items) || !items.length) {
     return `<div class="print-empty">${escapeHtml(emptyText || '—')}</div>`;
   }
-  const listItems = items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+  const listItems = items.map((item) => {
+    if (typeof item === 'object' && item.name && item.description) {
+      return `<li><strong>${escapeHtml(item.name)}</strong><br><span class="print-description">${escapeHtml(item.description)}</span></li>`;
+    }
+    return `<li>${escapeHtml(item)}</li>`;
+  }).join('');
   return `<ul class="print-list">${listItems}</ul>`;
+}
+
+function buildTraitLines(traitNames, type, helpers) {
+  if (!Array.isArray(traitNames)) return [];
+
+  const items = [];
+  traitNames.filter(Boolean).forEach(name => {
+    // Try to find trait description
+    if (helpers.getTraitData) {
+      const traitData = helpers.getTraitData();
+      if (traitData && traitData[type]) {
+        const trait = traitData[type].find(
+          t => t.name.toLowerCase() === name.toLowerCase()
+        );
+        if (trait && trait.description) {
+          items.push({ name: trait.name, description: trait.description });
+          return;
+        }
+      }
+    }
+    // Fallback to just the name if no description found
+    items.push(name);
+  });
+
+  return items;
 }
 
 function buildScrollLines(char, helpers) {
@@ -269,22 +305,37 @@ function resolvePackItems(char, helpers) {
 }
 
 function aggregateItemLines(items, helpers) {
-  const counts = new Map();
+  const itemMap = new Map();
   (Array.isArray(items) ? items : []).forEach((item) => {
     if (!item) return;
-    const descriptor = describeItemForPrint(item, helpers);
-    if (!descriptor) return;
-    const current = counts.get(descriptor);
-    if (current) {
-      counts.set(descriptor, current + 1);
+    const key = item.name || 'Unknown';
+    const existing = itemMap.get(key);
+    if (existing) {
+      existing.count += 1;
     } else {
-      counts.set(descriptor, 1);
+      // Get description from traits field or summarizeItem helper
+      let description = item.traits || item.description || helpers.summarizeItem(item);
+      // Clean up description if it's just stats
+      if (description && description.includes('g,') && description.includes('slots')) {
+        description = item.traits || ''; // Prefer traits over stat summaries
+      }
+
+      itemMap.set(key, {
+        name: item.name,
+        description: description,
+        count: 1
+      });
     }
   });
 
   const lines = [];
-  counts.forEach((count, descriptor) => {
-    lines.push(count > 1 ? `${descriptor} (×${count})` : descriptor);
+  itemMap.forEach((itemData) => {
+    const name = itemData.count > 1 ? `${itemData.name} (×${itemData.count})` : itemData.name;
+    if (itemData.description && itemData.description.trim()) {
+      lines.push({ name, description: itemData.description.trim() });
+    } else {
+      lines.push(name);
+    }
   });
   return lines;
 }
@@ -345,10 +396,25 @@ function initializePrint(state, helpers) {
       ensurePrintTemplates()
         .then(() => {
           renderPrintRoster(state, helpers);
-          window.print();
+          const printWindow = window.open('', '_blank');
+          const container = document.getElementById('printRoster');
+
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Print Preview - ${escapeHtml((state.warband?.name || '').trim() || 'Unnamed Warband')}</title>
+              <link rel="stylesheet" href="print-card.css">
+            </head>
+            <body class="print-preview">
+              ${container.innerHTML}
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
         })
         .catch(() => {
-          window.print();
+          alert('Failed to load print templates');
         });
     });
   }

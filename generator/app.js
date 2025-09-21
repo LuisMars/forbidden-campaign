@@ -2510,6 +2510,7 @@ if (window.PrintModule) {
     slotUsage,
     charPoints,
     summarizeItem,
+    getTraitData: () => traitData,
   };
   window.PrintModule.initializePrint(state, printHelpers);
 }

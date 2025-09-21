@@ -7,81 +7,104 @@
   <body>
     <article class="print-card">
       <header class="print-card-header">
-        <h2 class="print-card-name">{{NAME}}</h2>
-        <div class="print-card-subtitle">
-          <span class="print-character-type">{{CHARACTER_TYPE}}</span>
-          <span class="print-stat-template">{{STAT_TEMPLATE}}</span>
-        </div>
-        <div class="print-card-meta">
-          <span class="print-tag">XP: {{EXPERIENCE}}</span>
-          <span class="print-tag">HP: {{HP}}</span>
-          <span class="print-tag">Armor: {{ARMOR_VALUE}}</span>
-          <span class="print-tag">Slots: {{SLOTS_USED}}/{{SLOTS_TOTAL}} ({{SLOTS_BASE}}+{{SLOTS_BONUS}})</span>
-          <span class="print-tag">Gold: {{GOLD}} g</span>
-          <span class="print-tag">{{IS_MAGE}}</span>
-          <span class="print-tag">Tragedies: {{TRAGEDIES}}</span>
+        <div class="print-card-row">
+          <h2 class="print-card-name">{{NAME}}</h2>
+          <div class="print-card-hp">HP {{HP}}</div>
         </div>
       </header>
 
       <div class="print-stats">
-        <span class="print-stat">AGI {{AGILITY}}</span>
-        <span class="print-stat">PRE {{PRESENCE}}</span>
-        <span class="print-stat">STR {{STRENGTH}}</span>
-        <span class="print-stat">TOU {{TOUGHNESS}}</span>
-      </div>
-
-      <div class="print-columns">
-        <div class="print-column print-column--left">
-          <section class="print-section">
-            <h3>Feats <span class="print-count">({{FEATS_COUNT}})</span></h3>
-            {{FEATS_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Flaws <span class="print-count">({{FLAWS_COUNT}})</span></h3>
-            {{FLAWS_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Scrolls <span class="print-count">({{SCROLLS_COUNT}})</span></h3>
-            {{SCROLLS_LIST}}
-          </section>
+        <div class="print-stat-item">
+          <div class="print-stat-label">AGI</div>
+          <div class="print-stat-value">{{AGILITY}}</div>
         </div>
-
-        <div class="print-column print-column--right">
-          <section class="print-section">
-            <h3>Weapons <span class="print-count">({{WEAPON_COUNT}})</span></h3>
-            {{WEAPONS_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Armor <span class="print-count">({{ARMOR_COUNT}})</span></h3>
-            {{ARMOR_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Shields</h3>
-            {{SHIELDS_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Helmets</h3>
-            {{HELMETS_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Gear <span class="print-count">({{GEAR_COUNT}})</span></h3>
-            {{GEAR_LIST}}
-          </section>
-
-          <section class="print-section">
-            <h3>Pack <span class="print-count">({{PACK_COUNT}})</span></h3>
-            {{PACK_LIST}}
-          </section>
+        <div class="print-stat-item">
+          <div class="print-stat-label">PRE</div>
+          <div class="print-stat-value">{{PRESENCE}}</div>
+        </div>
+        <div class="print-stat-item">
+          <div class="print-stat-label">STR</div>
+          <div class="print-stat-value">{{STRENGTH}}</div>
+        </div>
+        <div class="print-stat-item">
+          <div class="print-stat-label">TOU</div>
+          <div class="print-stat-value">{{TOUGHNESS}}</div>
         </div>
       </div>
 
-      <section class="print-section print-notes">
+      <div class="print-content">
+        <section class="print-section print-section-feats count-{{FEATS_COUNT}}">
+          <h3>Feats</h3>
+          {{FEATS_LIST}}
+        </section>
+
+        <section class="print-section print-section-flaws count-{{FLAWS_COUNT}}">
+          <h3>Flaws</h3>
+          {{FLAWS_LIST}}
+        </section>
+
+        <section class="print-section print-section-scrolls count-{{SCROLLS_COUNT}}">
+          <h3>Scrolls</h3>
+          {{SCROLLS_LIST}}
+        </section>
+
+        <section class="print-section print-section-weapons count-{{WEAPON_COUNT}}">
+          <h3>Weapons</h3>
+          {{WEAPONS_LIST}}
+        </section>
+
+        <section class="print-section print-section-armor count-{{ARMOR_COUNT}}">
+          <h3>Armor</h3>
+          {{ARMOR_LIST}}
+        </section>
+
+        <section class="print-section print-section-shields count-{{SHIELDS_COUNT}}">
+          <h3>Shields</h3>
+          {{SHIELDS_LIST}}
+        </section>
+
+        <section class="print-section print-section-helmets count-{{HELMETS_COUNT}}">
+          <h3>Helmets</h3>
+          {{HELMETS_LIST}}
+        </section>
+
+        <section class="print-section print-section-gear count-{{GEAR_COUNT}}">
+          <h3>Gear</h3>
+          {{GEAR_LIST}}
+        </section>
+
+        <section class="print-section print-section-pack count-{{PACK_COUNT}}">
+          <h3>Pack</h3>
+          {{PACK_LIST}}
+        </section>
+      </div>
+
+      <footer class="print-card-footer">
+        <div class="print-card-meta">
+          <div class="print-meta-item">
+            <div class="print-meta-label">XP</div>
+            <div class="print-meta-value">{{EXPERIENCE}}</div>
+          </div>
+          <div class="print-meta-item">
+            <div class="print-meta-label">Armor</div>
+            <div class="print-meta-value">{{ARMOR_VALUE}}</div>
+          </div>
+          <div class="print-meta-item">
+            <div class="print-meta-label">Slots</div>
+            <div class="print-meta-value">{{SLOTS_USED}}/{{SLOTS_TOTAL}}</div>
+          </div>
+          <div class="print-meta-item">
+            <div class="print-meta-label">Gold</div>
+            <div class="print-meta-value">{{GOLD}} g</div>
+          </div>
+          <div class="print-meta-item print-meta-tragedies {{IS_MAGE}}">
+            <div class="print-meta-label">Tragedies</div>
+            <div class="print-meta-value">{{TRAGEDIES}}</div>
+          </div>
+        </div>
+      </footer>
+
+      <section class="print-section print-notes notes-length-{{NOTES_LENGTH}}">
         <h3>Notes</h3>
         <div class="print-notes-body">{{NOTES}}</div>
       </section>
