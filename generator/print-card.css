@@ -150,15 +150,9 @@ body {
   flex: 1;
 }
 
-.print-card-hp {
-  font-size: 1.4em;
-  font-weight: 700;
-  font-family: 'New Rocker', serif;
-  white-space: nowrap;
-}
-
-.print-card-hp span {
-  font-size: 0.7em;
+.print-card-stats {
+  display: flex;
+  gap: 0.25in;
 }
 
 .print-card-meta {
@@ -208,11 +202,33 @@ body {
   display: none;
 }
 
-.print-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.1in;
+.print-stats-row {
+  display: flex;
+  gap: 0.3in;
   font-size: 0.8em;
+}
+
+.print-stats-column {
+  display: flex;
+  flex-direction: row;
+  gap: 0.1in;
+  flex: 1;
+}
+
+.print-meta-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08in;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.print-meta-kv {
+  font-size: 0.9em;
+}
+
+.print-meta-kv strong {
+  font-family: 'New Rocker', serif;
 }
 
 .print-stat-item {
@@ -220,11 +236,12 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  flex: 1;
 }
 
 .print-stat-value {
   font-weight: 700;
-  font-size: 1.6em;
+  font-size: 2.2em;
   color: #000000;
   font-family: 'New Rocker', serif;
   margin-bottom: 0.02in;
@@ -274,11 +291,13 @@ body {
   margin: 0;
 }
 
+.print-list strong {
+  font-family: 'New Rocker', serif;
+}
+
 .print-description {
-  font-size: 0.9em;
-  color: #555555;
-  font-style: italic;
-  line-height: 1.3;
+  font-weight: normal;
+  color: #333333;
 }
 
 .print-empty {

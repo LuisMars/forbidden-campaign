@@ -130,7 +130,7 @@ function compilePrintCard(char, helpers) {
   // Lists for injection
   const feats = buildTraitLines(char.feats || [], 'feats', helpers);
   const flaws = buildTraitLines(char.flaws || [], 'flaws', helpers);
-  const scrolls = buildScrollLines(char, helpers);
+  const scrollData = buildScrollLines(char, helpers);
 
   const weapons = aggregateItemLines(resolveEntries(char.weapons, resolveItem), helpers);
   const armorGroups = resolveEquipmentGroups(char, helpers);
@@ -175,7 +175,8 @@ function compilePrintCard(char, helpers) {
     // Lists
     FEATS_LIST: renderItemList(feats, 'None'),
     FLAWS_LIST: renderItemList(flaws, 'None'),
-    SCROLLS_LIST: renderItemList(scrolls, isMage ? 'No scrolls recorded.' : 'None'),
+    CLEAN_SCROLLS_LIST: renderItemList(scrollData.clean, 'None'),
+    UNCLEAN_SCROLLS_LIST: renderItemList(scrollData.unclean, 'None'),
     WEAPONS_LIST: renderItemList(weapons, 'None'),
     ARMOR_LIST: renderItemList(armorGroups.armor, 'None'),
     SHIELDS_LIST: renderItemList(armorGroups.shields, 'None'),
@@ -186,7 +187,8 @@ function compilePrintCard(char, helpers) {
     // Individual counts for display
     FEATS_COUNT: feats.length,
     FLAWS_COUNT: flaws.length,
-    SCROLLS_COUNT: scrolls.length,
+    CLEAN_SCROLLS_COUNT: scrollData.clean.length,
+    UNCLEAN_SCROLLS_COUNT: scrollData.unclean.length,
     SHIELDS_COUNT: armorGroups.shields.length,
     HELMETS_COUNT: armorGroups.helms.length,
 
@@ -202,7 +204,7 @@ function renderItemList(items, emptyText) {
   }
   const listItems = items.map((item) => {
     if (typeof item === 'object' && item.name && item.description) {
-      return `<li><strong>${escapeHtml(item.name)}</strong><br><span class="print-description">${escapeHtml(item.description)}</span></li>`;
+      return `<li><strong>${escapeHtml(item.name)}:</strong> <span class="print-description">${escapeHtml(item.description)}</span></li>`;
     }
     return `<li>${escapeHtml(item)}</li>`;
   }).join('');
@@ -235,16 +237,15 @@ function buildTraitLines(traitNames, type, helpers) {
 }
 
 function buildScrollLines(char, helpers) {
-  const items = [];
   const scrollCounts = char.scrolls || {};
   const mageScrolls = char.mageScrolls || {};
 
-  // Add scroll counts if they exist
+  const cleanItems = [];
+  const uncleanItems = [];
+
+  // Add clean scroll count if it exists
   if (scrollCounts.clean > 0) {
-    items.push(`Clean Scrolls: ${scrollCounts.clean}`);
-  }
-  if (scrollCounts.unclean > 0) {
-    items.push(`Unclean Scrolls: ${scrollCounts.unclean}`);
+    cleanItems.push(`Clean Scrolls: ${scrollCounts.clean}`);
   }
 
   // Add individual clean spells
@@ -258,12 +259,17 @@ function buildScrollLines(char, helpers) {
       }
 
       if (scrollInfo && scrollInfo.description) {
-        items.push({ name: scrollInfo.name, description: scrollInfo.description });
+        cleanItems.push({ name: scrollInfo.name, description: scrollInfo.description });
       } else {
-        items.push(scrollName);
+        cleanItems.push(scrollName);
       }
     }
   });
+
+  // Add unclean scroll count if it exists
+  if (scrollCounts.unclean > 0) {
+    uncleanItems.push(`Unclean Scrolls: ${scrollCounts.unclean}`);
+  }
 
   // Add individual unclean spells
   const uncleanSpells = mageScrolls.unclean || [];
@@ -276,14 +282,14 @@ function buildScrollLines(char, helpers) {
       }
 
       if (scrollInfo && scrollInfo.description) {
-        items.push({ name: scrollInfo.name, description: scrollInfo.description });
+        uncleanItems.push({ name: scrollInfo.name, description: scrollInfo.description });
       } else {
-        items.push(scrollName);
+        uncleanItems.push(scrollName);
       }
     }
   });
 
-  return items;
+  return { clean: cleanItems, unclean: uncleanItems };
 }
 
 function resolveEntries(entries, resolveItem) {
@@ -348,12 +354,7 @@ function aggregateItemLines(items, helpers) {
     if (existing) {
       existing.count += 1;
     } else {
-      // Get description from traits field or summarizeItem helper
-      let description = item.traits || item.description || helpers.summarizeItem(item);
-      // Clean up description if it's just stats
-      if (description && description.includes('g,') && description.includes('slots')) {
-        description = item.traits || ''; // Prefer traits over stat summaries
-      }
+      let description = buildItemDescription(item);
 
       itemMap.set(key, {
         name: item.name,
@@ -373,6 +374,31 @@ function aggregateItemLines(items, helpers) {
     }
   });
   return lines;
+}
+
+function buildItemDescription(item) {
+  const parts = [];
+
+  // For weapons: show damage and attribute
+  if (item.type === 'weapon') {
+    if (item.dmg && item.attr) {
+      parts.push(`${item.dmg} ${item.attr}`);
+    } else if (item.dmg) {
+      parts.push(item.dmg);
+    }
+  }
+
+  // For armor: show armor value
+  if (item.type === 'armor' && item.armorVal > 0) {
+    parts.push(`Armor ${item.armorVal}`);
+  }
+
+  // Add traits if they exist
+  if (item.traits && item.traits.trim()) {
+    parts.push(item.traits.trim());
+  }
+
+  return parts.join('. ');
 }
 
 function describeItemForPrint(item, helpers) {
