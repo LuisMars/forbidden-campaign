@@ -402,6 +402,26 @@ function loadNameData() {
     });
 }
 
+function ensureNameData() {
+  return new Promise((resolve) => {
+    if (namesLoaded) {
+      resolve();
+    } else {
+      const checkLoaded = () => {
+        if (namesLoaded) {
+          resolve();
+        } else {
+          setTimeout(checkLoaded, 10);
+        }
+      };
+      if (!namesLoaded) {
+        loadNameData();
+      }
+      checkLoaded();
+    }
+  });
+}
+
 function loadState() {
   try {
     return JSON.parse(localStorage.getItem(STORE_KEY)) || null;
