@@ -16,11 +16,6 @@
   list-style: none;
 }
 
-@page {
-  size: A4 portrait;
-  margin: 0.5in;
-}
-
 body {
   background: #ffffff !important;
   color: #000000 !important;
@@ -156,10 +151,14 @@ body {
 }
 
 .print-card-hp {
-  font-size: 1.1em;
+  font-size: 1.4em;
   font-weight: 700;
   font-family: 'New Rocker', serif;
   white-space: nowrap;
+}
+
+.print-card-hp span {
+  font-size: 0.7em;
 }
 
 .print-card-meta {
@@ -223,20 +222,20 @@ body {
   text-align: center;
 }
 
+.print-stat-value {
+  font-weight: 700;
+  font-size: 1.6em;
+  color: #000000;
+  font-family: 'New Rocker', serif;
+  margin-bottom: 0.02in;
+}
+
 .print-stat-label {
-  font-size: 0.85em;
+  font-size: 0.7em;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #666666;
-  margin-bottom: 0.02in;
-  font-family: 'New Rocker', serif;
-}
-
-.print-stat-value {
-  font-weight: 700;
-  font-size: 1.1em;
-  color: #000000;
   font-family: 'New Rocker', serif;
 }
 
@@ -265,7 +264,7 @@ body {
 
 .print-list {
   margin: 0;
-  padding-left: 0.16in;
+  padding-left: 0;
   display: flex;
   flex-direction: column;
   gap: 0.04in;
@@ -317,7 +316,7 @@ body {
 
 .print-stash-list {
   margin: 0;
-  padding-left: 0.16in;
+  padding-left: 0;
   display: flex;
   flex-direction: column;
   gap: 0.04in;

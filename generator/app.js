@@ -2125,6 +2125,12 @@ function fillEditor(c) {
     slotsBadge.title = `Base ${slotsInfo.base}, Bonus ${slotsInfo.bonus}`;
   }
 
+  // Update movement: 5 + agility
+  const agility = Number(c.stats?.agi) || 0;
+  const movement = 5 + agility;
+  const movementEl = document.getElementById("edMovement");
+  if (movementEl) movementEl.textContent = movement;
+
   renderStatTemplate(c);
   ensureTraitArrays(c);
   renderTraitLists(c);
@@ -2511,6 +2517,7 @@ if (window.PrintModule) {
     charPoints,
     summarizeItem,
     getTraitData: () => traitData,
+    getScrollData: () => scrollData,
   };
   window.PrintModule.initializePrint(state, printHelpers);
 }

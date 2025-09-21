@@ -115,6 +115,9 @@ function compilePrintCard(char, helpers) {
   const strength = Number(stats.str) || 0;
   const toughness = Number(stats.tou) || 0;
 
+  // Calculate movement: 5 + agility
+  const movement = 5 + agility;
+
   // Meta information
   const experience = Number(char.experience || 0);
   const hp = Number(char.hp || 0);
@@ -140,6 +143,7 @@ function compilePrintCard(char, helpers) {
     NAME: safeName,
     EXPERIENCE: experience,
     HP: hp,
+    MOVEMENT: movement,
     ARMOR_VALUE: armor,
     GOLD: gold,
     IS_MAGE: isMage ? 'is-mage' : 'is-not-mage',
@@ -231,24 +235,55 @@ function buildTraitLines(traitNames, type, helpers) {
 }
 
 function buildScrollLines(char, helpers) {
-  const lines = [];
-  const scrolls = char.scrolls || {};
+  const items = [];
+  const scrollCounts = char.scrolls || {};
+  const mageScrolls = char.mageScrolls || {};
 
-  if (scrolls.clean > 0) {
-    lines.push(`Clean Scrolls: ${scrolls.clean}`);
+  // Add scroll counts if they exist
+  if (scrollCounts.clean > 0) {
+    items.push(`Clean Scrolls: ${scrollCounts.clean}`);
   }
-  if (scrolls.unclean > 0) {
-    lines.push(`Unclean Scrolls: ${scrolls.unclean}`);
+  if (scrollCounts.unclean > 0) {
+    items.push(`Unclean Scrolls: ${scrollCounts.unclean}`);
   }
 
-  const library = char.scrollLibrary || [];
-  library.forEach(scroll => {
-    if (scroll.name) {
-      lines.push(scroll.name);
+  // Add individual clean spells
+  const cleanSpells = mageScrolls.clean || [];
+  cleanSpells.forEach((scrollName) => {
+    if (scrollName && typeof scrollName === 'string') {
+      let scrollInfo = null;
+      if (helpers.getScrollData) {
+        const scrollData = helpers.getScrollData();
+        scrollInfo = scrollData.clean?.find(s => s.name === scrollName);
+      }
+
+      if (scrollInfo && scrollInfo.description) {
+        items.push({ name: scrollInfo.name, description: scrollInfo.description });
+      } else {
+        items.push(scrollName);
+      }
     }
   });
 
-  return lines;
+  // Add individual unclean spells
+  const uncleanSpells = mageScrolls.unclean || [];
+  uncleanSpells.forEach((scrollName) => {
+    if (scrollName && typeof scrollName === 'string') {
+      let scrollInfo = null;
+      if (helpers.getScrollData) {
+        const scrollData = helpers.getScrollData();
+        scrollInfo = scrollData.unclean?.find(s => s.name === scrollName);
+      }
+
+      if (scrollInfo && scrollInfo.description) {
+        items.push({ name: scrollInfo.name, description: scrollInfo.description });
+      } else {
+        items.push(scrollName);
+      }
+    }
+  });
+
+  return items;
 }
 
 function resolveEntries(entries, resolveItem) {
