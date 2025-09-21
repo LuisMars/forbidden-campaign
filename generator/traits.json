@@ -16,7 +16,10 @@
         "min": 5,
         "max": 8
       },
-      "description": "Suffers -1 to movement."
+      "description": "Suffers -1 to movement.",
+      "effects": {
+        "movementModifier": -1
+      }
     },
     {
       "id": "brittle-bones",
@@ -52,7 +55,12 @@
         "min": 21,
         "max": 24
       },
-      "description": "-1 to all Agility tests."
+      "description": "-1 to all Agility tests.",
+      "effects": {
+        "testModifiers": {
+          "agility": -1
+        }
+      }
     },
     {
       "id": "one-eyed",
@@ -61,7 +69,15 @@
         "min": 25,
         "max": 28
       },
-      "description": "-1 on all ranged attacks and all spells."
+      "description": "-1 on all ranged attacks and all spells.",
+      "effects": {
+        "weaponModifiers": {
+          "ranged": -1
+        },
+        "testModifiers": {
+          "spell": -1
+        }
+      }
     },
     {
       "id": "malnutrition",
@@ -70,7 +86,12 @@
         "min": 29,
         "max": 32
       },
-      "description": "-1 to all Strength tests."
+      "description": "-1 to all Strength tests.",
+      "effects": {
+        "testModifiers": {
+          "strength": -1
+        }
+      }
     },
     {
       "id": "scared-of-heights",
@@ -252,7 +273,15 @@
         "min": 9,
         "max": 12
       },
-      "description": "Model suffers -1 on all Morale tests but gains +1 Agility."
+      "description": "Model suffers -1 on all Morale tests but gains +1 Agility.",
+      "effects": {
+        "statModifiers": {
+          "agi": 1
+        },
+        "testModifiers": {
+          "morale": -1
+        }
+      }
     },
     {
       "id": "meathead",
@@ -261,7 +290,13 @@
         "min": 13,
         "max": 16
       },
-      "description": "+2 Strength and -1 Presence."
+      "description": "+2 Strength and -1 Presence.",
+      "effects": {
+        "statModifiers": {
+          "str": 2,
+          "pre": -1
+        }
+      }
     },
     {
       "id": "mind-over-matter",
@@ -315,7 +350,13 @@
         "min": 37,
         "max": 40
       },
-      "description": "+2 HP and -1 Agility."
+      "description": "+2 HP and -1 Agility.",
+      "effects": {
+        "statModifiers": {
+          "agi": -1
+        },
+        "hpModifier": 2
+      }
     },
     {
       "id": "marksman",
@@ -378,7 +419,13 @@
         "min": 65,
         "max": 68
       },
-      "description": "+1 Armor from tough skin but -1 Agility."
+      "description": "+1 Armor from tough skin but -1 Agility.",
+      "effects": {
+        "statModifiers": {
+          "agi": -1
+        },
+        "armorModifier": 1
+      }
     },
     {
       "id": "clawed-nails",
@@ -432,7 +479,10 @@
         "min": 89,
         "max": 92
       },
-      "description": "May reroll any one die roll per Scenario but has -1 Equipment slot."
+      "description": "May reroll any one die roll per Scenario but has -1 Equipment slot.",
+      "effects": {
+        "slotModifier": -1
+      }
     },
     {
       "id": "charge",

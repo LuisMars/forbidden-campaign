@@ -420,7 +420,7 @@ function normalizeState() {
   syncCatalogWithSeed();
   state.stash = Array.isArray(state.stash) ? state.stash : [];
   state.chars = Array.isArray(state.chars) ? state.chars : [];
-  state.settings = state.settings || { autoArmor: true };
+  state.settings = state.settings || {};
   const deprecatedIds = new Set([
     "armor-light",
     "armor-medium",
@@ -511,7 +511,7 @@ let state = loadState() || {
   stash: [],
   chars: [],
   selectedId: null,
-  settings: { autoArmor: true },
+  settings: {},
   catalogVersion: 0,
 };
 
@@ -558,8 +558,12 @@ function newCharacter(name) {
     isMage: false,
     tragedies: 0,
     mageScrolls: { clean: [], unclean: [] },
+    statTemplate: {
+      id: "setA",
+      assignments: {},
+      locked: false
+    }
   };
-  ensureStatTemplate(char, STAT_SETS[0].id);
   return char;
 }
 
@@ -596,12 +600,17 @@ function charPoints(c) {
 }
 
 function slotUsage(c) {
-  const base = Math.max(0, 5 + Number(c?.stats?.str || 0));
+  // Use effective strength for base slots calculation
+  const effectiveStats = getEffectiveStats(c);
+  const base = Math.max(0, 5 + effectiveStats.str);
+
   let bonus = 0;
   let used = 0;
   const all = [];
   if (Array.isArray(c.weapons)) all.push(...c.weapons);
   if (Array.isArray(c.equipment)) all.push(...c.equipment);
+
+  // Calculate equipment slot usage and bonuses
   for (const entry of all) {
     const item = resolveItem(entry.itemId);
     if (!item) continue;
@@ -610,6 +619,11 @@ function slotUsage(c) {
     const sb = Number(item.slotBonus || 0);
     if (Number.isFinite(sb)) bonus += sb;
   }
+
+  // Add trait-based slot modifiers
+  const traitModifiers = calculateTraitModifiers(c);
+  bonus += traitModifiers.slots;
+
   const total = Math.max(0, base + bonus);
   return { used, total, base, bonus };
 }
@@ -776,6 +790,26 @@ function renderStatTemplate(char) {
   const grid = el("statAssignmentGrid");
   if (!controls || !valuesContainer || !grid) return;
 
+  // Only auto-collapse if user hasn't manually opened it
+  const statTemplateBox = document.getElementById("statTemplateBox");
+  if (statTemplateBox) {
+    // Check if user has manually opened it (track via data attribute)
+    if (!statTemplateBox.hasAttribute('data-user-opened')) {
+      statTemplateBox.open = false;
+    }
+    // Add event listener to track when user manually opens/closes
+    if (!statTemplateBox.hasAttribute('data-listener-added')) {
+      statTemplateBox.addEventListener('toggle', () => {
+        if (statTemplateBox.open) {
+          statTemplateBox.setAttribute('data-user-opened', 'true');
+        } else {
+          statTemplateBox.removeAttribute('data-user-opened');
+        }
+      });
+      statTemplateBox.setAttribute('data-listener-added', 'true');
+    }
+  }
+
   controls.innerHTML = "";
   valuesContainer.innerHTML = "";
   grid.innerHTML = "";
@@ -800,7 +834,7 @@ function renderStatTemplate(char) {
   selectWrap.appendChild(presetSelect);
   controls.appendChild(selectWrap);
 
-  const activeId = (draft ? draft.id : template.id) || "";
+  const activeId = (draft ? draft.id : template.id) || "setA";
   presetSelect.value = activeId;
 
   presetSelect.onchange = (e) => {
@@ -827,12 +861,70 @@ function renderStatTemplate(char) {
 
   const effectiveId = draft ? draft.id : template.id;
   setStatInputsReadonly(!!effectiveId);
-  if (!effectiveId) {
-    const msg = document.createElement("div");
-    msg.className = "muted small";
-    msg.textContent =
-      "Custom distribution active. Edit the stat values directly above.";
-    valuesContainer.appendChild(msg);
+
+  // Only show custom inputs when explicitly in Custom mode (no preset selected)
+  const isCustomMode = !effectiveId && template.id === null;
+  if (isCustomMode) {
+    // Custom mode - show editable inputs for direct stat editing
+    const customInputs = document.createElement("div");
+    customInputs.className = "custom-stat-inputs";
+
+    const title = document.createElement("h4");
+    title.textContent = "Custom Attributes";
+    title.className = "custom-title";
+    customInputs.appendChild(title);
+
+    const inputGrid = document.createElement("div");
+    inputGrid.className = "custom-input-grid";
+
+    STAT_KEYS.forEach(({ key, label }) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "custom-input-wrapper";
+
+      const labelEl = document.createElement("label");
+      labelEl.textContent = label;
+      labelEl.className = "custom-input-label";
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = -5;
+      input.max = 5;
+      input.step = 1;
+      input.className = "custom-stat-input";
+      input.value = char.stats?.[key] || 0;
+
+      input.addEventListener("change", () => {
+        const val = Number(input.value);
+        if (Number.isFinite(val)) {
+          char.stats = char.stats || {};
+          char.stats[key] = val;
+          saveState();
+          // Update the display in the main stats section
+          const effectiveStats = getEffectiveStats(char);
+          el(`ed${key.charAt(0).toUpperCase() + key.slice(1)}`).textContent = formatStatValue(effectiveStats[key]);
+          // Update movement if agility changed
+          if (key === 'agi') {
+            const movementEl = document.getElementById("edMovement");
+            if (movementEl) movementEl.textContent = getEffectiveMovement(char);
+          }
+          // Update other dependent values
+          render();
+        }
+      });
+
+      wrapper.appendChild(labelEl);
+      wrapper.appendChild(input);
+      inputGrid.appendChild(wrapper);
+    });
+
+    customInputs.appendChild(inputGrid);
+
+    const helpText = document.createElement("div");
+    helpText.className = "muted small";
+    helpText.textContent = "Direct attribute editing. Values range from -5 to +5.";
+    customInputs.appendChild(helpText);
+
+    valuesContainer.appendChild(customInputs);
     return;
   }
 
@@ -1041,6 +1133,163 @@ function ensureTraitArrays(char) {
   if (!Array.isArray(char.flaws)) char.flaws = [];
 }
 
+// =====================
+// Trait Effect System
+// =====================
+
+function getTraitByName(traitName, type) {
+  const traits = traitData?.[type] || [];
+  return traits.find(t => t.name.toLowerCase() === traitName.toLowerCase()) || null;
+}
+
+function getAllCharacterTraits(char) {
+  ensureTraitArrays(char);
+  const allTraits = [];
+
+  // Add feats
+  if (char.feats) {
+    char.feats.forEach(featName => {
+      const trait = getTraitByName(featName, 'feats');
+      if (trait) allTraits.push(trait);
+    });
+  }
+
+  // Add flaws
+  if (char.flaws) {
+    char.flaws.forEach(flawName => {
+      const trait = getTraitByName(flawName, 'flaws');
+      if (trait) allTraits.push(trait);
+    });
+  }
+
+  return allTraits;
+}
+
+function calculateTraitModifiers(char, context = {}) {
+  const traits = getAllCharacterTraits(char);
+  const modifiers = {
+    stats: { agi: 0, pre: 0, str: 0, tou: 0 },
+    movement: 0,
+    armor: 0,
+    hp: 0,
+    slots: 0,
+    weaponModifiers: {},
+    testModifiers: {}
+  };
+
+  traits.forEach(trait => {
+    if (!trait.effects) return;
+
+    // Apply stat modifiers
+    if (trait.effects.statModifiers) {
+      Object.entries(trait.effects.statModifiers).forEach(([stat, value]) => {
+        if (modifiers.stats.hasOwnProperty(stat)) {
+          modifiers.stats[stat] += value;
+        }
+      });
+    }
+
+    // Apply other modifiers
+    if (trait.effects.movementModifier) {
+      modifiers.movement += trait.effects.movementModifier;
+    }
+    if (trait.effects.armorModifier) {
+      modifiers.armor += trait.effects.armorModifier;
+    }
+    if (trait.effects.hpModifier) {
+      modifiers.hp += trait.effects.hpModifier;
+    }
+    if (trait.effects.slotModifier) {
+      modifiers.slots += trait.effects.slotModifier;
+    }
+
+    // Apply weapon modifiers
+    if (trait.effects.weaponModifiers) {
+      Object.entries(trait.effects.weaponModifiers).forEach(([weaponType, value]) => {
+        modifiers.weaponModifiers[weaponType] = (modifiers.weaponModifiers[weaponType] || 0) + value;
+      });
+    }
+
+    // Apply test modifiers
+    if (trait.effects.testModifiers) {
+      Object.entries(trait.effects.testModifiers).forEach(([testType, value]) => {
+        modifiers.testModifiers[testType] = (modifiers.testModifiers[testType] || 0) + value;
+      });
+    }
+  });
+
+  return modifiers;
+}
+
+function getEffectiveStats(char, context = {}) {
+  if (!char || !char.stats) return { agi: 0, pre: 0, str: 0, tou: 0 };
+
+  const base = char.stats;
+  const modifiers = calculateTraitModifiers(char, context);
+
+  return {
+    agi: (base.agi || 0) + modifiers.stats.agi,
+    pre: (base.pre || 0) + modifiers.stats.pre,
+    str: (base.str || 0) + modifiers.stats.str,
+    tou: (base.tou || 0) + modifiers.stats.tou
+  };
+}
+
+function getEffectiveMovement(char) {
+  if (!char || !char.stats) return 5;
+
+  const baseMovement = 5 + (char.stats.agi || 0);
+  const modifiers = calculateTraitModifiers(char);
+
+  return Math.max(0, baseMovement + modifiers.movement);
+}
+
+function getEffectiveArmor(char) {
+  if (!char) return 0;
+
+  const baseArmor = char.armor || 0;
+  const modifiers = calculateTraitModifiers(char);
+
+  return Math.max(0, baseArmor + modifiers.armor);
+}
+
+function getEffectiveHP(char) {
+  if (!char) return 0;
+
+  const baseHP = char.hp || 0;
+  const modifiers = calculateTraitModifiers(char);
+
+  return Math.max(1, baseHP + modifiers.hp);
+}
+
+function getWeaponModifier(char, weapon, context = {}) {
+  if (!weapon) return 0;
+
+  const modifiers = calculateTraitModifiers(char, context);
+  let totalModifier = 0;
+
+  // Check weapon type modifiers
+  if (weapon.weaponType && modifiers.weaponModifiers[weapon.weaponType]) {
+    totalModifier += modifiers.weaponModifiers[weapon.weaponType];
+  }
+
+  // Check test type modifiers if weapon has test types
+  if (weapon.testTypes && Array.isArray(weapon.testTypes)) {
+    weapon.testTypes.forEach(testType => {
+      if (modifiers.testModifiers[testType]) {
+        totalModifier += modifiers.testModifiers[testType];
+      }
+    });
+  }
+
+  return totalModifier;
+}
+
+function getTestModifier(char, testType, context = {}) {
+  const modifiers = calculateTraitModifiers(char, context);
+  return modifiers.testModifiers[testType] || 0;
+}
+
 function updateTraitDetails(targetId, trait) {
   const target = el(targetId);
   if (!target) return;
@@ -1048,11 +1297,63 @@ function updateTraitDetails(targetId, trait) {
     target.textContent = "";
     return;
   }
-  const rangeText = `${trait.range.min}-${trait.range.max}`;
   const desc = trait.description
     ? trait.description
     : "No description provided.";
-  target.textContent = `Roll ${rangeText}: ${desc}`;
+  target.textContent = desc;
+}
+
+function updateWeaponDetails(targetId, weapon) {
+  const target = el(targetId);
+  if (!target) return;
+  if (!weapon) {
+    target.textContent = "";
+    return;
+  }
+
+  const parts = [];
+  if (weapon.dmg && weapon.attr) {
+    parts.push(`${weapon.dmg} ${weapon.attr}`);
+  }
+  if (weapon.cost) {
+    parts.push(`${weapon.cost}g`);
+  }
+  if (weapon.slots) {
+    parts.push(`${weapon.slots} slot${weapon.slots > 1 ? 's' : ''}`);
+  }
+  if (weapon.traits && weapon.traits.trim()) {
+    parts.push(weapon.traits);
+  }
+
+  target.textContent = parts.join(' • ');
+}
+
+function updateEquipmentDetails(targetId, equipment) {
+  const target = el(targetId);
+  if (!target) return;
+  if (!equipment) {
+    target.textContent = "";
+    return;
+  }
+
+  const parts = [];
+  if (equipment.armorVal > 0) {
+    parts.push(`Armor ${equipment.armorVal}`);
+  }
+  if (equipment.cost) {
+    parts.push(`${equipment.cost}g`);
+  }
+  if (equipment.slots) {
+    parts.push(`${equipment.slots} slot${equipment.slots > 1 ? 's' : ''}`);
+  }
+  if (equipment.slotBonus > 0) {
+    parts.push(`+${equipment.slotBonus} bonus slots`);
+  }
+  if (equipment.traits && equipment.traits.trim()) {
+    parts.push(equipment.traits);
+  }
+
+  target.textContent = parts.join(' • ');
 }
 
 function applyTrait(type, trait) {
@@ -1118,12 +1419,6 @@ function renderTraitLists(char) {
         (traitData?.[type] || []).find(
           (t) => t.name.toLowerCase() === name.toLowerCase()
         ) || null;
-      if (trait && trait.range) {
-        const rangeTag = document.createElement("span");
-        rangeTag.className = "tag";
-        rangeTag.textContent = `${trait.range.min}-${trait.range.max}`;
-        header.appendChild(rangeTag);
-      }
 
       const removeBtn = document.createElement("button");
       removeBtn.className = "ghost";
@@ -1280,10 +1575,7 @@ function updateScrollDetails(targetId, scroll) {
     target.textContent = "";
     return;
   }
-  const rangeText = `${scroll.range.min}-${scroll.range.max}`;
-  target.textContent = `Roll ${rangeText}: ${
-    scroll.description || "No description provided."
-  }`;
+  target.textContent = scroll.description || "No description provided.";
 }
 
 function applyScroll(type, scroll) {
@@ -1352,12 +1644,6 @@ function renderScrollLists(char) {
         (scrollData?.[type] || []).find(
           (s) => s.name.toLowerCase() === name.toLowerCase()
         ) || null;
-      if (scroll) {
-        const rangeTag = document.createElement("span");
-        rangeTag.className = "tag";
-        rangeTag.textContent = `${scroll.range.min}-${scroll.range.max}`;
-        header.appendChild(rangeTag);
-      }
 
       const removeBtn = document.createElement("button");
       removeBtn.className = "ghost";
@@ -1826,6 +2112,11 @@ function render() {
       slotUsage,
       charPoints,
       summarizeItem,
+      getEffectiveStats,
+      getEffectiveMovement,
+      getEffectiveArmor,
+      getEffectiveHP,
+      calculateTraitModifiers,
     };
     window.PrintModule.renderPrintRoster(state, printHelpers);
   }
@@ -1979,6 +2270,16 @@ function setWeaponOptions(sel, weapons) {
     addSectionHeader("Two-Handed Melee");
     addWeapons(twoHanded);
   }
+
+  // Add change event listener for weapon preview
+  if (!sel.dataset.weaponPreviewBound) {
+    sel.addEventListener("change", () => {
+      const weaponId = sel.value;
+      const weapon = weaponId ? resolveItem(weaponId) : null;
+      updateWeaponDetails("weaponDetails", weapon);
+    });
+    sel.dataset.weaponPreviewBound = "true";
+  }
 }
 
 function setEquipmentOptions(sel, equipment) {
@@ -2057,22 +2358,30 @@ function setEquipmentOptions(sel, equipment) {
     addSectionHeader("Utility");
     addItems(utility);
   }
+
+  // Add change event listener for equipment preview
+  if (!sel.dataset.equipmentPreviewBound) {
+    sel.addEventListener("change", () => {
+      const equipmentId = sel.value;
+      const equipment = equipmentId ? resolveItem(equipmentId) : null;
+      updateEquipmentDetails("equipmentDetails", equipment);
+    });
+    sel.dataset.equipmentPreviewBound = "true";
+  }
 }
 
 function fillEditor(c) {
-  // Auto-derive armor if enabled
-  if (state.settings && state.settings.autoArmor) {
-    const av = (function () {
-      let maxAv = 0;
-      for (const e of c.equipment || []) {
-        const it = resolveItem(e.itemId);
-        if (it && it.type === "armor" && (it.armorVal || 0) > maxAv)
-          maxAv = it.armorVal || 0;
-      }
-      return maxAv;
-    })();
-    c.armor = av;
-  }
+  // Auto-derive armor from equipment (always enabled now)
+  const av = (function () {
+    let maxAv = 0;
+    for (const e of c.equipment || []) {
+      const it = resolveItem(e.itemId);
+      if (it && it.type === "armor" && (it.armorVal || 0) > maxAv)
+        maxAv = it.armorVal || 0;
+    }
+    return maxAv;
+  })();
+  c.armor = av;
   el("edName").value = c.name || "";
   const mageToggle = el("isMageToggle");
   if (mageToggle) {
@@ -2089,33 +2398,20 @@ function fillEditor(c) {
     xpInput.value = Number(c.experience || 0);
     xpInput.disabled = false;
   }
-  const tragediesLabel = el("tragediesLabel");
-  if (tragediesLabel) {
-    tragediesLabel.style.display = c.isMage ? "" : "none";
+  const tragediesGroup = el("tragediesGroup");
+  if (tragediesGroup) {
+    tragediesGroup.style.display = c.isMage ? "" : "none";
   }
-  el("edArmor").value = c.armor || 0;
-  el("edHP").value = c.hp || 0;
-  const showStat = (key) => {
-    // If using a preset and this stat is Unset, display blank in the input
-    if (
-      c.statTemplate &&
-      c.statTemplate.id &&
-      (c.statTemplate.assignments?.[key] == null ||
-        !Number.isFinite(Number(c.statTemplate.assignments[key])))
-    ) {
-      return "";
-    }
-    const v = Number(c.stats?.[key]);
-    return Number.isFinite(v) ? v : "";
-  };
-  el("edAgi").value = showStat("agi");
-  el("edPre").value = showStat("pre");
-  el("edStr").value = showStat("str");
-  el("edTou").value = showStat("tou");
+  el("edArmor").textContent = getEffectiveArmor(c);
+  el("edHP").textContent = getEffectiveHP(c);
+  // Always show effective stats in the display elements
+  const effectiveStats = getEffectiveStats(c);
+  el("edAgi").textContent = formatStatValue(effectiveStats.agi);
+  el("edPre").textContent = formatStatValue(effectiveStats.pre);
+  el("edStr").textContent = formatStatValue(effectiveStats.str);
+  el("edTou").textContent = formatStatValue(effectiveStats.tou);
   el("edNotes").value = c.notes || "";
   el("edPoints").textContent = charPoints(c);
-  const autoCb = document.getElementById("autoArmor");
-  if (autoCb) autoCb.checked = !!(state.settings && state.settings.autoArmor);
   const slotsInfo = slotUsage(c);
   const slotsEl = document.getElementById("edSlots");
   if (slotsEl) slotsEl.textContent = `${slotsInfo.used}/${slotsInfo.total}`;
@@ -2125,11 +2421,11 @@ function fillEditor(c) {
     slotsBadge.title = `Base ${slotsInfo.base}, Bonus ${slotsInfo.bonus}`;
   }
 
-  // Update movement: 5 + agility
-  const agility = Number(c.stats?.agi) || 0;
-  const movement = 5 + agility;
+
+  // Update movement using effective stats
+  const effectiveMovement = getEffectiveMovement(c);
   const movementEl = document.getElementById("edMovement");
-  if (movementEl) movementEl.textContent = movement;
+  if (movementEl) movementEl.textContent = effectiveMovement;
 
   renderStatTemplate(c);
   ensureTraitArrays(c);
@@ -2159,10 +2455,11 @@ function fillEditor(c) {
       )} · ${it.cost} g</span>`;
       const rm = document.createElement("button");
       rm.className = "ghost";
-      rm.textContent = "Remove";
+      rm.textContent = "Unequip";
       rm.onclick = () => {
         c.weapons.splice(idx, 1);
-        addToStash(it.id, 1);
+        ensurePackArray(c);
+        c.pack.push(it.id);
         saveState();
       };
       row.appendChild(rm);
@@ -2290,6 +2587,22 @@ if (randWbNameBtn) {
   };
 }
 
+const randCharNameBtn = el("randCharName");
+if (randCharNameBtn) {
+  randCharNameBtn.onclick = () => {
+    const char = getSelectedChar();
+    if (!char) return;
+    ensureNameData().then(() => {
+      const name = randomName();
+      const input = el("edName");
+      if (input) input.value = name;
+      char.name = name;
+      fillCharList();
+      saveState();
+    });
+  };
+}
+
 const addCharBtn = el("addChar");
 if (addCharBtn) {
   addCharBtn.onclick = () => {
@@ -2390,12 +2703,6 @@ if (tragediesCtrl) {
   });
 }
 
-// Auto armor toggle
-document.getElementById("autoArmor").addEventListener("change", (e) => {
-  state.settings = state.settings || {};
-  state.settings.autoArmor = !!e.target.checked;
-  saveState();
-});
 
 // Add weapons/equipment from selects
 el("addWeaponBtn").onclick = () => {
@@ -2457,7 +2764,7 @@ el("clearAll").onclick = () => {
     stash: [],
     chars: [],
     selectedId: null,
-    settings: { autoArmor: true },
+    settings: {},
     catalogVersion: 0,
   };
   normalizeState();
@@ -2518,6 +2825,11 @@ if (window.PrintModule) {
     summarizeItem,
     getTraitData: () => traitData,
     getScrollData: () => scrollData,
+    getEffectiveStats,
+    getEffectiveMovement,
+    getEffectiveArmor,
+    getEffectiveHP,
+    calculateTraitModifiers,
   };
   window.PrintModule.initializePrint(state, printHelpers);
 }

@@ -108,20 +108,20 @@ function compilePrintCard(char, helpers) {
 
   const safeName = escapeHtml((char.name || '').trim() || '(unnamed)');
 
-  // Individual stat values for injection
-  const stats = char?.stats || {};
-  const agility = Number(stats.agi) || 0;
-  const presence = Number(stats.pre) || 0;
-  const strength = Number(stats.str) || 0;
-  const toughness = Number(stats.tou) || 0;
+  // Use effective stats that include trait modifiers
+  const effectiveStats = helpers.getEffectiveStats ? helpers.getEffectiveStats(char) : char?.stats || {};
+  const agility = Number(effectiveStats.agi) || 0;
+  const presence = Number(effectiveStats.pre) || 0;
+  const strength = Number(effectiveStats.str) || 0;
+  const toughness = Number(effectiveStats.tou) || 0;
 
-  // Calculate movement: 5 + agility
-  const movement = 5 + agility;
+  // Use effective movement calculation
+  const movement = helpers.getEffectiveMovement ? helpers.getEffectiveMovement(char) : (5 + agility);
 
-  // Meta information
+  // Meta information using effective values where available
   const experience = Number(char.experience || 0);
-  const hp = Number(char.hp || 0);
-  const armor = Number(char.armor || 0);
+  const hp = helpers.getEffectiveHP ? helpers.getEffectiveHP(char) : Number(char.hp || 0);
+  const armor = helpers.getEffectiveArmor ? helpers.getEffectiveArmor(char) : Number(char.armor || 0);
   const slots = slotUsage(char);
   const gold = charPoints(char);
   const isMage = !!char.isMage;

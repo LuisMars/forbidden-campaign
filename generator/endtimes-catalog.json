@@ -88,7 +88,10 @@
     "cost": 15,
     "slots": 1,
     "type": "weapon",
-    "id": "flintlock-pistol"
+    "id": "flintlock-pistol",
+    "weaponType": "ranged",
+    "testTypes": ["ranged", "shooting"],
+    "range": "12\""
   },
   {
     "name": "Sling",
@@ -98,7 +101,10 @@
     "cost": 1,
     "slots": 1,
     "type": "weapon",
-    "id": "sling"
+    "id": "sling",
+    "weaponType": "ranged",
+    "testTypes": ["ranged", "shooting"],
+    "range": "9\""
   },
   {
     "name": "Musket",
@@ -108,7 +114,10 @@
     "cost": 20,
     "slots": 2,
     "type": "weapon",
-    "id": "musket"
+    "id": "musket",
+    "weaponType": "ranged",
+    "testTypes": ["ranged", "shooting"],
+    "range": "24\""
   },
   {
     "name": "Cannon",
@@ -118,7 +127,10 @@
     "cost": 100,
     "slots": 2,
     "type": "weapon",
-    "id": "cannon"
+    "id": "cannon",
+    "weaponType": "ranged",
+    "testTypes": ["ranged", "artillery"],
+    "range": "36\""
   },
   {
     "name": "Crossbow",
@@ -128,7 +140,10 @@
     "cost": 8,
     "slots": 2,
     "type": "weapon",
-    "id": "crossbow"
+    "id": "crossbow",
+    "weaponType": "ranged",
+    "testTypes": ["ranged", "shooting"],
+    "range": "18\""
   },
   {
     "name": "Bow",
@@ -138,7 +153,10 @@
     "cost": 5,
     "slots": 2,
     "type": "weapon",
-    "id": "bow"
+    "id": "bow",
+    "weaponType": "ranged",
+    "testTypes": ["ranged", "shooting"],
+    "range": "15\""
   },
   {
     "name": "One-Handed Makeshift Melee Weapon",
@@ -168,7 +186,9 @@
     "cost": 2,
     "slots": 1,
     "type": "weapon",
-    "id": "shortsword"
+    "id": "shortsword",
+    "weaponType": "melee",
+    "testTypes": ["melee"]
   },
   {
     "name": "Dagger",
@@ -178,7 +198,9 @@
     "cost": 1,
     "slots": 1,
     "type": "weapon",
-    "id": "dagger"
+    "id": "dagger",
+    "weaponType": "melee",
+    "testTypes": ["melee", "thrown"]
   },
   {
     "name": "Hand Axe",
@@ -188,7 +210,9 @@
     "cost": 3,
     "slots": 1,
     "type": "weapon",
-    "id": "hand-axe"
+    "id": "hand-axe",
+    "weaponType": "melee",
+    "testTypes": ["melee", "thrown"]
   },
   {
     "name": "Ulfberht Sword",
@@ -258,7 +282,10 @@
     "cost": 3,
     "slots": 1,
     "type": "weapon",
-    "id": "net"
+    "id": "net",
+    "weaponType": "thrown",
+    "testTypes": ["thrown"],
+    "range": "9\""
   },
   {
     "name": "Warhammer",
@@ -278,7 +305,9 @@
     "cost": 3,
     "slots": 1,
     "type": "weapon",
-    "id": "sword"
+    "id": "sword",
+    "weaponType": "melee",
+    "testTypes": ["melee"]
   },
   {
     "name": "Rapier",
@@ -358,7 +387,10 @@
     "cost": 6,
     "slots": 1,
     "type": "weapon",
-    "id": "unholy-hand-grenades-of-apameia"
+    "id": "unholy-hand-grenades-of-apameia",
+    "weaponType": "thrown",
+    "testTypes": ["thrown", "explosive"],
+    "range": "6\""
   },
   {
     "name": "Bag o' Rats",

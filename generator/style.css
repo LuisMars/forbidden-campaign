@@ -541,3 +541,446 @@ button.char-card-name:focus-visible {
     display: block !important;
   }
 }
+
+/* =====================
+   Enhanced Character Editor
+   ===================== */
+
+.editor-card {
+  position: relative;
+  min-height: 400px;
+}
+
+/* Empty State */
+.editor-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  min-height: 350px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.editor-empty h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25em;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.editor-empty p {
+  margin: 0;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+/* Character Header */
+.editor-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.character-identity {
+  flex: 1;
+  min-width: 200px;
+}
+
+.name-section {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.character-name-input {
+  flex: 1;
+  font-size: 1.4em;
+  font-weight: 600;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.random-name-btn {
+  padding: 12px 16px;
+  background: var(--button-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.random-name-btn:hover {
+  background: var(--button-secondary-hover);
+  border-color: var(--accent);
+}
+
+.character-name-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.character-name-input::placeholder {
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.character-type {
+  margin-top: 8px;
+}
+
+.type-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.type-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.type-toggle input[type="checkbox"] {
+  margin: 0;
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.toggle-cost {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.character-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.stat-grid-item {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+.tragedies-item {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.progress-item label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-input {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 500;
+}
+
+.experience-input {
+  width: 100px;
+  font-size: 1.2em;
+  padding: 12px 16px;
+}
+
+/* Editor Sections */
+.editor-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Stats Display */
+.stats-display {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Attributes Row - First Priority */
+.attribute-stats {
+  display: flex;
+  gap: 16px;
+  justify-content: space-around;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.attribute {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 70px;
+}
+
+.attribute-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Combat Stats Row - Second Priority */
+.combat-stats {
+  display: flex;
+  gap: 20px;
+  justify-content: space-around;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 80px;
+}
+
+.stat-value {
+  font-size: 2.4em;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'New Rocker', serif;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attribute-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1em;
+  min-width: 60px;
+}
+
+.attribute-input:read-only {
+  background: rgba(255, 255, 255, 0.02);
+  cursor: default;
+}
+
+.attribute-display {
+  font-size: 2.4em;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'New Rocker', serif;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.resource-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 140px;
+}
+
+.resource-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.resource-item.warn {
+  border-color: var(--danger);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.resource-label {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resource-value {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'New Rocker', serif;
+}
+
+.resource-value.gold {
+  color: #fbbf24;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .column-left,
+  .column-right {
+    flex: 1 1 100%;
+    min-width: unset;
+    width: 100%;
+  }
+
+  .editor-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .name-section {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .character-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-grid-item {
+    min-height: auto;
+  }
+
+  .tragedies-item {
+    margin-top: 4px;
+  }
+
+  .attribute-stats {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .combat-stats {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .attribute {
+    min-width: 60px;
+  }
+}
+
+/* Custom stat inputs in stat template */
+.custom-stat-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.custom-title {
+  margin: 0;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.custom-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.custom-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-input-label {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.custom-stat-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-primary);
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1em;
+  transition: border-color 0.2s ease;
+}
+
+.custom-stat-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}

@@ -104,92 +104,63 @@
 
         <div class="column-right">
           <!-- Character Editor -->
-          <section class="card" id="editorCard">
-            <h2>Character Editor</h2>
-            <div id="noSelection" class="muted">
-              Select a character to edit.
+          <section class="card editor-card" id="editorCard">
+            <div id="noSelection" class="editor-empty">
+              <div class="empty-icon">⚔️</div>
+              <h3>No Character Selected</h3>
+              <p>Select a character from your warband to edit their details, stats, and equipment.</p>
             </div>
             <div id="editor" style="display: none">
-              <div class="row">
-                <input id="edName" type="text" placeholder="Name" />
-                <label class="pill" style="gap: 6px"
-                  ><input type="checkbox" id="isMageToggle" />
-                  <span class="small">Spellcaster (5 g)</span></label
-                >
-                <label class="pill" id="tragediesLabel" style="display: none"
-                  >Tragedies
-                  <input id="edTragedies" type="number" min="0" step="1"
-                /></label>
-                <label class="pill"
-                  >Experience <input id="edXP" type="number" min="0" step="1"
-                /></label>
-                <label class="pill"
-                  >Armor <input id="edArmor" type="number" step="1" min="0"
-                /></label>
-                <label class="pill" style="gap: 6px"
-                  ><input type="checkbox" id="autoArmor" checked /><span
-                    class="small"
-                    >Auto from equipment</span
-                  ></label
-                >
-                <label class="pill"
-                  >HP <input id="edHP" type="number" step="1" min="1"
-                /></label>
-                <span class="badge nowrap" id="edSlotsBadge"
-                  >Slots <span id="edSlots">0/0</span></span
-                >
-                <span class="badge nowrap"
-                  >Movement <span id="edMovement">5</span></span
-                >
-                <span class="badge nowrap"
-                  >Gold <span id="edPoints">0</span></span
-                >
+              <!-- Character Header -->
+              <div class="editor-header">
+                <div class="character-identity">
+                  <div class="name-section">
+                    <input id="edName" type="text" placeholder="Character Name" class="character-name-input" />
+                    <button id="randCharName" type="button" class="random-name-btn" title="Generate random character name">Random</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Character Stats Panel -->
+              <div class="editor-section">
+                <h3 class="section-title">Combat Stats</h3>
+                <div class="stats-display">
+                  <div class="attribute-stats">
+                    <div class="attribute">
+                      <div class="attribute-display" id="edAgi">0</div>
+                      <div class="attribute-label">AGI</div>
+                    </div>
+                    <div class="attribute">
+                      <div class="attribute-display" id="edPre">0</div>
+                      <div class="attribute-label">PRE</div>
+                    </div>
+                    <div class="attribute">
+                      <div class="attribute-display" id="edStr">0</div>
+                      <div class="attribute-label">STR</div>
+                    </div>
+                    <div class="attribute">
+                      <div class="attribute-display" id="edTou">0</div>
+                      <div class="attribute-label">TOU</div>
+                    </div>
+                  </div>
+                  <div class="combat-stats">
+                    <div class="stat-item">
+                      <div class="stat-value" id="edHP">0</div>
+                      <div class="stat-label">HP</div>
+                    </div>
+                    <div class="stat-item">
+                      <div class="stat-value" id="edArmor">0</div>
+                      <div class="stat-label">Armor</div>
+                    </div>
+                    <div class="stat-item">
+                      <div class="stat-value" id="edMovement">5</div>
+                      <div class="stat-label">Movement</div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="sep"></div>
-              <div class="stat-grid">
-                <label class="pill"
-                  >Agi
-                  <input
-                    id="edAgi"
-                    type="number"
-                    step="1"
-                    min="-5"
-                    max="5"
-                    readonly
-                /></label>
-                <label class="pill"
-                  >Pre
-                  <input
-                    id="edPre"
-                    type="number"
-                    step="1"
-                    min="-5"
-                    max="5"
-                    readonly
-                /></label>
-                <label class="pill"
-                  >Str
-                  <input
-                    id="edStr"
-                    type="number"
-                    step="1"
-                    min="-5"
-                    max="5"
-                    readonly
-                /></label>
-                <label class="pill"
-                  >Tou
-                  <input
-                    id="edTou"
-                    type="number"
-                    step="1"
-                    min="-5"
-                    max="5"
-                    readonly
-                /></label>
-              </div>
-              <div class="sep"></div>
-              <details id="statTemplateBox" class="stat-template-panel" open>
+              <details id="statTemplateBox" class="stat-template-panel">
                 <summary class="collapsible-summary">
                   <span class="summary-caret" aria-hidden="true"></span
                   ><span>Stat Template</span>
@@ -204,6 +175,43 @@
                 </div>
               </details>
               <div class="sep"></div>
+
+              <!-- Character Progress Grid -->
+              <div class="character-stats-grid">
+                <div class="stat-grid-item">
+                  <div class="character-type">
+                    <label class="type-toggle">
+                      <input type="checkbox" id="isMageToggle" />
+                      <span class="toggle-label">Spellcaster</span>
+                      <span class="toggle-cost">(+5g)</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="stat-grid-item">
+                  <div class="progress-item">
+                    <label>Experience</label>
+                    <input id="edXP" type="number" min="0" step="1" class="progress-input experience-input" />
+                  </div>
+                </div>
+                <div class="stat-grid-item">
+                  <div class="resource-item" id="edSlotsBadge">
+                    <span class="resource-label">Equipment Slots</span>
+                    <span class="resource-value" id="edSlots">0/0</span>
+                  </div>
+                </div>
+                <div class="stat-grid-item">
+                  <div class="resource-item">
+                    <span class="resource-label">Total Cost</span>
+                    <span class="resource-value gold" id="edPoints">0g</span>
+                  </div>
+                </div>
+                <div class="progress-item tragedies-item" id="tragediesGroup" style="display: none">
+                  <label>Tragedies</label>
+                  <input id="edTragedies" type="number" min="0" step="1" class="progress-input" />
+                </div>
+              </div>
+              <div class="sep"></div>
+
               <div class="grid2">
                 <div>
                   <h3>Feats</h3>
@@ -239,6 +247,7 @@
                     <select id="addWeaponSel"></select>
                     <button id="addWeaponBtn">Add</button>
                   </div>
+                  <div id="weaponDetails" class="muted small"></div>
                 </div>
                 <div>
                   <h3>Armor</h3>
@@ -253,6 +262,7 @@
                     <select id="addEquipSel"></select>
                     <button id="addEquipBtn">Add</button>
                   </div>
+                  <div id="equipmentDetails" class="muted small"></div>
                 </div>
               </div>
               <div class="sep"></div>
