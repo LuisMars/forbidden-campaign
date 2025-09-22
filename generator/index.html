@@ -28,64 +28,70 @@
         <div class="column-left">
           <!-- Left: Warband + Stash -->
           <section class="card" id="warbandCard">
-            <h2>Warband</h2>
-            <div class="row warband-row">
-              <input
-                id="wbName"
-                type="text"
-                class="warband-input"
-                placeholder="Warband name"
-              />
-              <button
-                id="randWbName"
-                type="button"
-                class="ghost warband-rand"
-                title="Generate a random warband name"
-              >
-                Random name
-              </button>
-            </div>
-            <div class="row">
-              <div class="pill">
-                Warband Gold: <strong id="wbGold">50 g</strong>
+            <header class="warband-header">
+              <h2>Warband</h2>
+              <div class="warband-name-section">
+                <input
+                  id="wbName"
+                  type="text"
+                  class="warband-name-input"
+                  placeholder="Enter warband name"
+                />
+                <button
+                  id="randWbName"
+                  type="button"
+                  class="ghost"
+                  title="Generate a random warband name"
+                >
+                  Random
+                </button>
               </div>
-              <button id="addGoldBtn" type="button" class="ghost">Add Gold</button>
-            </div>
-            <div class="row">
-              <label class="pill"
-                >Warband XP
+            </header>
+
+            <section class="warband-stats">
+              <div class="warband-stat-item">
+                <div class="stat-label">Gold</div>
+                <div class="stat-value gold" id="wbGold">50</div>
+                <button id="addGoldBtn" type="button" class="ghost stat-action">Add</button>
+              </div>
+              <div class="warband-stat-item">
+                <div class="stat-label">Experience</div>
                 <input
                   id="wbXP"
                   type="number"
                   min="0"
                   step="1"
-                  style="width: 100px"
-              /></label>
-              <label class="pill">
-                <button id="levelUpBtn" type="button" class="level-up-btn" title="Spend 5 XP to level up selected character">Level Up (5 XP)</button>
-              </label>
-            </div>
-            <div class="sep"></div>
-            <div class="row">
-              <button id="addChar" type="button">Add character</button>
-            </div>
-            <div id="charList" class="list" style="margin-top: 8px"></div>
-            <div class="sep"></div>
-            <div class="row">
-              <button id="exportBtn">Export JSON</button>
-              <button id="printRosterBtn" class="ghost" type="button">
-                Print roster
-              </button>
-              <label class="button ghost" for="importFile"
-                >Import
-                <input
-                  id="importFile"
-                  type="file"
-                  accept="application/json"
-                  style="display: none"
-              /></label>
-              <button id="clearAll" class="danger">Clear All</button>
-            </div>
+                  class="stat-input"
+                  value="0"
+                />
+                <button id="levelUpBtn" type="button" class="ghost stat-action" title="Spend 5 XP to level up selected character">Level Up</button>
+              </div>
+            </section>
+
+            <section class="warband-actions">
+              <button id="addChar" type="button" class="warband-primary-action">Add Character</button>
+            </section>
+            <div id="charList" class="warband-character-list"></div>
+
+            <footer class="warband-footer">
+              <div class="warband-file-actions">
+                <button id="exportBtn" class="ghost">Export</button>
+                <label class="button ghost" for="importFile"
+                  >Import
+                  <input
+                    id="importFile"
+                    type="file"
+                    accept="application/json"
+                    style="display: none"
+                /></label>
+              </div>
+              <div class="warband-roster-actions">
+                <button id="printRosterBtn" class="ghost" type="button">
+                  Print Roster
+                </button>
+                <button id="clearAll" class="danger">Clear All</button>
+              </div>
+            </footer>
           </section>
 
           <section class="card" id="stashCard">

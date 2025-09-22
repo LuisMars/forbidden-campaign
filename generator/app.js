@@ -1167,7 +1167,7 @@ function renderStatTemplate(char) {
   }
 
   const remainingLabel = document.createElement("div");
-  remainingLabel.className = "muted small";
+  remainingLabel.className = "";
   const remainingText = Object.keys(counts)
     .map((key) => {
       const left = Math.max(0, remainingCounts[key] ?? 0);
@@ -1183,7 +1183,7 @@ function renderStatTemplate(char) {
     container.className = "stat-template-item";
 
     const title = document.createElement("div");
-    title.className = "muted small";
+    title.className = "";
     title.textContent = label;
     container.appendChild(title);
 
@@ -1268,7 +1268,7 @@ function renderStatTemplate(char) {
   });
 
   const lockHint = document.createElement("div");
-  lockHint.className = "muted small";
+  lockHint.className = "";
   lockHint.textContent =
     "Select a value for each stat. Once all values are used the template locks automatically.";
   valuesContainer.appendChild(lockHint);

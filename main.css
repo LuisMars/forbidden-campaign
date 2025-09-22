@@ -232,7 +232,7 @@ button:disabled {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--ink);
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .pill {
@@ -241,11 +241,12 @@ button:disabled {
 
 .badge {
   padding: 6px 10px;
-  font-family: var(--font-accent);
+  font-family: var(--font-ultra);
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0.3px;
   margin-bottom: 18px;
+  font-size: 1.25rem;
 }
 
 .tag {
@@ -254,7 +255,6 @@ button:disabled {
   color: var(--muted);
   font-family: var(--font-accent);
   font-weight: 400;
-  font-size: 0.75rem;
   letter-spacing: 0.3px;
   text-transform: none;
 }
