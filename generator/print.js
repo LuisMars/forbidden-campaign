@@ -78,11 +78,25 @@ function renderPrintRoster(state, helpers) {
   chunks.forEach((group, pageIdx) => {
     const warbandName = escapeHtml((state.warband?.name || '').trim() || 'Unnamed Warband');
     const warbandXP = state.warband?.experience || 0;
+    const warbandGold = state.warband?.gold || 0;
     const data = {
       STASH: buildStashMarkup(state, helpers),
       WARBAND_UPGRADES: buildWarbandUpgradesMarkup(state, helpers),
       TITLE: warbandName,
-      WARBAND_INFO: `Warband XP: ${warbandXP}`,
+      WARBAND_INFO: `
+        <div class="print-stats-row">
+          <div class="print-stats-column">
+            <div class="print-stat-item">
+              <div class="print-stat-value">${warbandGold}</div>
+              <div class="print-stat-label">GOLD</div>
+            </div>
+            <div class="print-stat-item">
+              <div class="print-stat-value">${warbandXP}</div>
+              <div class="print-stat-label">XP</div>
+            </div>
+          </div>
+        </div>
+      `,
     };
 
     group.forEach((char, idx) => {
@@ -122,7 +136,7 @@ function compilePrintCard(char, helpers) {
   const hp = helpers.getEffectiveHP ? helpers.getEffectiveHP(char) : Number(char.hp || 0);
   const armor = helpers.getEffectiveArmor ? helpers.getEffectiveArmor(char) : Number(char.armor || 0);
   const slots = slotUsage(char);
-  const gold = charPoints(char);
+  // Remove individual character gold - now tracked at warband level
   const isMage = !!char.isMage;
   const tragedies = Number(char.tragedies || 0);
 
@@ -144,7 +158,7 @@ function compilePrintCard(char, helpers) {
     HP: hp,
     MOVEMENT: movement,
     ARMOR_VALUE: armor,
-    GOLD: gold,
+    // GOLD: removed - now tracked at warband level
     IS_MAGE: isMage ? 'is-mage' : 'is-not-mage',
     TRAGEDIES: tragedies,
 

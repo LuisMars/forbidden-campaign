@@ -12,8 +12,7 @@
           <div class="print-page-summary">Page 1</div>
         </header>
         <div class="print-grid print-grid--dual">
-          {{CHAR_SLOT_1}}
-          {{CHAR_SLOT_2}}
+          {{CHAR_SLOT_1}} {{CHAR_SLOT_2}}
         </div>
       </section>
       <section class="print-page print-page--secondary">
@@ -22,8 +21,7 @@
           <div class="print-page-summary">Page 2</div>
         </header>
         <div class="print-grid print-grid--dual">
-          {{CHAR_SLOT_3}}
-          {{CHAR_SLOT_4}}
+          {{CHAR_SLOT_3}} {{CHAR_SLOT_4}}
         </div>
       </section>
       <section class="print-page print-page--tertiary">
@@ -32,23 +30,33 @@
           <div class="print-page-summary">Page 3</div>
         </header>
         <div class="print-grid print-grid--dual">
-          {{CHAR_SLOT_5}}
-          {{CHAR_SLOT_6}}
+          {{CHAR_SLOT_5}} {{CHAR_SLOT_6}}
         </div>
       </section>
       <section class="print-page print-page--warband">
         <header class="print-page-header">
           <div class="print-page-title">{{TITLE}}</div>
-          <div class="print-page-summary">{{WARBAND_INFO}}</div>
+          <div class="print-page-summary">Page 4</div>
         </header>
-        <section class="print-stash">
-          <h2 class="print-stash-title">Warband</h2>
-          {{STASH}}
-        </section>
-        <section class="print-stash">
-          <h2 class="print-stash-title">Hogs Head Inn Upgrades</h2>
-          {{WARBAND_UPGRADES}}
-        </section>
+        <div class="print-warband-content">
+          <div class="print-warband-top">
+            <section class="print-warband-info">
+              <div class="print-warband-details">
+                {{WARBAND_INFO}}
+              </div>
+            </section>
+            <section class="print-stash">
+              <h2 class="print-stash-title">Stash</h2>
+              {{STASH}}
+            </section>
+          </div>
+          <section class="print-upgrades">
+            <h2 class="print-stash-title">Hogs Head Inn Upgrades</h2>
+            <div class="print-upgrades-content">
+              {{WARBAND_UPGRADES}}
+            </div>
+          </section>
+        </div>
       </section>
     </div>
   </body>
