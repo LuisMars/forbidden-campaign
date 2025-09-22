@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Germania+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Germania+One&family=Grenze+Gotisch:wght@400;700&family=New+Rocker&display=swap');
 
 :root {
   /* Core surfaces */
@@ -37,8 +37,11 @@
   --radius-pill: 999px;
 
   /* Typography */
-  --font-heading: "Germania One", fantasy;
+  --font-heading: "Grenze Gotisch", fantasy;
   --font-body: "IM Fell English", serif;
+  --font-accent: "Grenze Gotisch", fantasy;
+  --font-ultra: "New Rocker", cursive;
+  --font-button: "Germania One", fantasy;
 }
 
 * {
@@ -80,12 +83,14 @@ h2,
 h3,
 h4 {
   font-family: var(--font-heading);
+  font-weight: 700;
   letter-spacing: 0.4px;
   margin: 0 0 6px;
 }
 
 h1 {
   font-size: 2.2rem;
+  font-family: var(--font-ultra);
 }
 
 h2 {
@@ -99,7 +104,7 @@ h3 {
 
 h4 {
   font-size: 0.8rem;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
@@ -136,22 +141,34 @@ textarea {
   line-height: 1.5;
 }
 
-button {
+.button,
+button,
+label.button {
   background: var(--accent);
   border: 1px solid var(--accent-border);
   color: var(--ink-inverse);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
+  text-transform: uppercase;
+  font-family: var(--font-button);
   font-weight: 700;
-  letter-spacing: 0.2px;
+  letter-spacing: 1.25px;
   cursor: pointer;
   transition: filter 0.15s ease, transform 0.02s ease;
 }
 
-button.ghost {
+button.ghost,
+label.ghost {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--ink);
+  font-family: var(--font-ultra);
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: inline-block;
+  text-decoration: none;
 }
 
 button.danger {
@@ -224,7 +241,9 @@ button:disabled {
 
 .badge {
   padding: 6px 10px;
-  text-transform: uppercase;
+  font-family: var(--font-accent);
+  font-weight: 400;
+  text-transform: none;
   letter-spacing: 0.3px;
   margin-bottom: 18px;
 }
@@ -233,9 +252,11 @@ button:disabled {
   padding: 4px 10px;
   background: var(--surface-tag);
   color: var(--muted);
+  font-family: var(--font-accent);
+  font-weight: 400;
   font-size: 0.75rem;
   letter-spacing: 0.3px;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .badge span,

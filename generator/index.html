@@ -76,7 +76,7 @@
               <button id="printRosterBtn" class="ghost" type="button">
                 Print roster
               </button>
-              <label class="ghost" for="importFile" style="cursor: pointer; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--ink); font-weight: 700; letter-spacing: 0.2px; display: inline-block; text-decoration: none;"
+              <label class="button ghost" for="importFile"
                 >Import
                 <input
                   id="importFile"
@@ -91,8 +91,6 @@
           <section class="card" id="stashCard">
             <h2>Warband Stash</h2>
             <div class="row">
-              <label class="pill"
-                >Type
                 <select id="stashTypeFilter">
                   <option value="all">All Items</option>
                   <option value="weapon">Weapons</option>
@@ -100,7 +98,6 @@
                   <option value="armor">Armor</option>
                   <option value="scroll">Scrolls</option>
                 </select>
-              </label>
               <select
                 id="stashItemSelect"
                 aria-label="Available catalog items"

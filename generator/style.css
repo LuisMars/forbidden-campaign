@@ -394,7 +394,8 @@ button.char-card-name {
   border: none;
   padding: 0;
   color: var(--ink);
-  font-weight: 700;
+  font-family: var(--font-accent);
+  font-weight: 400;
   font-size: 1rem;
   letter-spacing: 0.02em;
   text-align: left;
@@ -629,24 +630,6 @@ button.char-card-name:focus-visible {
   background: var(--surface);
   color: var(--text-primary);
   transition: border-color 0.2s ease;
-}
-
-.random-name-btn {
-  padding: 10px 14px;
-  background: var(--button-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.9em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.random-name-btn:hover {
-  background: var(--button-secondary-hover);
-  border-color: var(--accent);
 }
 
 .character-name-input:focus {
@@ -1019,11 +1002,12 @@ button.char-card-name:focus-visible {
 }
 
 .attribute-label {
-  font-size: 0.8em;
+  font-size: 1em;
   font-weight: 600;
   color: var(--text-secondary);
+  font-family: var(--font-button);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   margin-top: 4px;
 }
 
@@ -1050,17 +1034,18 @@ button.char-card-name:focus-visible {
   font-size: 2.4em;
   font-weight: 700;
   color: var(--accent);
-  font-family: var(--font-heading);
+  font-family: var(--font-button);
   line-height: 1;
   margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 0.8em;
+  font-size: 1em;
   font-weight: 600;
   color: var(--text-secondary);
+  font-family: var(--font-button);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .attribute-input {
@@ -1084,7 +1069,7 @@ button.char-card-name:focus-visible {
   font-size: 2.4em;
   font-weight: 700;
   color: var(--accent);
-  font-family: var(--font-heading);
+  font-family: var(--font-button);
   line-height: 1;
   margin-bottom: 4px;
 }
