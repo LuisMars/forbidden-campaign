@@ -408,6 +408,7 @@ button.char-card-name {
   letter-spacing: 0.02em;
   text-align: left;
   transition: color 0.15s ease;
+  font-size: 2rem;
 }
 
 button.char-card-name:hover,
@@ -434,6 +435,8 @@ button.char-card-name:focus-visible {
 
 .char-card-actions button {
   flex-shrink: 0;
+  padding: 6px 10px;
+  font-size: 0.8rem;
 }
 
 .char-card-meta {
@@ -442,8 +445,18 @@ button.char-card-name:focus-visible {
   gap: 8px;
 }
 
-.char-card-meta .tag {
-  background: var(--surface-tag);
+/* Uniform styling for all character card meta tags */
+.char-card-meta .tag,
+.char-card-meta .stat-tag {
+  background: none;
+  border: none;
+  font-family: var(--font-button);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  padding: 4px 8px;
 }
 
 @media (max-width: 1200px) {
@@ -658,25 +671,37 @@ button.char-card-name:focus-visible {
   margin-top: 32px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
-.warband-file-actions,
-.warband-roster-actions {
+.warband-actions-merged {
   display: flex;
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-.warband-file-actions {
-  order: 2;
+/* Button group for merged buttons */
+.button-group {
+  display: flex;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
-.warband-roster-actions {
-  order: 1;
+.button-group button {
+  border-radius: 0;
+  border: none;
+  border-right: 1px solid var(--border);
+  margin: 0;
+}
+
+.button-group button:last-child {
+  border-right: none;
+}
+
+.button-group button:hover {
+  z-index: 1;
+  position: relative;
 }
 
 /* Responsive Design */

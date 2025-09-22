@@ -2172,7 +2172,7 @@ function render() {
         saveState();
       };
     } else {
-      deathBtn.className = "danger";
+      deathBtn.className = "ghost";
       deathBtn.textContent = "Mark Dead";
       deathBtn.onclick = (ev) => {
         ev.stopPropagation();
@@ -2204,12 +2204,35 @@ function render() {
 
     const meta = document.createElement("div");
     meta.className = "char-card-meta";
+
+    // Character attributes
+    const effectiveHP = getEffectiveHP(c);
+    const effectiveArmor = getEffectiveArmor(c);
+    const effectiveMovement = getEffectiveMovement(c);
+
+    meta.appendChild(tag(`HP ${effectiveHP}`));
+    meta.appendChild(tag(`Armor ${effectiveArmor}`));
+    meta.appendChild(tag(`Move ${effectiveMovement}"`));
+
+    // Character stats (special styling)
+    const statTag = (label, value) => {
+      const t = tag(`${label} ${value}`);
+      t.classList.add('stat-tag');
+      return t;
+    };
+
+    meta.appendChild(statTag('AGI', c.agility || 0));
+    meta.appendChild(statTag('PRE', c.presence || 0));
+    meta.appendChild(statTag('STR', c.strength || 0));
+    meta.appendChild(statTag('TOU', c.toughness || 0));
+
+    // Slots (keep existing logic)
     const slots = slotUsage(c);
     const slotTag = tag(`Slots ${slots.used}/${slots.total}`);
     if (slots.used > slots.total) slotTag.classList.add("warn");
     slotTag.title = `Base ${slots.base}, Bonus ${slots.bonus}`;
     meta.appendChild(slotTag);
-    meta.appendChild(tag(`${charPoints(c)} g`));
+
     card.appendChild(meta);
 
     list.appendChild(card);
