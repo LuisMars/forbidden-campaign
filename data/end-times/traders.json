@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Mad Wizard",
+    "alias": "Vriprix",
+    "type": "general",
+    "sellMultiplier": 1.0,
+    "buyMultiplier": 0.5,
+    "roundingRule": "down",
+    "cannotSell": ["Manuscripts"],
+    "specialItems": ["Relics", "Manuscripts"],
+    "description": "Sells Items at full price, buys Items at half price, access to special Relics and Manuscripts"
+  },
+  {
+    "name": "Hogs Head Inn",
+    "type": "general",
+    "sellMultiplier": 1.0,
+    "buyMultiplier": 0.5,
+    "roundingRule": "down",
+    "cannotSell": ["Manuscripts"],
+    "upgradeable": true,
+    "upgrades": {
+      "recruitmentPoster": {
+        "name": "Recruitment Poster",
+        "cost": 50,
+        "currency": "Gold",
+        "effect": "New warband members come equipped with 1 random Weapon and Light Armor for free"
+      },
+      "beds": {
+        "name": "Beds",
+        "cost": 50,
+        "currency": "Gold",
+        "maxPurchases": 5,
+        "effect": "Expand warband by 1 member per bed (still only take 5 warband members into each Scenario)"
+      },
+      "betterGrub": {
+        "name": "Better Grub",
+        "cost": 50,
+        "currency": "Gold",
+        "repeatable": true,
+        "effect": "Give 1 member +1 HP (can be purchased once per warband member)"
+      },
+      "ritualCircle": {
+        "name": "Ritual Circle",
+        "cost": 50,
+        "currency": "Gold",
+        "effect": "Attempt to resurrect a Dead member (Presence test required)"
+      },
+      "whittlingKnife": {
+        "name": "Whittling Knife",
+        "cost": 50,
+        "currency": "Gold",
+        "effect": "Warband can make 5 Ammo or 1 Cannon Ball per Scenario"
+      }
+    },
+    "description": "Standard trading post with upgradeable facilities"
+  },
+  {
+    "name": "The Merchant",
+    "type": "risky",
+    "sellModifier": -1,
+    "sellMinimum": 1,
+    "buyModifier": 1,
+    "cannotSell": ["Free Items"],
+    "inventory": {
+      "weapons": 3,
+      "armor": 1,
+      "equipment": 1,
+      "relics": 1
+    },
+    "specialPricing": {
+      "relics": 100
+    },
+    "risk": {
+      "description": "Roll D20 each visit, on 1 you're caught by Vriprix",
+      "dieType": "D20",
+      "triggerValue": 1,
+      "consequences": [
+        {
+          "occurrence": "first",
+          "effect": "One model gains Lost Limb Injury"
+        },
+        {
+          "occurrence": "second",
+          "effect": "Vriprix refuses to deal with you, must replace one warband member"
+        }
+      ]
+    },
+    "description": "Shadowy figure who approaches on way back to Vriprix's castle. Buys items for 1 Gold more than Vriprix, sells for 1 Gold less (minimum 1 Gold). Has random inventory: 3 weapons, 1 armor, 1 equipment, 1 relic (100 Gold)."
+  }
+]

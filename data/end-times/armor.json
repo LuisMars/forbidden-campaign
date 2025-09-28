@@ -1,0 +1,128 @@
+[
+  {
+    "name": "Light Armor",
+    "armorValue": 1,
+    "special": null,
+    "cost": 2,
+    "slots": 1,
+    "effects": [],
+    "restrictions": []
+  },
+  {
+    "name": "Medium Armor",
+    "armorValue": 2,
+    "special": null,
+    "cost": 10,
+    "slots": 1,
+    "effects": [],
+    "restrictions": []
+  },
+  {
+    "name": "Heavy Armor",
+    "armorValue": 3,
+    "special": "Spellcasters cannot wear",
+    "cost": 20,
+    "slots": 1,
+    "effects": [],
+    "restrictions": [
+      {
+        "type": "class_restriction",
+        "excludedClasses": ["spellcaster"]
+      }
+    ]
+  },
+  {
+    "name": "Shield",
+    "armorValue": 1,
+    "special": "Blocks ranged attacks",
+    "cost": 3,
+    "slots": 1,
+    "effects": [
+      {
+        "type": "ranged_defense",
+        "benefit": "blocks_ranged_attacks"
+      }
+    ],
+    "restrictions": []
+  },
+  {
+    "name": "Tower Shield",
+    "armorValue": 0,
+    "special": "Acts as cover, -3 to ranged attacks against bearer",
+    "cost": 5,
+    "slots": 2,
+    "effects": [
+      {
+        "type": "ranged_defense",
+        "benefit": "acts_as_cover",
+        "modifier": -3,
+        "appliesTo": "ranged_attacks_against_bearer"
+      }
+    ],
+    "restrictions": []
+  },
+  {
+    "name": "Full Plate",
+    "armorValue": 4,
+    "special": "+2 Strength required or -1 Agility",
+    "cost": 50,
+    "slots": 2,
+    "effects": [],
+    "restrictions": [
+      {
+        "type": "stat_requirement",
+        "stat": "strength",
+        "requiredValue": "+2",
+        "alternative": {
+          "type": "stat_penalty",
+          "stat": "agility",
+          "modifier": -1
+        }
+      }
+    ]
+  },
+  {
+    "name": "Pet Armor",
+    "armorValue": 1,
+    "special": "Can be used on any pet",
+    "cost": 10,
+    "slots": 1,
+    "effects": [],
+    "restrictions": [
+      {
+        "type": "target_restriction",
+        "allowedTargets": ["pets"]
+      }
+    ]
+  },
+  {
+    "name": "Improvised Armor",
+    "armorValue": 1,
+    "special": "-1 Agility",
+    "cost": 0,
+    "slots": 1,
+    "effects": [
+      {
+        "type": "stat_modifier",
+        "stat": "agility",
+        "modifier": -1
+      }
+    ],
+    "restrictions": []
+  },
+  {
+    "name": "Comfy Socks",
+    "armorValue": 0,
+    "special": "1 AV if has Scroll, Takes up no Equipment slots",
+    "cost": 15,
+    "slots": 0,
+    "effects": [
+      {
+        "type": "conditional_armor",
+        "condition": "has_scroll",
+        "armorValue": 1
+      }
+    ],
+    "restrictions": []
+  }
+]

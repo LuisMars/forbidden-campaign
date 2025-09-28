@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Hope's Last Breath",
+    "effect": "Heal model within 1 inch for D6 HP. Doesn't work on Downed/Dead",
+    "category": "clean"
+  },
+  {
+    "name": "Will of the Optimistic",
+    "effect": "Target adds extra D6 to next test",
+    "category": "clean"
+  },
+  {
+    "name": "Not Dead Yet",
+    "effect": "Dead model awakens with 1 HP and additional Flaw",
+    "category": "clean"
+  },
+  {
+    "name": "Shield of the Faithless",
+    "effect": "Model cannot be targeted by ranged attacks for one round",
+    "category": "clean"
+  },
+  {
+    "name": "Shadow Bind",
+    "effect": "Target cannot move for D3 rounds",
+    "category": "unclean"
+  },
+  {
+    "name": "Curse of Weakness",
+    "effect": "Target suffers -2 to all Stats for remainder of Scenario",
+    "category": "unclean"
+  },
+  {
+    "name": "Blood Boil",
+    "effect": "Target makes Toughness test or takes 1D8 damage ignoring Armor",
+    "category": "unclean"
+  },
+  {
+    "name": "Fear",
+    "effect": "All enemies within 6 inches must make Morale test",
+    "category": "unclean"
+  }
+]

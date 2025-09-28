@@ -1,0 +1,13 @@
+- Do TDD always, even for bugs, test that fails first
+- Create tests first!
+- Simpler is better
+- Modularity is even better
+- Data driven, we love json
+- Classless css is better that class based css
+- Run the tests before and after your changes
+- TODOs are a nice way to leave notes for features that are not finished
+- Old files must be removed ASAP, if they can't be removed, ask
+- Compact sooner, at 10% left to be safe
+- Self reflect, review your work, you're not perfect
+- Ask questions if in doubt
+- Use tools!
