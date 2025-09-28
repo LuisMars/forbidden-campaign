@@ -1,0 +1,76 @@
+{
+  "items": [
+    {
+      "name": "Bandages",
+      "effect": "Cures Bleeding",
+      "cost": 1,
+      "slots": 1,
+      "roll": 1
+    },
+    {
+      "name": "Lantern",
+      "effect": "Required for models to see in the dark",
+      "cost": 3,
+      "slots": 1,
+      "roll": 2
+    },
+    {
+      "name": "Torch",
+      "effect": "As a lantern but only lasts 3 rounds. Can be used as One-Handed Makeshift Weapon",
+      "cost": 1,
+      "slots": 1,
+      "roll": 3
+    },
+    {
+      "name": "Backpack",
+      "effect": "Takes up one Equipment slot but provides two additional slots",
+      "cost": 1,
+      "slots": 1,
+      "extraSlots": 2,
+      "roll": 4
+    },
+    {
+      "name": "Potion",
+      "effect": "Heals D6, then drinker makes Toughness test or becomes Dazed",
+      "cost": 6,
+      "slots": 1,
+      "roll": 5
+    },
+    {
+      "name": "Ammo",
+      "effect": "Five shots per stack of Ammo",
+      "cost": 1,
+      "slots": 1,
+      "shots": 5,
+      "roll": 6
+    },
+    {
+      "name": "Antidote",
+      "effect": "Cures Poisoned",
+      "cost": 7,
+      "slots": 1,
+      "roll": 7
+    },
+    {
+      "name": "Bag o' Rats",
+      "effect": "Special throwable item",
+      "cost": 3,
+      "slots": 1,
+      "roll": 8
+    },
+    {
+      "name": "Whisky",
+      "effect": "Required for Dutch Courage flaw",
+      "cost": 2,
+      "slots": 1,
+      "roll": 9
+    },
+    {
+      "name": "Manuscript",
+      "effect": "Ancient writings",
+      "cost": "Variable",
+      "slots": 1,
+      "roll": 10
+    }
+  ]
+}

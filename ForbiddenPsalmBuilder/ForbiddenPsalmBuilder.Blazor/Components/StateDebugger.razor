@@ -1,0 +1,140 @@
+@using ForbiddenPsalmBuilder.Core.Services.State
+@inject IGameStateService StateService
+@implements IDisposable
+
+<section>
+    <header>
+        <h6>State Debugger <small>(Development Only)</small></h6>
+    </header>
+
+    <section>
+        <h6>Current State</h6>
+        <ul>
+            <li><strong>Game Variant:</strong> @StateService.State.SelectedGameVariant</li>
+            <li><strong>Total Warbands:</strong> @StateService.State.Warbands.Count</li>
+            <li><strong>Active Warband ID:</strong> @(StateService.State.ActiveWarbandId ?? "None")</li>
+            <li><strong>Active Warband Name:</strong> @(StateService.State.ActiveWarband?.Name ?? "None")</li>
+            <li><strong>Is Loading:</strong> @StateService.State.IsLoading</li>
+            <li><strong>Error:</strong> @(StateService.State.ErrorMessage ?? "None")</li>
+            <li><strong>Character Builder Active:</strong> @(StateService.State.CharacterBeingBuilt != null)</li>
+        </ul>
+    </section>
+
+    <section>
+        <h6>Actions</h6>
+        <button @onclick="TriggerStateChange">
+            <i class="fas fa-sync"></i> Trigger State Change
+        </button>
+        <button @onclick="SimulateError">
+            <i class="fas fa-exclamation-triangle"></i> Simulate Error
+        </button>
+        <button @onclick="ClearError">
+            <i class="fas fa-times"></i> Clear Error
+        </button>
+        <button @onclick="ClearAllState">
+            <i class="fas fa-trash-alt"></i> Clear All State
+        </button>
+    </section>
+
+    @if (StateService.State.Warbands.Any())
+    {
+        <section>
+            <h6>Warbands Detail</h6>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Game</th>
+                        <th>Members</th>
+                        <th>Gold</th>
+                        <th>Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var warband in StateService.State.Warbands.Values)
+                    {
+                        <tr>
+                            <td>@warband.Name</td>
+                            <td>@warband.GameVariant</td>
+                            <td>@warband.Members.Count</td>
+                            <td>@warband.Gold</td>
+                            <td>@(warband.Id == StateService.State.ActiveWarbandId ? "✓" : "")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+
+    <footer>
+        <small>
+            State changes: @stateChangeCount | Last update: @lastUpdate.ToString("HH:mm:ss")
+        </small>
+    </footer>
+</section>
+
+@code {
+    private int stateChangeCount = 0;
+    private DateTime lastUpdate = DateTime.Now;
+
+    protected override void OnInitialized()
+    {
+        StateService.StateChanged += OnStateChanged;
+        StateService.WarbandChanged += OnWarbandChanged;
+        StateService.GameVariantChanged += OnGameVariantChanged;
+        StateService.ActiveWarbandChanged += OnActiveWarbandChanged;
+    }
+
+    private void OnStateChanged()
+    {
+        stateChangeCount++;
+        lastUpdate = DateTime.Now;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnWarbandChanged(string warbandId)
+    {
+        Console.WriteLine($"Warband changed: {warbandId}");
+        OnStateChanged();
+    }
+
+    private void OnGameVariantChanged(string gameVariant)
+    {
+        Console.WriteLine($"Game variant changed: {gameVariant}");
+        OnStateChanged();
+    }
+
+    private void OnActiveWarbandChanged(string? warbandId)
+    {
+        Console.WriteLine($"Active warband changed: {warbandId}");
+        OnStateChanged();
+    }
+
+    private void TriggerStateChange()
+    {
+        StateService.State.NotifyStateChanged();
+    }
+
+    private async Task SimulateError()
+    {
+        await StateService.SetErrorAsync("This is a simulated error for testing purposes.");
+    }
+
+    private async Task ClearError()
+    {
+        await StateService.ClearErrorAsync();
+    }
+
+    private async Task ClearAllState()
+    {
+        await StateService.ClearStateAsync();
+    }
+
+    public void Dispose()
+    {
+        StateService.StateChanged -= OnStateChanged;
+        StateService.WarbandChanged -= OnWarbandChanged;
+        StateService.GameVariantChanged -= OnGameVariantChanged;
+        StateService.ActiveWarbandChanged -= OnActiveWarbandChanged;
+    }
+}

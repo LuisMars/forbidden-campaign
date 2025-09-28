@@ -1,0 +1,277 @@
+{
+  "oneHandedRanged": [
+    {
+      "name": "Flintlock Pistol",
+      "damage": "D8",
+      "properties": ["Ranged", "Explode", "Reload"],
+      "stat": "Presence",
+      "cost": 15,
+      "slots": 1,
+      "rollRange": "1-3"
+    },
+    {
+      "name": "Sling",
+      "damage": "D4",
+      "properties": ["Ranged"],
+      "stat": "Agility",
+      "cost": 1,
+      "slots": 1,
+      "rollRange": "4-7"
+    }
+  ],
+  "twoHandedRanged": [
+    {
+      "name": "Musket",
+      "damage": "D10",
+      "properties": ["Ranged", "Explode", "Reload"],
+      "stat": "Presence",
+      "cost": 20,
+      "slots": 2,
+      "rollRange": "8-9"
+    },
+    {
+      "name": "Cannon",
+      "damage": "D20",
+      "properties": ["Ranged", "Explode", "Reload"],
+      "stat": "Strength",
+      "cost": 100,
+      "slots": 2,
+      "rollRange": "10",
+      "special": "Does not come with ammo"
+    },
+    {
+      "name": "Crossbow",
+      "damage": "D6",
+      "properties": ["Ranged", "Cruel", "Reload"],
+      "stat": "Presence",
+      "cost": 8,
+      "slots": 2,
+      "rollRange": "11-15"
+    },
+    {
+      "name": "Bow",
+      "damage": "D6",
+      "properties": ["Ranged"],
+      "stat": "Presence",
+      "cost": 5,
+      "slots": 2,
+      "rollRange": "16-19"
+    }
+  ],
+  "oneHandedMelee": [
+    {
+      "name": "One-Handed Makeshift",
+      "damage": "D4",
+      "properties": [],
+      "stat": "Strength",
+      "cost": 0,
+      "slots": 1,
+      "rollRange": "20-25"
+    },
+    {
+      "name": "Staff",
+      "damage": "D4",
+      "properties": [],
+      "stat": "Strength",
+      "cost": 1,
+      "slots": 1,
+      "rollRange": "26-29"
+    },
+    {
+      "name": "Shortsword",
+      "damage": "D6",
+      "properties": [],
+      "stat": "Agility",
+      "cost": 2,
+      "slots": 1,
+      "rollRange": "30-35"
+    },
+    {
+      "name": "Dagger",
+      "damage": "D4",
+      "properties": ["Thrown"],
+      "stat": "Agility",
+      "cost": 1,
+      "slots": 1,
+      "rollRange": "36-40"
+    },
+    {
+      "name": "Hand Axe",
+      "damage": "D8",
+      "properties": ["Thrown"],
+      "stat": "Strength",
+      "cost": 3,
+      "slots": 1,
+      "rollRange": "41-43"
+    },
+    {
+      "name": "Ulfberht Sword",
+      "damage": "D8",
+      "properties": ["Criticals cause Bleeding"],
+      "stat": "Strength",
+      "cost": 10,
+      "slots": 1,
+      "rollRange": "43-46"
+    },
+    {
+      "name": "Morning Star",
+      "damage": "D8",
+      "properties": ["Criticals cause Dazed", "Cruel"],
+      "stat": "Strength",
+      "cost": 8,
+      "slots": 1,
+      "rollRange": "47-50"
+    },
+    {
+      "name": "Horseman's Pick",
+      "damage": "D6",
+      "properties": ["Cruel"],
+      "stat": "Strength",
+      "cost": 8,
+      "slots": 1,
+      "rollRange": "51-55"
+    },
+    {
+      "name": "Flail",
+      "damage": "D8",
+      "properties": ["Criticals cause Bleeding"],
+      "stat": "Strength",
+      "cost": 7,
+      "slots": 1,
+      "rollRange": "56-60"
+    },
+    {
+      "name": "Brass Knuckles",
+      "damage": "2",
+      "properties": ["Takes up no Equipment slot", "Criticals cause Dazed"],
+      "stat": "Agility",
+      "cost": 9,
+      "slots": 0,
+      "rollRange": "61-65"
+    },
+    {
+      "name": "Bone Flail",
+      "damage": "D8",
+      "properties": ["Criticals cause Dazed and Bleeding"],
+      "stat": "Strength",
+      "cost": 3,
+      "slots": 1,
+      "rollRange": "66-69"
+    },
+    {
+      "name": "Net",
+      "damage": "-",
+      "properties": ["Thrown", "Target must pass Agility test or lose movement"],
+      "stat": "Agility",
+      "cost": 4,
+      "slots": 1,
+      "rollRange": "70-73"
+    },
+    {
+      "name": "Warhammer",
+      "damage": "D6",
+      "properties": ["Criticals cause Dazed"],
+      "stat": "Strength",
+      "cost": 3,
+      "slots": 1,
+      "rollRange": "74-75"
+    },
+    {
+      "name": "Sword",
+      "damage": "D6",
+      "properties": [],
+      "stat": "Strength",
+      "cost": 4,
+      "slots": 1,
+      "rollRange": "76-77"
+    },
+    {
+      "name": "Rapier",
+      "damage": "D6",
+      "properties": ["Criticals disarm enemy"],
+      "stat": "Agility",
+      "cost": null,
+      "slots": 1,
+      "rollRange": "78-79"
+    }
+  ],
+  "twoHandedMelee": [
+    {
+      "name": "Two-Handed Makeshift",
+      "damage": "D6",
+      "properties": [],
+      "stat": "Strength",
+      "cost": 0,
+      "slots": 2,
+      "rollRange": "80-84"
+    },
+    {
+      "name": "Bastard Sword",
+      "damage": "D10",
+      "properties": ["Criticals destroy enemy Weapons"],
+      "stat": "Strength",
+      "cost": null,
+      "slots": 2,
+      "rollRange": "85-89"
+    },
+    {
+      "name": "Great Axe",
+      "damage": "D10",
+      "properties": ["Criticals destroy Shields and deal damage"],
+      "stat": "Strength",
+      "cost": null,
+      "slots": 2,
+      "rollRange": "90-91"
+    },
+    {
+      "name": "Glaive",
+      "damage": "D8",
+      "properties": ["Reach"],
+      "stat": "Strength",
+      "cost": null,
+      "slots": 2,
+      "rollRange": "92-93"
+    },
+    {
+      "name": "Spear",
+      "damage": "D6",
+      "properties": ["Reach", "Thrown"],
+      "stat": "Agility",
+      "cost": null,
+      "slots": 2,
+      "rollRange": "94"
+    },
+    {
+      "name": "Trident",
+      "damage": "D6",
+      "properties": ["Thrown", "Criticals disarm enemy"],
+      "stat": "Agility",
+      "cost": null,
+      "slots": 2,
+      "rollRange": "95-96"
+    }
+  ],
+  "throwables": [
+    {
+      "name": "Unholy Hand Grenades",
+      "damage": "D10",
+      "properties": ["Thrown", "Explode", "Called Shot"],
+      "stat": "Agility",
+      "cost": 6,
+      "slots": 1,
+      "rollRange": "95-96",
+      "consumable": true
+    },
+    {
+      "name": "Bag o' Rats",
+      "damage": "-",
+      "properties": ["Thrown"],
+      "stat": "Agility",
+      "cost": 3,
+      "slots": 1,
+      "rollRange": "97-100",
+      "consumable": true
+    }
+  ],
+  "notes": "All ranged weapons come with 5 Ammo except Cannon"
+}

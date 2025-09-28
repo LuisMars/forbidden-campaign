@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Quartermaster",
+    "sellMultiplier": 0.5,
+    "roundingRule": "down",
+    "minimumValue": 1,
+    "minimumValueRule": "doesnt_buy_if_rounds_to_zero",
+    "cannotSell": ["Manuscripts"]
+  }
+]

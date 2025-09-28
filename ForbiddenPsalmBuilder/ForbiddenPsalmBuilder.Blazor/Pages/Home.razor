@@ -1,0 +1,23 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
+@inject IWebAssemblyHostEnvironment Environment
+
+<PageTitle>Forbidden Psalm Builder</PageTitle>
+
+<main>
+    <header>
+        <h1>Forbidden Psalm Builder</h1>
+    </header>
+
+    <WarbandList />
+
+    @* Only show state debugger in development *@
+    @if (IsDevelopment)
+    {
+        <StateDebugger />
+    }
+</main>
+
+@code {
+    private bool IsDevelopment => Environment.IsDevelopment();
+}

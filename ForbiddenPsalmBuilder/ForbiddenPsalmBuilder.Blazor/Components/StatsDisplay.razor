@@ -1,0 +1,25 @@
+@namespace ForbiddenPsalmBuilder.Components
+
+@*
+    Custom stats display component with big accent numbers and smaller text labels
+*@
+
+<div class="stats-container">
+    @foreach (var stat in Stats)
+    {
+        <div class="stat-item">
+            <div class="stat-value">@stat.Value</div>
+            <div class="stat-label">@stat.Label</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<StatItem> Stats { get; set; } = new();
+
+    public class StatItem
+    {
+        public string Value { get; set; } = "";
+        public string Label { get; set; } = "";
+    }
+}

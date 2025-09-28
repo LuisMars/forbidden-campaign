@@ -1,0 +1,21 @@
+namespace ForbiddenPsalmBuilder.Core.Models.Character;
+
+public class Equipment
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty; // weapon, armor, item
+    public string? Damage { get; set; }
+    public List<string> Properties { get; set; } = new();
+    public string? Stat { get; set; } // What stat this uses
+    public int Cost { get; set; }
+    public int Slots { get; set; } = 1;
+    public int ArmorValue { get; set; }
+    public string? Special { get; set; }
+    public string? Effect { get; set; }
+    public string? RollRange { get; set; }
+
+    public bool IsWeapon => Type.Equals("weapon", StringComparison.OrdinalIgnoreCase);
+    public bool IsArmor => Type.Equals("armor", StringComparison.OrdinalIgnoreCase);
+    public bool IsItem => Type.Equals("item", StringComparison.OrdinalIgnoreCase);
+}

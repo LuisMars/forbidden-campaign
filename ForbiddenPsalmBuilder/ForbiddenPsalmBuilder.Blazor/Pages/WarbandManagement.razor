@@ -1,0 +1,453 @@
+@page "/warband/{WarbandId}"
+@using ForbiddenPsalmBuilder.Core.Services.State
+@using ForbiddenPsalmBuilder.Core.Models.Warband
+@using ForbiddenPsalmBuilder.Core.Models.Character
+@using ForbiddenPsalmBuilder.Core.DTOs
+@using ForbiddenPsalmBuilder.Core.Validation
+@using Microsoft.AspNetCore.Components.Forms
+@using ForbiddenPsalmBuilder.Blazor.Components
+@inject IGameStateService StateService
+@inject NavigationManager Navigation
+<PageTitle>
+    @(warband?.Name ?? "Warband") - Forbidden Psalm Builder
+</PageTitle>
+<header aria-label="breadcrumb" class="horizontal">
+    <a href="/">← Home</a>
+    <span>/</span>
+    <span>
+        @(warband?.Name ?? "Warband")
+    </span>
+</header>
+<main>
+    @if (warband == null)
+    {
+        <section>
+            <div>
+                @if (isLoading)
+                {
+                    <section>
+                        <div role="status">
+                            <span>Loading...</span>
+                        </div>
+                        <p>Loading warband...</p>
+                    </section>
+                }
+                else
+                {
+                    <section>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Warband Not Found</h3>
+                        <p>The warband you're looking for doesn't exist or has been deleted.</p>
+                        <button @onclick="GoHome">
+                            <i class="fas fa-home"></i>
+                            Go Home
+                        </button>
+                    </section>
+                }
+            </div>
+        </section>
+    }
+    else
+    {
+        <!-- Warband Header -->
+        <header>
+            <div class="horizontal space">
+                <div>
+                    <h1>
+                    @warband.Name
+                    </h1>
+                    <p>
+                    @GetGameVariantDisplayName(warband.GameVariant)
+                    </p>
+                </div>
+                <div class="horizontal">
+                    <button @onclick="() => showEditModal = true">
+                        <i class="fas fa-edit"></i>
+                        Edit
+                    </button>
+                    <button @onclick="AddCharacter" disabled="@(!warband.CanAddMember)">
+                        <i class="ra ra-person"></i>
+                        Add Member
+                    </button>
+                </div>
+            </div>
+            <StatsDisplay Stats="@GetWarbandStats()" />
+        </header>
+        <!-- Warband Members -->
+        <section>
+            <section>
+                <header class="horizontal space">
+                    <h2>Warband Members</h2>
+                    <span>
+                        @warband.Members.Count / 5
+                    </span>
+                </header>
+                <div>
+                    @if (warband.Members.Any())
+                    {
+                        <section>
+                            @foreach (var character in warband.Members)
+                            {
+                                <article>
+                                    <div>
+                                        <div class="horizontal space">
+                                            <h3>
+                                            @character.Name
+                                            </h3>
+                                            <div class="horizontal">
+                                                <button @onclick="() => EditCharacter(character.Id)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button @onclick="() => RemoveCharacter(character.Id)">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div>
+                                                <small>HP:</small>
+                                                @character.CurrentHP
+                                                /
+                                                @character.Stats.HP<br />
+                                                <small>Toughness:</small>
+                                                @character.Stats.Toughness<br />
+                                                <small>Movement:</small>
+                                                @character.Stats.Movement
+                                                "
+                                            </div>
+                                            <div>
+                                                <small>XP:</small>
+                                                @character.Experience<br />
+                                                @if (character.IsSpellcaster)
+                                                {
+                                                    <span>Spellcaster</span>
+                                                    <br />
+                                                }
+                                                @if (!string.IsNullOrEmpty(character.SpecialTrooperType))
+                                                {
+                                                    <span>
+                                                    @character.SpecialTrooperType
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (character.Equipment.Any())
+                                        {
+                                            <hr />
+                                            <small>Equipment:</small>
+                                            <div>
+                                                @foreach (var equipment in character.Equipment)
+                                                {
+                                                    <span>
+                                                    @equipment.Name
+                                                    </span>
+                                                }
+                                            </div>
+                                        }
+                                        @if (character.Injuries.Any())
+                                        {
+                                            <hr />
+                                            <small>Injuries:</small>
+                                            <div>
+                                                @foreach (var injury in character.Injuries)
+                                                {
+                                                    <span>
+                                                    @injury
+                                                    </span>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </article>
+                            }
+                        </section>
+                    }
+                    else
+                    {
+                        <section>
+                            <i class="ra ra-muscle-up"></i>
+                            <p>No members in this warband yet.</p>
+                            <p>Add your first character to get started!</p>
+                            <button @onclick="AddCharacter">
+                                <i class="ra ra-person"></i>
+                                Add First Member
+                            </button>
+                        </section>
+                    }
+                </div>
+            </section>
+        </section>
+    }
+    <!-- Edit Warband Info Modal -->
+    <Modal IsVisible="@(showEditModal && warband != null)"
+           Title="Edit Warband Info"
+           OnClose="CancelEdit">
+        <EditForm Model="editWarbandDto" OnValidSubmit="SaveWarband">
+            <DataAnnotationsValidator />
+            <div>
+                <label for="warbandName">Warband Name</label>
+                <InputText
+                    id="warbandName"
+                    @bind-Value="editWarbandDto.Name"
+                    placeholder="Enter warband name..." />
+                <ValidationMessage For="@(() => editWarbandDto.Name)" />
+            </div>
+            <div>
+                <div>
+                    <div>
+                        <label for="gold">
+                            @GetCurrencyName() (@GetCurrencySymbol() )
+                        </label>
+                        <InputNumber id="gold" @bind-Value="editWarbandDto.Gold" />
+                        <ValidationMessage For="@(() => editWarbandDto.Gold)" />
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <label for="experience">Experience Points</label>
+                        <InputNumber id="experience" @bind-Value="editWarbandDto.Experience" />
+                        <ValidationMessage For="@(() => editWarbandDto.Experience)" />
+                    </div>
+                </div>
+            </div>
+            @if (validationErrors.Any())
+            {
+                <aside>
+                    <strong>Validation Errors:</strong>
+                    <ul>
+                        @foreach (var error in validationErrors)
+                        {
+                            <li>
+                            @error
+                            </li>
+                        }
+                    </ul>
+                </aside>
+            }
+            <footer>
+                <button type="button" @onclick="CancelEdit">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" disabled="@(!IsValidForm())">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </footer>
+        </EditForm>
+    </Modal>
+</main>
+
+@code {
+    [Parameter] public string WarbandId { get; set; } = string.Empty;
+
+    private Warband? warband;
+    private EditWarbandDto editWarbandDto = new();
+    private List<string> validationErrors = new();
+    private bool isLoading = true;
+    private bool showEditModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadWarband();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(WarbandId))
+        {
+            await LoadWarband();
+        }
+    }
+
+    private async Task LoadWarband()
+    {
+        isLoading = true;
+        validationErrors.Clear();
+
+        try
+        {
+            warband = await StateService.GetWarbandAsync(WarbandId);
+
+            if (warband != null)
+            {
+                editWarbandDto = new EditWarbandDto
+                {
+                    Id = warband.Id,
+                    Name = warband.Name,
+                    Gold = warband.Gold,
+                    Experience = warband.Experience,
+                    GameVariant = warband.GameVariant
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to load warband: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveWarband()
+    {
+        if (warband == null) return;
+
+        validationErrors.Clear();
+
+        try
+        {
+            // Update the warband with new values
+            warband.Name = editWarbandDto.Name.Trim();
+            warband.Gold = editWarbandDto.Gold;
+            warband.Experience = editWarbandDto.Experience;
+
+            // Save the updated warband
+            await StateService.UpdateWarbandAsync(warband);
+
+            // Close modal and refresh
+            showEditModal = false;
+            await LoadWarband();
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to save warband: {ex.Message}");
+        }
+    }
+
+    private void CancelEdit()
+    {
+        showEditModal = false;
+        validationErrors.Clear();
+
+        // Reset the form to original values
+        if (warband != null)
+        {
+            editWarbandDto = new EditWarbandDto
+            {
+                Id = warband.Id,
+                Name = warband.Name,
+                Gold = warband.Gold,
+                Experience = warband.Experience,
+                GameVariant = warband.GameVariant
+            };
+        }
+    }
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task AddCharacter()
+    {
+        if (warband == null) return;
+
+        try
+        {
+            // For now, just create a placeholder character
+            var character = new Character($"Member {warband.Members.Count + 1}");
+            await StateService.AddCharacterToWarbandAsync(warband.Id, character);
+            await LoadWarband(); // Refresh the page
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to add character: {ex.Message}");
+        }
+    }
+
+    private async Task EditCharacter(string characterId)
+    {
+        // TODO: Navigate to character edit page
+        await StateService.SetErrorAsync("Character editing not yet implemented");
+    }
+
+    private async Task RemoveCharacter(string characterId)
+    {
+        if (warband == null) return;
+
+        try
+        {
+            await StateService.RemoveCharacterFromWarbandAsync(warband.Id, characterId);
+            await LoadWarband(); // Refresh the page
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to remove character: {ex.Message}");
+        }
+    }
+
+    private bool IsValidForm()
+    {
+        if (editWarbandDto == null) return false;
+        if (string.IsNullOrWhiteSpace(editWarbandDto.Name)) return false;
+        if (editWarbandDto.Gold < 0 || editWarbandDto.Gold > 9999) return false;
+        if (editWarbandDto.Experience < 0 || editWarbandDto.Experience > 999) return false;
+        return true;
+    }
+
+    private string GetGameVariantDisplayName(string variant)
+    {
+        return variant switch
+        {
+            "28-psalms" => "28 Psalms",
+            "end-times" => "Forbidden Psalm: End Times",
+            "last-war" => "The Last War",
+            _ => variant
+        };
+    }
+
+    private string GetCurrencyName()
+    {
+        return warband?.GameVariant switch
+        {
+            "28-psalms" => "Credits",
+            "end-times" => "Gold",
+            "last-war" => "Resources",
+            _ => "Gold"
+        };
+    }
+
+    private string GetCurrencySymbol()
+    {
+        return warband?.GameVariant switch
+        {
+            "28-psalms" => "C",
+            "end-times" => "G",
+            "last-war" => "R",
+            _ => "G"
+        };
+    }
+
+    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetWarbandStats()
+    {
+        if (warband == null) return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>();
+
+        return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
+        {
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = $"{warband.Members.Count}/5",
+                Label = "Members"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = $"{warband.Gold}{GetCurrencySymbol()}",
+                Label = GetCurrencyName()
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = $"{warband.Experience}",
+                Label = "Experience"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = $"{warband.TotalValue}{GetCurrencySymbol()}",
+                Label = "Total Value"
+            }
+        };
+    }
+}
