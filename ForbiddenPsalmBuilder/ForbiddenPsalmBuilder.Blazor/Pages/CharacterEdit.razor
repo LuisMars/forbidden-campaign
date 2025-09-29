@@ -1,0 +1,365 @@
+@page "/warband/{WarbandId}/character/{CharacterId}"
+@page "/warband/{WarbandId}/character/new"
+@using ForbiddenPsalmBuilder.Core.Services.State
+@using ForbiddenPsalmBuilder.Core.Models.Warband
+@using ForbiddenPsalmBuilder.Core.Models.Character
+@using ForbiddenPsalmBuilder.Core.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@inject IGameStateService StateService
+@inject NavigationManager Navigation
+
+<PageTitle>
+    @(IsNewCharacter ? "New Character" : $"Edit {character?.Name}") - Forbidden Psalm Builder
+</PageTitle>
+
+<PageHeader
+    Title="@(IsNewCharacter ? "New Character" : $"Edit {character?.Name}")"
+    Subtitle="@(warband?.Name ?? "Unknown Warband")"
+    BreadcrumbItems="@GetBreadcrumbItems()">
+    <Actions>
+        <button type="button" @onclick="Cancel">
+            <i class="fas fa-times"></i>
+            Cancel
+        </button>
+    </Actions>
+</PageHeader>
+
+<main>
+    @if (isLoading)
+    {
+        <section>
+            <div role="status">
+                <span>Loading...</span>
+            </div>
+            <p>@(IsNewCharacter ? "Preparing character creation..." : "Loading character...")</p>
+        </section>
+    }
+    else if (warband == null)
+    {
+        <section>
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Warband Not Found</h3>
+            <p>The warband you're looking for doesn't exist or has been deleted.</p>
+            <button @onclick="GoHome">
+                <i class="fas fa-home"></i>
+                Go Home
+            </button>
+        </section>
+    }
+    else
+    {
+        <EditForm Model="editCharacterDto" OnValidSubmit="SaveCharacter">
+            <DataAnnotationsValidator />
+
+            <!-- Character Info -->
+            <section>
+                <h2>Character Information</h2>
+                <div>
+                    <label for="characterName">Character Name</label>
+                    <InputText
+                        id="characterName"
+                        @bind-Value="editCharacterDto.Name"
+                        placeholder="Enter character name..." />
+                    <ValidationMessage For="@(() => editCharacterDto.Name)" />
+                </div>
+
+                <div class="horizontal">
+                    <div>
+                        <label for="isSpellcaster">
+                            <InputCheckbox id="isSpellcaster" @bind-Value="editCharacterDto.IsSpellcaster" />
+                            Spellcaster
+                        </label>
+                    </div>
+                </div>
+
+                @if (availableSpecialTrooperTypes.Any())
+                {
+                    <div>
+                        <label for="specialTrooperType">Special Trooper Type (Optional)</label>
+                        <InputSelect id="specialTrooperType" @bind-Value="editCharacterDto.SpecialTrooperType">
+                            <option value="">-- None --</option>
+                            @foreach (var type in availableSpecialTrooperTypes)
+                            {
+                                <option value="@type">@type</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => editCharacterDto.SpecialTrooperType)" />
+                    </div>
+                }
+
+                <div>
+                    <label for="experience">Experience Points</label>
+                    <InputNumber id="experience" @bind-Value="editCharacterDto.Experience" />
+                    <ValidationMessage For="@(() => editCharacterDto.Experience)" />
+                </div>
+            </section>
+
+            <!-- Stat Array Selection -->
+            <section>
+                <StatArraySelector
+                    StatArrays="@availableStatArrays"
+                    OnStatsChanged="OnStatArrayStatsChanged"
+                    OnArraySelectionChanged="OnStatArraySelectionChanged" />
+            </section>
+
+            <!-- Calculated Stats Display -->
+            <section>
+                <h2>Calculated Stats</h2>
+                <StatsDisplay Stats="@GetCalculatedStats()" />
+            </section>
+
+            @if (validationErrors.Any())
+            {
+                <aside>
+                    <strong>Validation Errors:</strong>
+                    <ul>
+                        @foreach (var error in validationErrors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </aside>
+            }
+
+            <footer class="horizontal">
+                <button type="button" @onclick="Cancel">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" disabled="@(!IsValidForm())">
+                    <i class="fas fa-save"></i>
+                    @(IsNewCharacter ? "Create Character" : "Save Changes")
+                </button>
+            </footer>
+        </EditForm>
+    }
+</main>
+
+@code {
+    [Parameter] public string WarbandId { get; set; } = string.Empty;
+    [Parameter] public string? CharacterId { get; set; }
+
+    private Warband? warband;
+    private Character? character;
+    private EditCharacterDto editCharacterDto = new();
+    private List<string> validationErrors = new();
+    private bool isLoading = true;
+    private List<string> availableSpecialTrooperTypes = new();
+    private List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray> availableStatArrays = new();
+
+    private bool IsNewCharacter => string.IsNullOrEmpty(CharacterId) || CharacterId == "new";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(WarbandId))
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        validationErrors.Clear();
+
+        try
+        {
+            warband = await StateService.GetWarbandAsync(WarbandId);
+
+            if (warband == null)
+            {
+                return;
+            }
+
+            // Load available special trooper types for this game variant
+            availableSpecialTrooperTypes = await StateService.GetSpecialTrooperTypesAsync(warband.GameVariant);
+
+            // Load available stat arrays
+            availableStatArrays = await StateService.GetStatArraysAsync();
+
+            if (IsNewCharacter)
+            {
+                editCharacterDto = new EditCharacterDto
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = $"Member {warband.Members.Count + 1}",
+                    Agility = 0,
+                    Presence = 0,
+                    Strength = 0,
+                    Toughness = 0,
+                    Experience = 0,
+                    IsSpellcaster = false
+                };
+            }
+            else
+            {
+                character = warband.Members.FirstOrDefault(m => m.Id == CharacterId);
+                if (character != null)
+                {
+                    editCharacterDto = new EditCharacterDto
+                    {
+                        Id = character.Id,
+                        Name = character.Name,
+                        Agility = character.Stats.Agility,
+                        Presence = character.Stats.Presence,
+                        Strength = character.Stats.Strength,
+                        Toughness = character.Stats.Toughness,
+                        Experience = character.Experience,
+                        IsSpellcaster = character.IsSpellcaster,
+                        SpecialTrooperType = character.SpecialTrooperType
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to load data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveCharacter()
+    {
+        validationErrors.Clear();
+
+        try
+        {
+            if (IsNewCharacter)
+            {
+                var newCharacter = new Character(editCharacterDto.Name)
+                {
+                    Id = editCharacterDto.Id,
+                    Stats = new Stats(
+                        editCharacterDto.Agility,
+                        editCharacterDto.Presence,
+                        editCharacterDto.Strength,
+                        editCharacterDto.Toughness
+                    ),
+                    Experience = editCharacterDto.Experience,
+                    IsSpellcaster = editCharacterDto.IsSpellcaster,
+                    SpecialTrooperType = editCharacterDto.SpecialTrooperType
+                };
+                newCharacter.CurrentHP = newCharacter.Stats.HP;
+
+                await StateService.AddCharacterToWarbandAsync(WarbandId, newCharacter);
+            }
+            else if (character != null)
+            {
+                character.Name = editCharacterDto.Name.Trim();
+                character.Stats = new Stats(
+                    editCharacterDto.Agility,
+                    editCharacterDto.Presence,
+                    editCharacterDto.Strength,
+                    editCharacterDto.Toughness
+                );
+                character.Experience = editCharacterDto.Experience;
+                character.IsSpellcaster = editCharacterDto.IsSpellcaster;
+                character.SpecialTrooperType = editCharacterDto.SpecialTrooperType;
+
+                // Update current HP if toughness changed
+                if (character.CurrentHP > character.Stats.HP)
+                {
+                    character.CurrentHP = character.Stats.HP;
+                }
+
+                await StateService.UpdateWarbandAsync(warband!);
+            }
+
+            Navigation.NavigateTo($"/warband/{WarbandId}");
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to save character: {ex.Message}");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo($"/warband/{WarbandId}");
+    }
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private bool IsValidForm()
+    {
+        if (editCharacterDto == null) return false;
+        if (string.IsNullOrWhiteSpace(editCharacterDto.Name)) return false;
+        if (editCharacterDto.Agility < 0 || editCharacterDto.Agility > 10) return false;
+        if (editCharacterDto.Presence < 0 || editCharacterDto.Presence > 10) return false;
+        if (editCharacterDto.Strength < 0 || editCharacterDto.Strength > 10) return false;
+        if (editCharacterDto.Toughness < 0 || editCharacterDto.Toughness > 10) return false;
+        if (editCharacterDto.Experience < 0 || editCharacterDto.Experience > 1000) return false;
+        return true;
+    }
+
+    private List<ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem> GetBreadcrumbItems()
+    {
+        return new List<ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem>
+        {
+            new ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem
+            {
+                Text = "Home",
+                Href = "/"
+            },
+            new ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem
+            {
+                Text = warband?.Name ?? "Warband",
+                Href = $"/warband/{WarbandId}"
+            },
+            new ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem
+            {
+                Text = IsNewCharacter ? "New Character" : "Edit Character",
+                Href = null
+            }
+        };
+    }
+
+    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetCalculatedStats()
+    {
+        return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
+        {
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.Movement.ToString(),
+                Label = "Movement"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.HP.ToString(),
+                Label = "Hit Points"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.EquipmentSlots.ToString(),
+                Label = "Equipment Slots"
+            }
+        };
+    }
+
+    private void OnStatArrayStatsChanged((int Agility, int Presence, int Strength, int Toughness) stats)
+    {
+        editCharacterDto.Agility = stats.Agility;
+        editCharacterDto.Presence = stats.Presence;
+        editCharacterDto.Strength = stats.Strength;
+        editCharacterDto.Toughness = stats.Toughness;
+        StateHasChanged();
+    }
+
+    private void OnStatArraySelectionChanged(string arrayId)
+    {
+        // This method can be simplified or removed if no longer needed
+        StateHasChanged();
+    }
+}

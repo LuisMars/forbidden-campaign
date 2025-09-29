@@ -5,19 +5,31 @@
 @using ForbiddenPsalmBuilder.Core.DTOs
 @using ForbiddenPsalmBuilder.Core.Validation
 @using Microsoft.AspNetCore.Components.Forms
-@using ForbiddenPsalmBuilder.Blazor.Components
 @inject IGameStateService StateService
 @inject NavigationManager Navigation
 <PageTitle>
     @(warband?.Name ?? "Warband") - Forbidden Psalm Builder
 </PageTitle>
-<header aria-label="breadcrumb" class="horizontal">
-    <a href="/">← Home</a>
-    <span>/</span>
-    <span>
-        @(warband?.Name ?? "Warband")
-    </span>
-</header>
+
+<PageHeader
+    Title="@(warband?.Name ?? "Warband")"
+    Subtitle="@GetGameVariantDisplayName(warband?.GameVariant ?? "")"
+    BreadcrumbItems="@GetBreadcrumbItems()">
+    <Actions>
+        @if (warband != null)
+        {
+            <button @onclick="() => showEditModal = true">
+                <i class="fas fa-edit"></i>
+                Edit
+            </button>
+            <button @onclick="AddCharacter" disabled="@(!warband.CanAddMember)">
+                <i class="ra ra-person"></i>
+                Add Member
+            </button>
+        }
+    </Actions>
+</PageHeader>
+
 <main>
     @if (warband == null)
     {
@@ -49,30 +61,10 @@
     }
     else
     {
-        <!-- Warband Header -->
-        <header>
-            <div class="horizontal space">
-                <div>
-                    <h1>
-                    @warband.Name
-                    </h1>
-                    <p>
-                    @GetGameVariantDisplayName(warband.GameVariant)
-                    </p>
-                </div>
-                <div class="horizontal">
-                    <button @onclick="() => showEditModal = true">
-                        <i class="fas fa-edit"></i>
-                        Edit
-                    </button>
-                    <button @onclick="AddCharacter" disabled="@(!warband.CanAddMember)">
-                        <i class="ra ra-person"></i>
-                        Add Member
-                    </button>
-                </div>
-            </div>
+        <!-- Warband Stats -->
+        <section>
             <StatsDisplay Stats="@GetWarbandStats()" />
-        </header>
+        </section>
         <!-- Warband Members -->
         <section>
             <section>
@@ -179,9 +171,10 @@
         </section>
     }
     <!-- Edit Warband Info Modal -->
-    <Modal IsVisible="@(showEditModal && warband != null)"
-           Title="Edit Warband Info"
-           OnClose="CancelEdit">
+    <Modal
+        IsVisible="@(showEditModal && warband != null)"
+        Title="Edit Warband Info"
+        OnClose="CancelEdit">
         <EditForm Model="editWarbandDto" OnValidSubmit="SaveWarband">
             <DataAnnotationsValidator />
             <div>
@@ -237,7 +230,6 @@
         </EditForm>
     </Modal>
 </main>
-
 @code {
     [Parameter] public string WarbandId { get; set; } = string.Empty;
 
@@ -342,27 +334,14 @@
         Navigation.NavigateTo("/");
     }
 
-    private async Task AddCharacter()
+    private void AddCharacter()
     {
-        if (warband == null) return;
-
-        try
-        {
-            // For now, just create a placeholder character
-            var character = new Character($"Member {warband.Members.Count + 1}");
-            await StateService.AddCharacterToWarbandAsync(warband.Id, character);
-            await LoadWarband(); // Refresh the page
-        }
-        catch (Exception ex)
-        {
-            await StateService.SetErrorAsync($"Failed to add character: {ex.Message}");
-        }
+        Navigation.NavigateTo($"/warband/{WarbandId}/character/new");
     }
 
-    private async Task EditCharacter(string characterId)
+    private void EditCharacter(string characterId)
     {
-        // TODO: Navigate to character edit page
-        await StateService.SetErrorAsync("Character editing not yet implemented");
+        Navigation.NavigateTo($"/warband/{WarbandId}/character/{characterId}");
     }
 
     private async Task RemoveCharacter(string characterId)
@@ -447,6 +426,23 @@
             {
                 Value = $"{warband.TotalValue}{GetCurrencySymbol()}",
                 Label = "Total Value"
+            }
+        };
+    }
+
+    private List<ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem> GetBreadcrumbItems()
+    {
+        return new List<ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem>
+        {
+            new ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem
+            {
+                Text = "Home",
+                Href = "/"
+            },
+            new ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem
+            {
+                Text = warband?.Name ?? "Warband",
+                Href = null
             }
         };
     }

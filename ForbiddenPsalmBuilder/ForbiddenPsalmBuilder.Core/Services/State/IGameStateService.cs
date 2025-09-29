@@ -36,6 +36,8 @@ public interface IGameStateService
     // Data loading
     Task LoadGameDataAsync();
     Task RefreshGameDataAsync();
+    Task<List<string>> GetSpecialTrooperTypesAsync(string gameVariant);
+    Task<List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray>> GetStatArraysAsync();
 
     // State persistence
     Task SaveStateAsync();

@@ -192,6 +192,11 @@ public class GameStateService : IGameStateService
 
         warband.Members.Add(character);
         warband.UpdateLastModified();
+
+        // Save to repository
+        var updatedWarband = await _warbandRepository.SaveAsync(warband);
+        _state.Warbands[updatedWarband.Id] = updatedWarband;
+
         _state.NotifyWarbandChanged(warbandId);
         await SaveStateAsync();
 
@@ -318,6 +323,41 @@ public class GameStateService : IGameStateService
     public async Task RefreshGameDataAsync()
     {
         await LoadGameDataAsync();
+    }
+
+    public async Task<List<string>> GetSpecialTrooperTypesAsync(string gameVariant)
+    {
+        await Task.CompletedTask; // For async consistency
+
+        return gameVariant switch
+        {
+            "last-war" => new List<string> { "Witch", "Sniper", "Anti-Tank Gunner" },
+            _ => new List<string>() // Other game variants don't have special trooper types
+        };
+    }
+
+    public async Task<List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray>> GetStatArraysAsync()
+    {
+        await Task.CompletedTask; // For async consistency
+
+        // Based on character-creation.json data
+        return new List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray>
+        {
+            new ForbiddenPsalmBuilder.Core.Models.Character.StatArray
+            {
+                Id = "specialist",
+                Name = "Specialist",
+                Values = new[] { 3, 1, 0, -3 },
+                Description = "High specialization with major weakness"
+            },
+            new ForbiddenPsalmBuilder.Core.Models.Character.StatArray
+            {
+                Id = "balanced",
+                Name = "Balanced",
+                Values = new[] { 2, 2, -1, -2 },
+                Description = "More balanced distribution"
+            }
+        };
     }
 
     // State persistence (placeholder - will implement with localStorage)
