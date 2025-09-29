@@ -145,4 +145,269 @@ public class GameStateServiceTests
         _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Never);
     }
 
+    [Fact]
+    public async Task GenerateWarbandNameAsync_ShouldReturnValidName()
+    {
+        // Act
+        var result = await _service.GenerateWarbandNameAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.DoesNotContain("[", result); // Should not contain unprocessed tokens
+        Assert.DoesNotContain("]", result);
+    }
+
+    [Fact]
+    public async Task GenerateWarbandNameAsync_MultipleCalls_ShouldProduceDifferentResults()
+    {
+        // Act
+        var names = new HashSet<string>();
+        for (int i = 0; i < 20; i++)
+        {
+            var name = await _service.GenerateWarbandNameAsync();
+            names.Add(name);
+        }
+
+        // Assert
+        Assert.True(names.Count > 1, "Should generate varied names");
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_28Psalms_ShouldReturnValidName()
+    {
+        // Act
+        var result = await _service.GenerateCharacterNameAsync("28-psalms");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.NotEqual("Unnamed", result); // Should not be default fallback
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_EndTimes_ShouldReturnValidName()
+    {
+        // Act
+        var result = await _service.GenerateCharacterNameAsync("end-times");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.NotEqual("Unnamed", result); // Should not be default fallback
+        // End times can return either "FirstName Title" or a complete name
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_LastWar_ShouldReturnValidName()
+    {
+        // Act
+        var result = await _service.GenerateCharacterNameAsync("last-war");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+        Assert.NotEqual("Unnamed", result); // Should not be default fallback
+        // Last war can return "FirstName Suffix", "Prefix FirstName", or "Prefix FirstName Suffix"
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_MultipleCalls_ShouldProduceDifferentResults()
+    {
+        // Act
+        var names = new HashSet<string>();
+        for (int i = 0; i < 20; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("end-times");
+            names.Add(name);
+        }
+
+        // Assert
+        Assert.True(names.Count > 1, "Should generate varied character names");
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_UnknownVariant_ShouldReturnDefaultName()
+    {
+        // Act
+        var result = await _service.GenerateCharacterNameAsync("unknown-variant");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_28Psalms_ShouldPickFrom28PsalmsData()
+    {
+        // Known names from 28-psalms data (sample from names.json)
+        var known28PsalmsNames = new HashSet<string>
+        {
+            "Rex", "Gridotus", "Mister Quimper", "Inquisitor Lucius", "David C. Moore",
+            "Ophelia", "Alex Goode", "John R. Young", "Merlin", "Filthor"
+        };
+
+        // Act - Generate 50 names to get good coverage
+        var generated = new HashSet<string>();
+        for (int i = 0; i < 50; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("28-psalms");
+            generated.Add(name);
+        }
+
+        // Assert - At least some should match known 28-psalms names
+        var matchCount = generated.Intersect(known28PsalmsNames).Count();
+        Assert.True(matchCount > 0,
+            $"Should generate at least some names from 28-psalms data. Found {matchCount} matches out of {generated.Count} generated names.");
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_EndTimes_ShouldPickFromEndTimesData()
+    {
+        // Known first names and complete names from end-times data
+        var knownEndTimesFirstNames = new HashSet<string>
+        {
+            "Nohr", "Ash", "Darkest", "Saint", "Mother", "Hugo", "Ryan", "Willnox"
+        };
+
+        var knownEndTimesCompleteNames = new HashSet<string>
+        {
+            "Hugo Stieglitz", "Ryan R", "Willnox", "Danny The Deströyer", "Ymön"
+        };
+
+        // Act - Generate 50 names
+        var generated = new HashSet<string>();
+        for (int i = 0; i < 50; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("end-times");
+            generated.Add(name);
+        }
+
+        // Assert - Should find either complete names or names starting with known first names
+        var completeMatches = generated.Intersect(knownEndTimesCompleteNames).Count();
+        var firstNameMatches = generated.Count(name =>
+            knownEndTimesFirstNames.Any(fn => name.StartsWith(fn)));
+
+        Assert.True(completeMatches > 0 || firstNameMatches > 0,
+            $"Should generate names from end-times data. Complete matches: {completeMatches}, First name matches: {firstNameMatches}");
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_EndTimes_ShouldAlwaysHaveEitherCompleteNameOrFirstNameWithTitle()
+    {
+        // Known first names that should NOT appear alone
+        var knownFirstNamesOnly = new HashSet<string>
+        {
+            "Nohr", "Ash", "Darkest", "Saint", "Mother", "Dire", "Dre", "Lemon", "Steven",
+            "Beca", "Jherek", "Carys", "Owain", "Marc", "Tomos", "Nadia", "Pete", "Bruce"
+        };
+
+        // Act - Generate 100 names
+        var generated = new HashSet<string>();
+        for (int i = 0; i < 100; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("end-times");
+            generated.Add(name);
+        }
+
+        // Assert - No names should be JUST a single first name from the knownFirstNamesOnly list
+        // They should either be:
+        // 1. A complete name (from completeNames list), OR
+        // 2. A firstName combined with a title (containing "The ")
+        var justFirstNames = generated.Where(name =>
+            knownFirstNamesOnly.Contains(name)
+        ).ToList();
+
+        Assert.Empty(justFirstNames);
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_LastWar_ShouldPickFromLastWarData()
+    {
+        // Known first names and title components from last-war data
+        var knownLastWarFirstNames = new HashSet<string>
+        {
+            "Wilhelm", "René", "Edward", "Tommy", "Mary", "Kaiser", "General", "Ghost"
+        };
+
+        var knownLastWarPrefixes = new HashSet<string>
+        {
+            "Private 1st. class", "Captain", "Lieutenant", "Major", "Baron", "Nurse"
+        };
+
+        var knownLastWarSuffixes = new HashSet<string>
+        {
+            "Jr", "The Hellfighter", "the Tommy", "the Baron", "the Wolf", "the Ace"
+        };
+
+        // Act - Generate 100 names (more because of prefix/suffix combinations)
+        var generated = new List<string>();
+        for (int i = 0; i < 100; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("last-war");
+            generated.Add(name);
+        }
+
+        // Assert - Should find names with known first names, and possibly prefixes/suffixes
+        var firstNameMatches = generated.Count(name =>
+            knownLastWarFirstNames.Any(fn => name.Contains(fn)));
+
+        var prefixMatches = generated.Count(name =>
+            knownLastWarPrefixes.Any(p => name.StartsWith(p)));
+
+        var suffixMatches = generated.Count(name =>
+            knownLastWarSuffixes.Any(s => name.EndsWith(s)));
+
+        Assert.True(firstNameMatches > 0,
+            $"Should generate names containing last-war first names. Found {firstNameMatches} matches.");
+
+        // Some names should have prefixes or suffixes (33% chance each)
+        Assert.True(prefixMatches > 0 || suffixMatches > 0,
+            $"Should generate names with last-war titles. Prefix matches: {prefixMatches}, Suffix matches: {suffixMatches}");
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_28Psalms_ShouldNotUsEndTimesData()
+    {
+        // Known end-times complete names that should NOT appear in 28-psalms
+        var endTimesOnlyNames = new HashSet<string>
+        {
+            "Hugo Stieglitz", "Ryan R", "Willnox", "Danny The Deströyer", "Soupbone"
+        };
+
+        // Act - Generate 100 names
+        var generated = new HashSet<string>();
+        for (int i = 0; i < 100; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("28-psalms");
+            generated.Add(name);
+        }
+
+        // Assert - Should not contain any end-times-only names
+        var wrongDataMatches = generated.Intersect(endTimesOnlyNames).ToList();
+        Assert.Empty(wrongDataMatches);
+    }
+
+    [Fact]
+    public async Task GenerateCharacterNameAsync_LastWar_ShouldNotUse28PsalmsData()
+    {
+        // Known 28-psalms names that should NOT appear in last-war
+        var psalmsOnlyNames = new HashSet<string>
+        {
+            "Gridotus", "Inquisitor Lucius", "Capitald", "Matthias Mencel"
+        };
+
+        // Act - Generate 100 names
+        var generated = new HashSet<string>();
+        for (int i = 0; i < 100; i++)
+        {
+            var name = await _service.GenerateCharacterNameAsync("last-war");
+            generated.Add(name);
+        }
+
+        // Assert - Should not contain any 28-psalms-only names
+        var wrongDataMatches = generated.Intersect(psalmsOnlyNames).ToList();
+        Assert.Empty(wrongDataMatches);
+    }
+
 }

@@ -64,9 +64,14 @@
 
         <fieldset>
             <label for="warbandName">Warband Name</label>
-            <InputText id="warbandName"
-                      @bind-Value="createWarbandDto.Name"
-                      placeholder="Enter warband name..." />
+            <div class="horizontal gap-small">
+                <InputText id="warbandName"
+                          @bind-Value="createWarbandDto.Name"
+                          placeholder="Enter warband name..." />
+                <button type="button" @onclick="GenerateNewName" title="Generate new random name">
+                    <i class="fas fa-dice"></i>
+                </button>
+            </div>
             <ValidationMessage For="@(() => createWarbandDto.Name)" />
         </fieldset>
 
@@ -163,15 +168,23 @@
         }
     }
 
-    private void CreateNewWarband()
+    private async Task CreateNewWarband()
     {
+        var generatedName = await StateService.GenerateWarbandNameAsync();
         createWarbandDto = new CreateWarbandDto
         {
+            Name = generatedName,
             GameVariant = "",
             StartingGold = 50 // Default value
         };
         validationErrors.Clear();
         showCreateModal = true;
+    }
+
+    private async Task GenerateNewName()
+    {
+        createWarbandDto.Name = await StateService.GenerateWarbandNameAsync();
+        StateHasChanged();
     }
 
     private void CancelCreate()

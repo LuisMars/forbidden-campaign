@@ -11,4 +11,4 @@
 - Self reflect, review your work, you're not perfect
 - Ask questions if in doubt
 - Use tools!
-- Build ALWAYS to confirm your changes work
+- Build ALWAYS to confirm your changes work, unless it's just css

@@ -56,10 +56,18 @@
                 <h2>Character Information</h2>
                 <div>
                     <label for="characterName">Character Name</label>
-                    <InputText
-                        id="characterName"
-                        @bind-Value="editCharacterDto.Name"
-                        placeholder="Enter character name..." />
+                    <div class="horizontal gap-small">
+                        <InputText
+                            id="characterName"
+                            @bind-Value="editCharacterDto.Name"
+                            placeholder="Enter character name..." />
+                        <button
+                            type="button"
+                            @onclick="GenerateNewCharacterName"
+                            title="Generate new random name">
+                            <i class="fas fa-dice"></i>
+                        </button>
+                    </div>
                     <ValidationMessage For="@(() => editCharacterDto.Name)" />
                 </div>
 
@@ -296,10 +304,10 @@
     {
         if (editCharacterDto == null) return false;
         if (string.IsNullOrWhiteSpace(editCharacterDto.Name)) return false;
-        if (editCharacterDto.Agility < 0 || editCharacterDto.Agility > 10) return false;
-        if (editCharacterDto.Presence < 0 || editCharacterDto.Presence > 10) return false;
-        if (editCharacterDto.Strength < 0 || editCharacterDto.Strength > 10) return false;
-        if (editCharacterDto.Toughness < 0 || editCharacterDto.Toughness > 10) return false;
+        if (editCharacterDto.Agility < -3 || editCharacterDto.Agility > 3) return false;
+        if (editCharacterDto.Presence < -3 || editCharacterDto.Presence > 3) return false;
+        if (editCharacterDto.Strength < -3 || editCharacterDto.Strength > 3) return false;
+        if (editCharacterDto.Toughness < -3 || editCharacterDto.Toughness > 3) return false;
         if (editCharacterDto.Experience < 0 || editCharacterDto.Experience > 1000) return false;
         return true;
     }
@@ -360,6 +368,13 @@
     private void OnStatArraySelectionChanged(string arrayId)
     {
         // This method can be simplified or removed if no longer needed
+        StateHasChanged();
+    }
+
+    private async Task GenerateNewCharacterName()
+    {
+        if (warband == null) return;
+        editCharacterDto.Name = await StateService.GenerateCharacterNameAsync(warband.GameVariant);
         StateHasChanged();
     }
 }

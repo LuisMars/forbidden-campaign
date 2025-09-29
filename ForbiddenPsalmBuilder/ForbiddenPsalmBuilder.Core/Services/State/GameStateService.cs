@@ -1,7 +1,9 @@
 using ForbiddenPsalmBuilder.Core.Models.Character;
 using ForbiddenPsalmBuilder.Core.Models.Warband;
 using ForbiddenPsalmBuilder.Core.Models.GameData;
+using ForbiddenPsalmBuilder.Core.Models.NameGeneration;
 using ForbiddenPsalmBuilder.Core.Repositories;
+using ForbiddenPsalmBuilder.Data.Services;
 using System.Text.Json;
 
 namespace ForbiddenPsalmBuilder.Core.Services.State;
@@ -10,7 +12,9 @@ public class GameStateService : IGameStateService
 {
     private readonly GlobalGameState _state;
     private readonly IWarbandRepository _warbandRepository;
+    private readonly IEmbeddedResourceService _resourceService;
     private const string StateStorageKey = "forbidden-psalm-builder-state";
+    private static readonly Lazy<WarbandNameGenerator> _nameGenerator = new(LoadNameGenerator);
 
     public GlobalGameState State => _state;
 
@@ -39,10 +43,11 @@ public class GameStateService : IGameStateService
         remove => _state.ActiveWarbandChanged -= value;
     }
 
-    public GameStateService(GlobalGameState state, IWarbandRepository warbandRepository)
+    public GameStateService(GlobalGameState state, IWarbandRepository warbandRepository, IEmbeddedResourceService? resourceService = null)
     {
         _state = state;
         _warbandRepository = warbandRepository;
+        _resourceService = resourceService ?? new EmbeddedResourceService();
     }
 
     // Game variant management
@@ -396,6 +401,58 @@ public class GameStateService : IGameStateService
         _state.ClearError();
         _state.NotifyStateChanged();
         await SaveStateAsync();
+    }
+
+    // Name generation
+    public async Task<string> GenerateWarbandNameAsync()
+    {
+        return await Task.FromResult(_nameGenerator.Value.GenerateName());
+    }
+
+    public async Task<string> GenerateCharacterNameAsync(string gameVariant)
+    {
+        var generator = new CharacterNameGenerator(_resourceService);
+        return await generator.GenerateNameAsync(gameVariant);
+    }
+
+    private static WarbandNameGenerator LoadNameGenerator()
+    {
+        try
+        {
+            // Try to load from the JSON file
+            var dataPath = Path.Combine("data", "shared", "warband-names.json");
+            if (File.Exists(dataPath))
+            {
+                return WarbandNameGenerator.LoadFromFileAsync(dataPath).GetAwaiter().GetResult();
+            }
+        }
+        catch
+        {
+            // Fall back to hardcoded data if file loading fails
+        }
+
+        // Fallback to basic hardcoded data
+        var basicData = new WarbandNameData
+        {
+            Patterns = new List<string>
+            {
+                "[group] of [adjective] [occupation]",
+                "the [adjective] [group]",
+                "the [occupation]",
+                "the [adjective] [occupation]"
+            },
+            Group = new List<string> { "Band", "Guild", "Order", "Circle", "Crew", "Pack", "Legion" },
+            Occupation = new List<string> { "Seekers", "Wanderers", "Guardians", "Hunters", "Defenders", "Knights", "Scribes" },
+            Adjective = new List<string> { "Dark", "Ancient", "Wild", "Lost", "Iron", "Silent", "Forgotten", "Desperate" },
+            Location = new List<string> { "of the Woods", "of the Hills", "of the Void" },
+            LocationTemplates = new List<string>(),
+            Shape = new List<string>(),
+            Atmosphere = new List<string>(),
+            Color = new List<string>(),
+            Animal = new List<string>()
+        };
+
+        return new WarbandNameGenerator(basicData);
     }
 
     // Error handling

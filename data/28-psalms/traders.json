@@ -1,8 +1,0 @@
-[
-  {
-    "name": "Scoundrel trader",
-    "sellMultiplier": 0.5,
-    "roundingRule": "down",
-    "cannotSell": ["Scrolls"]
-  }
-]

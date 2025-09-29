@@ -1,28 +1,27 @@
 @if (IsVisible)
 {
     <div class="modal">
-        <div class="modal-wrapper">
-            <dialog open>
-                @if (!string.IsNullOrEmpty(Title))
-                {
-                    <header class="horizontal space">
-                        <h3>@Title</h3>
-                        @if (ShowCloseButton)
-                        {
-                            <button type="button" class="close-button" @onclick="Close">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        }
-                    </header>
-                }
+        <dialog open class="modal-dialog">
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <header class="horizontal space">
+                    <h3>@Title</h3>
+                    @if (ShowCloseButton)
+                    {
+                        <button type="button" class="close-button" @onclick="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    }
+                </header>
+            }
 
-                <section>
-                    @ChildContent
-                </section>
-            </dialog>
-        </div>
+            @ChildContent
+        </dialog>
     </div>
 }
+
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
 
 @code {
     [Parameter] public bool IsVisible { get; set; }
@@ -30,6 +29,24 @@
     [Parameter] public bool ShowCloseButton { get; set; } = true;
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
+
+    private bool _previousIsVisible = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_previousIsVisible != IsVisible)
+        {
+            if (IsVisible)
+            {
+                await JSRuntime.InvokeVoidAsync("document.body.classList.add", "modal-open");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "modal-open");
+            }
+            _previousIsVisible = IsVisible;
+        }
+    }
 
     private async Task Close()
     {

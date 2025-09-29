@@ -10,8 +10,20 @@ public class EmbeddedResourceService : IEmbeddedResourceService
 
     public EmbeddedResourceService()
     {
+        // Load resources from the Data assembly where they are embedded
         _assembly = Assembly.GetExecutingAssembly();
-        _baseNamespace = "ForbiddenPsalmBuilder.Blazor.Data";
+        _baseNamespace = "ForbiddenPsalmBuilder.Data";
+
+        // Debug: Log available resources
+        var resources = _assembly.GetManifestResourceNames();
+        Console.WriteLine($"[EmbeddedResourceService] Assembly: {_assembly.GetName().Name}");
+        Console.WriteLine($"[EmbeddedResourceService] Total resources: {resources.Length}");
+        var nameResources = resources.Where(r => r.Contains("names")).ToList();
+        Console.WriteLine($"[EmbeddedResourceService] Name resources: {nameResources.Count}");
+        foreach (var res in nameResources)
+        {
+            Console.WriteLine($"  - {res}");
+        }
     }
 
     public async Task<string> GetResourceAsStringAsync(string resourcePath)
@@ -39,18 +51,23 @@ public class EmbeddedResourceService : IEmbeddedResourceService
     {
         // Convert hyphens to underscores for embedded resource naming
         var resourceGameVariant = gameVariant.Replace("-", "_");
+        var resourceFileName = fileName.Replace("-", "-"); // Keep hyphens in filenames as they are
 
         // .NET adds underscore prefix if folder name starts with a number
         var resourcePath = char.IsDigit(resourceGameVariant[0])
-            ? $"data._{resourceGameVariant}.{fileName}"
-            : $"data.{resourceGameVariant}.{fileName}";
+            ? $"data._{resourceGameVariant}.{resourceFileName}"
+            : $"data.{resourceGameVariant}.{resourceFileName}";
 
-        return await GetResourceAsJsonAsync<T>(resourcePath);
+        Console.WriteLine($"[EmbeddedResourceService] Loading game resource: {gameVariant}/{fileName} -> {resourcePath}");
+        var result = await GetResourceAsJsonAsync<T>(resourcePath);
+        Console.WriteLine($"[EmbeddedResourceService] Loaded: {result != null}");
+        return result;
     }
 
     public async Task<T?> GetSharedResourceAsync<T>(string fileName)
     {
-        var resourcePath = $"data.shared.{fileName}";
+        var resourceFileName = fileName.Replace("-", "-"); // Keep hyphens in filenames as they are
+        var resourcePath = $"data.shared.{resourceFileName}";
         return await GetResourceAsJsonAsync<T>(resourcePath);
     }
 

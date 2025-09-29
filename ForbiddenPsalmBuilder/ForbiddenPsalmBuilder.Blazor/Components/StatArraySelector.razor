@@ -42,51 +42,51 @@
 
                 <div class="assignment-grid">
                     <div class="stat-assignment-row">
-                        <label>Agility:</label>
                         <select @bind="AgilityIndex" class="stat-selector">
-                            <option value="-1">Not Set</option>
+                            <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
                                 var value = GetSelectedArray()!.Values[i];
                                 <option value="@i">@(value >= 0 ? "+" : "")@value</option>
                             }
                         </select>
+                        <label>AGI</label>
                     </div>
 
                     <div class="stat-assignment-row">
-                        <label>Presence:</label>
                         <select @bind="PresenceIndex" class="stat-selector">
-                            <option value="-1">Not Set</option>
+                            <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
                                 var value = GetSelectedArray()!.Values[i];
                                 <option value="@i" disabled="@(IsIndexUsed(i, nameof(PresenceIndex)))">@(value >= 0 ? "+" : "")@value</option>
                             }
                         </select>
+                        <label>PRE</label>
                     </div>
 
                     <div class="stat-assignment-row">
-                        <label>Strength:</label>
                         <select @bind="StrengthIndex" class="stat-selector">
-                            <option value="-1">Not Set</option>
+                            <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
                                 var value = GetSelectedArray()!.Values[i];
                                 <option value="@i" disabled="@(IsIndexUsed(i, nameof(StrengthIndex)))">@(value >= 0 ? "+" : "")@value</option>
                             }
                         </select>
+                        <label>STR</label>
                     </div>
 
                     <div class="stat-assignment-row">
-                        <label>Toughness:</label>
                         <select @bind="ToughnessIndex" class="stat-selector">
-                            <option value="-1">Not Set</option>
+                            <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
                                 var value = GetSelectedArray()!.Values[i];
                                 <option value="@i" disabled="@(IsIndexUsed(i, nameof(ToughnessIndex)))">@(value >= 0 ? "+" : "")@value</option>
                             }
                         </select>
+                        <label>TOU</label>
                     </div>
                 </div>
 
@@ -107,23 +107,23 @@
 
                 <div class="assignment-grid">
                     <div class="stat-assignment-row">
-                        <label>Agility:</label>
-                        <input type="number" @bind="ManualAgility" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="0" max="10" />
+                        <input type="number" @bind="ManualAgility" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="-3" max="3" />
+                        <label>AGI</label>
                     </div>
 
                     <div class="stat-assignment-row">
-                        <label>Presence:</label>
-                        <input type="number" @bind="ManualPresence" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="0" max="10" />
+                        <input type="number" @bind="ManualPresence" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="-3" max="3" />
+                        <label>PRE</label>
                     </div>
 
                     <div class="stat-assignment-row">
-                        <label>Strength:</label>
-                        <input type="number" @bind="ManualStrength" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="0" max="10" />
+                        <input type="number" @bind="ManualStrength" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="-3" max="3" />
+                        <label>STR</label>
                     </div>
 
                     <div class="stat-assignment-row">
-                        <label>Toughness:</label>
-                        <input type="number" @bind="ManualToughness" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="0" max="10" />
+                        <input type="number" @bind="ManualToughness" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="-3" max="3" />
+                        <label>TOU</label>
                     </div>
                 </div>
             </div>

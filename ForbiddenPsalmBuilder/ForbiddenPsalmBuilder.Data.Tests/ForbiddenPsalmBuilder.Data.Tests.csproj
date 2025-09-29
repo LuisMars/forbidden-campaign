@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ForbiddenPsalmBuilder.Data\ForbiddenPsalmBuilder.Data.csproj" />
+    <ProjectReference Include="..\ForbiddenPsalmBuilder.Core\ForbiddenPsalmBuilder.Core.csproj" />
   </ItemGroup>
 
 </Project>

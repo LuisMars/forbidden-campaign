@@ -21,6 +21,8 @@ public interface IGameStateService
     Task<List<Warband>> GetWarbandsForGameAsync(string gameVariant);
     Task<Warband?> GetWarbandAsync(string warbandId);
     Task UpdateWarbandAsync(Warband warband);
+    Task<string> GenerateWarbandNameAsync();
+    Task<string> GenerateCharacterNameAsync(string gameVariant);
 
     // Character management
     Task<string> AddCharacterToWarbandAsync(string warbandId, Character character);

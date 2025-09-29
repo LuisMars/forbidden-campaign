@@ -17,4 +17,5 @@
     <ProjectReference Include="..\ForbiddenPsalmBuilder.Core\ForbiddenPsalmBuilder.Core.csproj" />
   </ItemGroup>
 
+
 </Project>

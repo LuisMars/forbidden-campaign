@@ -176,10 +176,8 @@ textarea {
 }
 
 fieldset {
-  border: var(--border-width) solid var(--color-container);
-  padding: var(--spacing-one);
-  margin-bottom: var(--spacing-one);
-  background-color: var(--color-container);
+  padding: 0;
+  margin: 0;
   color: var(--color-white);
 }
 
@@ -188,6 +186,16 @@ legend {
   font-size: var(--font-size-lg);
   color: var(--color-accent-1);
   padding: 0 var(--spacing-half);
+}
+
+fieldset label {
+  padding: var(--spacing-half) var(--spacing-half) 0 var(--spacing-half);
+}
+
+fieldset input,
+fieldset select,
+fieldset textarea {
+  margin: 0 var(--spacing-half) var(--spacing-half) var(--spacing-half);
 }
 
 input[type="checkbox"], input[type="radio"] {
@@ -203,8 +211,7 @@ input:disabled, textarea:disabled, select:disabled {
 }
 
 :focus-visible {
-  outline: var(--border-width) solid var(--color-accent-2);
-  outline-offset: var(--spacing-quarter);
+  outline: none;
 }
 
 table {
@@ -374,38 +381,36 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--color-black);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
-  overflow: hidden;
-}
-
-.modal .modal-wrapper {
-  width: 100vw;
-  height: 100vh;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: var(--spacing-one);
   overflow-y: auto;
-  background-color: var(--color-black);
-  border: var(--border-width) solid var(--color-accent-1);
+  overscroll-behavior: contain;
+  padding: 3rem 0;
 }
 
-.modal dialog {
-  background: none;
-  border: none;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
-  margin: 0;
+.modal .modal-dialog {
+  width: 80%;
+  max-width: 700px;
+  margin: 0 auto;
   padding: 0;
+  background-color: var(--color-black);
+  border: none;
+  /* Reset dialog default positioning */
+  position: static;
 }
 
-.modal dialog header {
+/* Mobile responsive width */
+@media (max-width: 768px) {
+  .modal .modal-dialog {
+    width: 95%;
+    margin: 1rem auto;
+    padding: var(--spacing-one);
+  }
+}
+
+.modal .modal-dialog header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -414,13 +419,13 @@ button:disabled {
   margin-bottom: var(--spacing-one);
 }
 
-.modal dialog footer {
+.modal .modal-dialog footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-half);
   border-top: var(--border-width) solid var(--color-container);
-  padding-top: var(--spacing-half);
-  margin-top: var(--spacing-one);
+  padding: 0;
+  margin: 0;
 }
 
 .close-button {
@@ -441,6 +446,12 @@ button:disabled {
 .close-button:hover {
   background-color: var(--color-accent-2);
   color: var(--color-white);
+}
+
+/* Prevent body scrolling when modal is open */
+body.modal-open {
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 /* Stats Display Component */
@@ -643,24 +654,36 @@ button:disabled {
 .assignment-grid {
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-one);
+  width: 100%;
+  gap: var(--spacing-quarter);
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: none;
   flex-wrap: wrap;
 }
 
 .stat-assignment-row {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-quarter);
-  flex: 1;
-  min-width: 120px;
+  justify-content: center;
   text-align: center;
+  gap: var(--spacing-quarter);
+  padding: var(--spacing-quarter);
+  background-color: transparent;
+  border: none;
+  margin: 0;
 }
 
 .stat-assignment-row label {
-  margin: 0;
-  font-weight: bold;
+  font-family: var(--font-accent);
   font-size: var(--font-size-small);
+  color: var(--color-white);
+  margin-top: var(--spacing-quarter);
+  line-height: 1.2;
+  margin: 0;
 }
 
 .stat-assignment-row select {
@@ -671,7 +694,7 @@ button:disabled {
 
 .stat-selector {
   font-family: var(--font-display) !important;
-  font-size: var(--font-size-large) !important;
+  font-size: var(--font-size-4xl) !important;
   color: var(--color-accent-1) !important;
   font-weight: bold !important;
   padding: var(--spacing-half) !important;
@@ -679,7 +702,6 @@ button:disabled {
   border: 2px solid var(--color-accent-1) !important;
   background-color: var(--color-container) !important;
   border-radius: var(--border-radius) !important;
-  max-width: 140px !important;
 }
 
 .stat-selector:focus {
