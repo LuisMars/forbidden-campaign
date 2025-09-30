@@ -1,86 +1,37 @@
-using ForbiddenPsalmBuilder.Core.Services.Storage;
-using Microsoft.JSInterop;
-using System.Text.Json;
+using Blazored.LocalStorage;
+using ForbiddenPsalmBuilder.Core.Services.State;
 
 namespace ForbiddenPsalmBuilder.Blazor.Services;
 
-public class LocalStorageService : IStorageService
+/// <summary>
+/// Blazor implementation of IStateStorageService using Blazored.LocalStorage
+/// </summary>
+public class LocalStorageService : IStateStorageService
 {
-    private readonly IJSRuntime _jsRuntime;
+    private readonly ILocalStorageService _localStorage;
 
-    public LocalStorageService(IJSRuntime jsRuntime)
+    public LocalStorageService(ILocalStorageService localStorage)
     {
-        _jsRuntime = jsRuntime;
-    }
-
-    public async Task<T?> GetItemAsync<T>(string key)
-    {
-        try
-        {
-            var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
-            if (string.IsNullOrEmpty(json))
-                return default;
-
-            return JsonSerializer.Deserialize<T>(json);
-        }
-        catch (JSException)
-        {
-            // LocalStorage might not be available (e.g., in prerender mode)
-            return default;
-        }
+        _localStorage = localStorage;
     }
 
     public async Task SetItemAsync<T>(string key, T value)
     {
-        try
-        {
-            var json = JsonSerializer.Serialize(value);
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, json);
-        }
-        catch (JSException)
-        {
-            // LocalStorage might not be available (e.g., in prerender mode)
-            // Silently fail to avoid breaking the app
-        }
+        await _localStorage.SetItemAsync(key, value);
+    }
+
+    public async Task<T?> GetItemAsync<T>(string key)
+    {
+        return await _localStorage.GetItemAsync<T>(key);
     }
 
     public async Task RemoveItemAsync(string key)
     {
-        try
-        {
-            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);
-        }
-        catch (JSException)
-        {
-            // LocalStorage might not be available (e.g., in prerender mode)
-            // Silently fail to avoid breaking the app
-        }
-    }
-
-    public async Task<bool> ContainsKeyAsync(string key)
-    {
-        try
-        {
-            var value = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
-            return !string.IsNullOrEmpty(value);
-        }
-        catch (JSException)
-        {
-            // LocalStorage might not be available (e.g., in prerender mode)
-            return false;
-        }
+        await _localStorage.RemoveItemAsync(key);
     }
 
     public async Task ClearAsync()
     {
-        try
-        {
-            await _jsRuntime.InvokeVoidAsync("localStorage.clear");
-        }
-        catch (JSException)
-        {
-            // LocalStorage might not be available (e.g., in prerender mode)
-            // Silently fail to avoid breaking the app
-        }
+        await _localStorage.ClearAsync();
     }
 }
