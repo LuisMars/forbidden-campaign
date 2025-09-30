@@ -19,17 +19,10 @@
     <StatsDisplay Stats="@MainStats" />
     <StatsDisplay Stats="@CalculatedStats" />
 
-    @if (Character.IsSpellcaster || !string.IsNullOrEmpty(Character.SpecialTrooperType))
+    @if (!string.IsNullOrEmpty(Character.SpecialClassId))
     {
         <div class="character-tags">
-            @if (Character.IsSpellcaster)
-            {
-                <span class="tag">Spellcaster</span>
-            }
-            @if (!string.IsNullOrEmpty(Character.SpecialTrooperType))
-            {
-                <span class="tag">@Character.SpecialTrooperType</span>
-            }
+            <span class="tag">@Character.SpecialClassId</span>
         </div>
     }
 

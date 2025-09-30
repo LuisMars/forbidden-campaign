@@ -1,0 +1,179 @@
+@namespace ForbiddenPsalmBuilder.Components
+@using ForbiddenPsalmBuilder.Core.Models.Selection
+
+<Modal IsVisible="true" OnClose="Cancel" Title="@Label">
+    <div class="info-selector-modal">
+        @if (Searchable)
+        {
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="search"
+                       class="search-input"
+                       @bind="searchTerm"
+                       @bind:event="oninput"
+                       placeholder="Search..." />
+                @if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    <button type="button" class="search-clear" @onclick="ClearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                }
+            </div>
+        }
+
+        <div class="info-selector-content">
+            <div class="info-selector-grid">
+                @if (FilteredItems.Count == 0)
+                {
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <p>No items found</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in FilteredItems)
+                    {
+                        <div class="info-selector-card @(item.Id == selectedId ? "selected" : "")"
+                             @onclick="@(() => HandleItemClick(item))">
+                            @if (ShowIcons)
+                            {
+                                <i class="@item.IconClass card-icon"></i>
+                            }
+                            <div class="card-name">@item.DisplayName</div>
+                            @if (ShowCost && item.Cost.HasValue)
+                            {
+                                <div class="card-cost">
+                                    @if (item.Cost.Value > 0)
+                                    {
+                                        <span>@item.Cost@CurrencySymbol</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="cost-free">FREE</span>
+                                    }
+                                </div>
+                            }
+                            @if (item.Id == selectedId)
+                            {
+                                <i class="fas fa-check-circle card-selected"></i>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(selectedId))
+            {
+                var selectedItem = Items.FirstOrDefault(i => i.Id == selectedId);
+                if (selectedItem != null)
+                {
+                    <div class="info-selector-details">
+                        <h4>@selectedItem.DisplayName</h4>
+
+                        @if (!string.IsNullOrWhiteSpace(selectedItem.Description))
+                        {
+                            <p class="detail-description">@selectedItem.Description</p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(selectedItem.GetDetailedInfo()))
+                        {
+                            <div class="detail-info">
+                                @((MarkupString)ConvertMarkdownToHtml(selectedItem.GetDetailedInfo()))
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="info-selector-actions">
+            <button type="button" class="button-secondary" @onclick="Cancel">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="button" class="button-primary" @onclick="Confirm" disabled="@(selectedId == null)">
+                <i class="fas fa-check"></i> Select
+            </button>
+        </div>
+    </div>
+</Modal>
+
+@code {
+    [Parameter] public List<ISelectableItem> Items { get; set; } = new();
+    [Parameter] public string? InitialSelectedId { get; set; }
+    [Parameter] public string Label { get; set; } = "Select Item";
+    [Parameter] public bool Searchable { get; set; } = true;
+    [Parameter] public bool ShowCost { get; set; } = true;
+    [Parameter] public bool ShowIcons { get; set; } = true;
+    [Parameter] public string CurrencySymbol { get; set; } = "";
+    [Parameter] public EventCallback<string?> OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private string searchTerm = string.Empty;
+    private string? selectedId;
+
+    protected override void OnInitialized()
+    {
+        selectedId = InitialSelectedId;
+    }
+
+    private List<ISelectableItem> FilteredItems
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return Items;
+
+            var lowerSearch = searchTerm.ToLowerInvariant();
+            return Items.Where(item =>
+                item.Name.Contains(lowerSearch, StringComparison.OrdinalIgnoreCase) ||
+                item.DisplayName.Contains(lowerSearch, StringComparison.OrdinalIgnoreCase) ||
+                item.Description.Contains(lowerSearch, StringComparison.OrdinalIgnoreCase) ||
+                item.Category.Contains(lowerSearch, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+    }
+
+    private void HandleItemClick(ISelectableItem item)
+    {
+        selectedId = item.Id;
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+    }
+
+    private async Task Confirm()
+    {
+        if (OnConfirm.HasDelegate)
+        {
+            await OnConfirm.InvokeAsync(selectedId);
+        }
+    }
+
+    private async Task Cancel()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+    private string ConvertMarkdownToHtml(string markdown)
+    {
+        if (string.IsNullOrWhiteSpace(markdown))
+            return string.Empty;
+
+        // Simple markdown to HTML conversion
+        var html = markdown;
+
+        // Convert **bold** to <strong>bold</strong>
+        html = System.Text.RegularExpressions.Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+
+        // Convert newlines to <br>
+        html = html.Replace("\n", "<br>");
+
+        return html;
+    }
+}

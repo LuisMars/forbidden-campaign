@@ -31,11 +31,5 @@ public class Warband
     // Check warband composition rules
     public bool CanAddMember => Members.Count < 5;
 
-    public bool CanAddSpellcaster =>
-        !Members.Any(m => m.IsSpellcaster) && GameVariant != "last-war";
-
-    public bool CanAddSpecialTrooper =>
-        !Members.Any(m => !string.IsNullOrEmpty(m.SpecialTrooperType)) && GameVariant == "last-war";
-
     public void UpdateLastModified() => LastModified = DateTime.UtcNow;
 }

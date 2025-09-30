@@ -25,13 +25,14 @@ public class CharacterNameGenerator
 {
     private readonly Random _random;
     private readonly IEmbeddedResourceService _resourceService;
-    private static CharacterNameData28Psalms? _cachedData28Psalms;
-    private static CharacterNameDataEndTimes? _cachedDataEndTimes;
-    private static CharacterNameDataLastWar? _cachedDataLastWar;
 
     private CharacterNameData28Psalms? _customData28Psalms;
     private CharacterNameDataEndTimes? _customDataEndTimes;
     private CharacterNameDataLastWar? _customDataLastWar;
+
+    private CharacterNameData28Psalms? _cachedData28Psalms;
+    private CharacterNameDataEndTimes? _cachedDataEndTimes;
+    private CharacterNameDataLastWar? _cachedDataLastWar;
 
     public CharacterNameGenerator(IEmbeddedResourceService? resourceService = null, Random? random = null)
     {

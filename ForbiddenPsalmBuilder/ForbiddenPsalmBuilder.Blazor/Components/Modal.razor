@@ -22,6 +22,7 @@
 
 @using Microsoft.JSInterop
 @inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
 
 @code {
     [Parameter] public bool IsVisible { get; set; }
@@ -31,6 +32,7 @@
     [Parameter] public EventCallback OnClose { get; set; }
 
     private bool _previousIsVisible = false;
+    private bool _modalOpenAdded = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -39,10 +41,12 @@
             if (IsVisible)
             {
                 await JSRuntime.InvokeVoidAsync("document.body.classList.add", "modal-open");
+                _modalOpenAdded = true;
             }
             else
             {
                 await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "modal-open");
+                _modalOpenAdded = false;
             }
             _previousIsVisible = IsVisible;
         }
@@ -51,5 +55,20 @@
     private async Task Close()
     {
         await OnClose.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_modalOpenAdded)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "modal-open");
+            }
+            catch
+            {
+                // Ignore errors during disposal
+            }
+        }
     }
 }

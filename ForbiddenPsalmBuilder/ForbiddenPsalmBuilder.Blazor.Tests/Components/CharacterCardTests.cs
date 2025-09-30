@@ -85,13 +85,13 @@ public class CharacterCardTests : TestContext
     }
 
     [Fact]
-    public void CharacterCard_ShouldDisplaySpellcasterTag()
+    public void CharacterCard_ShouldDisplaySpecialClassTag()
     {
         // Arrange
         var character = new Character("Mage")
         {
             Stats = new Stats(1, 2, 0, 1),
-            IsSpellcaster = true
+            SpecialClassId = "witch"
         };
 
         // Act
@@ -100,17 +100,17 @@ public class CharacterCardTests : TestContext
 
         // Assert
         var tagsDiv = cut.Find(".character-tags");
-        Assert.Contains("Spellcaster", tagsDiv.TextContent);
+        Assert.Contains("witch", tagsDiv.TextContent);
     }
 
     [Fact]
-    public void CharacterCard_ShouldDisplaySpecialTrooperType()
+    public void CharacterCard_ShouldDisplaySpecialClassForSniper()
     {
         // Arrange
         var character = new Character("Sniper")
         {
             Stats = new Stats(3, 0, 1, 1),
-            SpecialTrooperType = "Sniper"
+            SpecialClassId = "sniper"
         };
 
         // Act
@@ -119,7 +119,7 @@ public class CharacterCardTests : TestContext
 
         // Assert
         var tagsDiv = cut.Find(".character-tags");
-        Assert.Contains("Sniper", tagsDiv.TextContent);
+        Assert.Contains("sniper", tagsDiv.TextContent);
     }
 
     [Fact]

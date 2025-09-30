@@ -21,32 +21,6 @@ public class GameStateServiceTests
         _service = new GameStateService(_state, _mockRepository.Object);
     }
 
-    [Fact]
-    public async Task GetSpecialTrooperTypesAsync_LastWar_ReturnsCorrectTypes()
-    {
-        // Act
-        var result = await _service.GetSpecialTrooperTypesAsync("last-war");
-
-        // Assert
-        Assert.Equal(3, result.Count);
-        Assert.Contains("Witch", result);
-        Assert.Contains("Sniper", result);
-        Assert.Contains("Anti-Tank Gunner", result);
-    }
-
-    [Fact]
-    public async Task GetSpecialTrooperTypesAsync_OtherVariants_ReturnsEmptyList()
-    {
-        // Act
-        var result28Psalms = await _service.GetSpecialTrooperTypesAsync("28-psalms");
-        var resultEndTimes = await _service.GetSpecialTrooperTypesAsync("end-times");
-        var resultUnknown = await _service.GetSpecialTrooperTypesAsync("unknown");
-
-        // Assert
-        Assert.Empty(result28Psalms);
-        Assert.Empty(resultEndTimes);
-        Assert.Empty(resultUnknown);
-    }
 
     [Fact]
     public async Task GetStatArraysAsync_ReturnsCorrectArrays()
@@ -80,9 +54,7 @@ public class GameStateServiceTests
         var character = new Character("Test Character")
         {
             Stats = new Stats(2, 1, 3, 2),
-            IsSpellcaster = true,
-            SpecialTrooperType = "Witch",
-            Experience = 15
+            SpecialClassId = "witch"
         };
 
         // Setup mock repository to return the warband when SaveAsync is called
@@ -97,9 +69,7 @@ public class GameStateServiceTests
         Assert.Single(warband.Members);
         Assert.Equal(character, warband.Members.First());
         Assert.Equal("Test Character", warband.Members.First().Name);
-        Assert.True(warband.Members.First().IsSpellcaster);
-        Assert.Equal("Witch", warband.Members.First().SpecialTrooperType);
-        Assert.Equal(15, warband.Members.First().Experience);
+        Assert.Equal("witch", warband.Members.First().SpecialClassId);
 
         // Verify the repository SaveAsync was called
         _mockRepository.Verify(r => r.SaveAsync(warband), Times.Once);
@@ -422,8 +392,7 @@ public class GameStateServiceTests
         var warband = new Warband("Test Warband", "last-war");
         var character = new Character("Original Name")
         {
-            Stats = new Stats(1, 1, 1, 1),
-            Experience = 10
+            Stats = new Stats(1, 1, 1, 1)
         };
         warband.Members.Add(character);
         _state.Warbands[warband.Id] = warband;
@@ -431,8 +400,7 @@ public class GameStateServiceTests
         var updatedCharacter = new Character("Updated Name")
         {
             Stats = new Stats(2, 2, 2, 2),
-            Experience = 20,
-            IsSpellcaster = true
+            SpecialClassId = "witch"
         };
 
         // Setup mock repository to return the warband when SaveAsync is called
@@ -446,8 +414,7 @@ public class GameStateServiceTests
         Assert.Single(warband.Members);
         Assert.Equal("Updated Name", warband.Members.First().Name);
         Assert.Equal(2, warband.Members.First().Stats.Agility);
-        Assert.Equal(20, warband.Members.First().Experience);
-        Assert.True(warband.Members.First().IsSpellcaster);
+        Assert.Equal("witch", warband.Members.First().SpecialClassId);
 
         // Verify the repository SaveAsync was called
         _mockRepository.Verify(r => r.SaveAsync(warband), Times.Once);

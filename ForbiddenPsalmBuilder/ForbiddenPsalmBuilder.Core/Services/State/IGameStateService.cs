@@ -1,4 +1,5 @@
 using ForbiddenPsalmBuilder.Core.Models.Character;
+using ForbiddenPsalmBuilder.Core.Models.Selection;
 using ForbiddenPsalmBuilder.Core.Models.Warband;
 
 namespace ForbiddenPsalmBuilder.Core.Services.State;
@@ -38,8 +39,13 @@ public interface IGameStateService
     // Data loading
     Task LoadGameDataAsync();
     Task RefreshGameDataAsync();
-    Task<List<string>> GetSpecialTrooperTypesAsync(string gameVariant);
     Task<List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray>> GetStatArraysAsync();
+
+    // Special Classes
+    Task<List<SpecialClass>> GetSpecialClassesAsync(string gameVariant);
+    Task<SpecialClass?> GetSpecialClassByIdAsync(string specialClassId, string gameVariant);
+    Task<bool> CanAddSpecialClassAsync(string warbandId, string specialClassId);
+    Task<string?> ValidateSpecialClassSelectionAsync(string warbandId, string? specialClassId, string? characterIdToExclude = null);
 
     // State persistence
     Task SaveStateAsync();

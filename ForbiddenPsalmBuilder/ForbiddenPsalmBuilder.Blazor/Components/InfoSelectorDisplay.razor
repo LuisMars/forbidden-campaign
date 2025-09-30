@@ -1,0 +1,49 @@
+@namespace ForbiddenPsalmBuilder.Components
+@using ForbiddenPsalmBuilder.Core.Models.Selection
+
+<div class="info-selector-display">
+    @if (SelectedItem != null)
+    {
+        @if (ShowIcon)
+        {
+            <i class="@SelectedItem.IconClass info-icon"></i>
+        }
+        <div class="info-content">
+            <span class="info-name">@SelectedItem.DisplayName</span>
+            @if (ShowCost && SelectedItem.Cost.HasValue && SelectedItem.Cost.Value > 0)
+            {
+                <span class="info-cost">@SelectedItem.Cost@CurrencySymbol</span>
+            }
+            else if (ShowCost && SelectedItem.Cost == 0)
+            {
+                <span class="info-cost info-cost-free">FREE</span>
+            }
+        </div>
+    }
+    else
+    {
+        <i class="fas fa-question-circle info-icon"></i>
+        <span class="info-name info-name-empty">Select...</span>
+    }
+
+    <button type="button" class="change-button" @onclick="OpenSelector" disabled="@IsDisabled">
+        <i class="fas fa-edit"></i> Change
+    </button>
+</div>
+
+@code {
+    [Parameter] public ISelectableItem? SelectedItem { get; set; }
+    [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public bool ShowCost { get; set; } = true;
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public string CurrencySymbol { get; set; } = "";
+    [Parameter] public EventCallback OnOpenSelector { get; set; }
+
+    private async Task OpenSelector()
+    {
+        if (OnOpenSelector.HasDelegate)
+        {
+            await OnOpenSelector.InvokeAsync();
+        }
+    }
+}

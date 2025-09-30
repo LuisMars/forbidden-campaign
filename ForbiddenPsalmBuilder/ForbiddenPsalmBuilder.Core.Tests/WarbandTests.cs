@@ -87,52 +87,6 @@ public class WarbandTests
     }
 
     [Fact]
-    public void CanAddSpellcaster_ShouldReturnTrueWhenNoSpellcasterExists()
-    {
-        var warband = new Warband("Test", "end-times");
-        warband.Members.Add(new Character("Regular Member"));
-
-        Assert.True(warband.CanAddSpellcaster);
-    }
-
-    [Fact]
-    public void CanAddSpellcaster_ShouldReturnFalseWhenSpellcasterExists()
-    {
-        var warband = new Warband("Test", "end-times");
-        var spellcaster = new Character("Spellcaster") { IsSpellcaster = true };
-        warband.Members.Add(spellcaster);
-
-        Assert.False(warband.CanAddSpellcaster);
-    }
-
-    [Fact]
-    public void CanAddSpellcaster_ShouldReturnFalseForLastWar()
-    {
-        var warband = new Warband("Test", "last-war");
-
-        Assert.False(warband.CanAddSpellcaster);
-    }
-
-    [Fact]
-    public void CanAddSpecialTrooper_ShouldReturnTrueForLastWarWithoutSpecialTrooper()
-    {
-        var warband = new Warband("Test", "last-war");
-        warband.Members.Add(new Character("Regular Member"));
-
-        Assert.True(warband.CanAddSpecialTrooper);
-    }
-
-    [Fact]
-    public void CanAddSpecialTrooper_ShouldReturnFalseWhenSpecialTrooperExists()
-    {
-        var warband = new Warband("Test", "last-war");
-        var specialTrooper = new Character("Special") { SpecialTrooperType = "Veteran" };
-        warband.Members.Add(specialTrooper);
-
-        Assert.False(warband.CanAddSpecialTrooper);
-    }
-
-    [Fact]
     public void TotalValue_ShouldIncludeGoldAndEquipmentValue()
     {
         var warband = new Warband();

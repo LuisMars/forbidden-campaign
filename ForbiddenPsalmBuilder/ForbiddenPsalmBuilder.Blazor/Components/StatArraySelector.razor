@@ -1,48 +1,37 @@
 @namespace ForbiddenPsalmBuilder.Components
 
 <div class="stat-array-selector">
-    <h3>Stat Array Selection</h3>
-    <p>Choose a predefined stat distribution and assign to your character's attributes:</p>
-
     @if (StatArrays.Any())
     {
-        <div class="array-options">
-            @foreach (var array in StatArrays)
-            {
-                <div class="array-option @(SelectedArrayId == array.Id ? "selected" : "")"
-                     @onclick="() => SelectArray(array.Id)">
-                    <h4>@array.Name</h4>
-                    <p>@array.Description</p>
-                    <div class="array-values horizontal gap-small">
-                        @foreach (var value in array.Values)
-                        {
-                            <span class="stat-value @(value >= 0 ? "positive" : "negative")">
-                                @(value >= 0 ? "+" : "")@value
-                            </span>
-                        }
-                    </div>
-                </div>
-            }
+        <div class="horizontal gap-small" style="align-items: center;">
+            <h3 style="margin: 0;">Stat Distribution</h3>
+            <div class="array-options horizontal gap-small">
+                @foreach (var array in StatArrays)
+                {
+                    <button type="button"
+                            class="array-option-compact @(SelectedArrayId == array.Id ? "selected" : "")"
+                            @onclick="() => SelectArray(array.Id)">
+                        <strong>@array.Name</strong>
+                        <span class="array-values-inline">
+                            [@string.Join(", ", array.Values.Select(v => (v >= 0 ? "+" : "") + v))]
+                        </span>
+                    </button>
+                }
 
-            <div class="array-option @(SelectedArrayId == "unset" ? "selected" : "")"
-                 @onclick="@(() => SelectArray("unset"))">
-                <h4>Custom</h4>
-                <p>Use manual override section below</p>
-                <div class="array-values horizontal gap-small">
-                    <span class="stat-value neutral">Custom</span>
-                </div>
+                <button type="button"
+                        class="array-option-compact @(SelectedArrayId == "unset" ? "selected" : "")"
+                        @onclick="@(() => SelectArray("unset"))">
+                    <strong>Custom</strong>
+                </button>
             </div>
         </div>
 
         @if (!string.IsNullOrEmpty(SelectedArrayId) && SelectedArrayId != "unset")
         {
             <div class="stat-assignment">
-                <h4>Assign Stats</h4>
-                <p>Drag and drop or use dropdowns to assign the values [@(string.Join(", ", GetSelectedArray()?.Values.Select(v => (v >= 0 ? "+" : "") + v) ?? Array.Empty<string>()))] to your attributes:</p>
-
                 <div class="assignment-grid">
                     <div class="stat-assignment-row">
-                        <select @bind="AgilityIndex" class="stat-selector">
+                        <select @bind="AgilityIndex" @bind:after="NotifyStatsChanged" class="stat-selector">
                             <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
@@ -54,7 +43,7 @@
                     </div>
 
                     <div class="stat-assignment-row">
-                        <select @bind="PresenceIndex" class="stat-selector">
+                        <select @bind="PresenceIndex" @bind:after="NotifyStatsChanged" class="stat-selector">
                             <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
@@ -66,7 +55,7 @@
                     </div>
 
                     <div class="stat-assignment-row">
-                        <select @bind="StrengthIndex" class="stat-selector">
+                        <select @bind="StrengthIndex" @bind:after="NotifyStatsChanged" class="stat-selector">
                             <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
@@ -78,7 +67,7 @@
                     </div>
 
                     <div class="stat-assignment-row">
-                        <select @bind="ToughnessIndex" class="stat-selector">
+                        <select @bind="ToughnessIndex" @bind:after="NotifyStatsChanged" class="stat-selector">
                             <option value="-1">-</option>
                             @for (int i = 0; i < (GetSelectedArray()?.Values.Length ?? 0); i++)
                             {
@@ -102,9 +91,6 @@
         else if (SelectedArrayId == "unset")
         {
             <div class="stat-assignment">
-                <h4>Manual Attribute Override</h4>
-                <p>You can manually set the stats as needed:</p>
-
                 <div class="assignment-grid">
                     <div class="stat-assignment-row">
                         <input type="number" @bind="ManualAgility" @bind:event="oninput" @onchange="OnManualStatChanged" class="stat-selector" min="-3" max="3" />
@@ -136,12 +122,19 @@
             <p>You can set stats manually using the individual attribute inputs.</p>
         </div>
     }
+
+    <div class="modal-actions">
+        <button type="button" @onclick="Close">
+            <i class="fas fa-check"></i> Done
+        </button>
+    </div>
 </div>
 
 @code {
     [Parameter] public List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray> StatArrays { get; set; } = new();
     [Parameter] public EventCallback<(int Agility, int Presence, int Strength, int Toughness)> OnStatsChanged { get; set; }
     [Parameter] public EventCallback<string> OnArraySelectionChanged { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public int? InitialAgility { get; set; }
     [Parameter] public int? InitialPresence { get; set; }
     [Parameter] public int? InitialStrength { get; set; }
@@ -293,6 +286,14 @@
         if (firstRender && !string.IsNullOrEmpty(SelectedArrayId))
         {
             await NotifyStatsChanged();
+        }
+    }
+
+    private async Task Close()
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
         }
     }
 }

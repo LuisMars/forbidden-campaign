@@ -1,0 +1,56 @@
+@namespace ForbiddenPsalmBuilder.Components
+@using ForbiddenPsalmBuilder.Core.Models.Selection
+
+<div class="info-selector-item @(IsSelected ? "selected" : "") @(IsDisabled ? "disabled" : "")"
+     @onclick="HandleClick">
+
+    <div class="item-header">
+        @if (ShowIcon)
+        {
+            <i class="@Item.IconClass item-icon"></i>
+        }
+        <div class="item-title">
+            <span class="item-name">@Item.DisplayName</span>
+            @if (ShowCost && Item.Cost.HasValue && Item.Cost.Value > 0)
+            {
+                <span class="item-cost">@Item.Cost@CurrencySymbol</span>
+            }
+            else if (ShowCost && Item.Cost == 0)
+            {
+                <span class="item-cost item-cost-free">FREE</span>
+            }
+        </div>
+        @if (IsSelected)
+        {
+            <i class="fas fa-check-circle item-selected-icon"></i>
+        }
+    </div>
+
+    <div class="item-description">@Item.Description</div>
+
+    @if (IsExpanded && !string.IsNullOrWhiteSpace(Item.GetDetailedInfo()))
+    {
+        <div class="item-details">
+            @((MarkupString)Item.GetDetailedInfo().Replace("\n", "<br>"))
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ISelectableItem Item { get; set; } = null!;
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public bool IsDisabled { get; set; }
+    [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public bool ShowCost { get; set; } = true;
+    [Parameter] public bool IsExpanded { get; set; }
+    [Parameter] public string CurrencySymbol { get; set; } = "";
+    [Parameter] public EventCallback<ISelectableItem> OnClick { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (!IsDisabled && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(Item);
+        }
+    }
+}

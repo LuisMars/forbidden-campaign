@@ -69,8 +69,6 @@ public class EditCharacterDtoTests
         Assert.Equal(0, dto.Presence);
         Assert.Equal(0, dto.Strength);
         Assert.Equal(0, dto.Toughness);
-        Assert.Equal(0, dto.Experience);
-        Assert.False(dto.IsSpellcaster);
-        Assert.Null(dto.SpecialTrooperType);
+        Assert.Null(dto.SpecialClassId);
     }
 }

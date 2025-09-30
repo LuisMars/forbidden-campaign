@@ -48,77 +48,61 @@
     }
     else
     {
-        <EditForm Model="editCharacterDto" OnValidSubmit="SaveCharacter">
+        <EditForm Model="editCharacterDto" OnValidSubmit="SaveCharacter" OnInvalidSubmit="HandleInvalidSubmit">
             <DataAnnotationsValidator />
+            <ValidationSummary />
 
-            <!-- Character Info -->
-            <section>
-                <h2>Character Information</h2>
-                <div>
-                    <label for="characterName">Character Name</label>
-                    <div class="horizontal gap-small">
-                        <InputText
-                            id="characterName"
-                            @bind-Value="editCharacterDto.Name"
-                            placeholder="Enter character name..." />
-                        <button
-                            type="button"
-                            @onclick="GenerateNewCharacterName"
-                            title="Generate new random name">
-                            <i class="fas fa-dice"></i>
+            <div class="edit-sections-grid">
+                <!-- Character Info -->
+                <section class="edit-section">
+                    <h2>Character Information</h2>
+                    <div class="character-info-grid">
+                        <div class="form-group-compact">
+                            <label for="characterName">Character Name</label>
+                            <div class="horizontal gap-small">
+                                <InputText
+                                    id="characterName"
+                                    @bind-Value="editCharacterDto.Name"
+                                    placeholder="Enter character name..." />
+                                <button
+                                    type="button"
+                                    @onclick="GenerateNewCharacterName"
+                                    title="Generate new random name">
+                                    <i class="fas fa-dice"></i>
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => editCharacterDto.Name)" />
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Special Classes -->
+                <section class="edit-section">
+                    <InfoSelector
+                        Items="@availableSpecialClasses"
+                        @bind-SelectedId="editCharacterDto.SpecialClassId"
+                        Label="Special Class"
+                        ModalLabel="Select Special Class"
+                        Category="special-class"
+                        AllowNone="true"
+                        Searchable="true"
+                        ShowCost="true"
+                        ShowIcons="true"
+                        CurrencySymbol="@GetCurrencySymbol()" />
+                </section>
+
+                <!-- Character Stats -->
+                <section class="edit-section edit-section-wide">
+                    <div class="stats-header">
+                        <h2>Character Stats</h2>
+                        <button type="button" class="button-secondary" @onclick="OpenStatArrayModal">
+                            <i class="fas fa-dice-d20"></i> Select Distribution
                         </button>
                     </div>
-                    <ValidationMessage For="@(() => editCharacterDto.Name)" />
-                </div>
 
-                <div class="horizontal">
-                    <div>
-                        <label for="isSpellcaster">
-                            <InputCheckbox id="isSpellcaster" @bind-Value="editCharacterDto.IsSpellcaster" />
-                            Spellcaster
-                        </label>
-                    </div>
-                </div>
-
-                @if (availableSpecialTrooperTypes.Any())
-                {
-                    <div>
-                        <label for="specialTrooperType">Special Trooper Type (Optional)</label>
-                        <InputSelect id="specialTrooperType" @bind-Value="editCharacterDto.SpecialTrooperType">
-                            <option value="">-- None --</option>
-                            @foreach (var type in availableSpecialTrooperTypes)
-                            {
-                                <option value="@type">@type</option>
-                            }
-                        </InputSelect>
-                        <ValidationMessage For="@(() => editCharacterDto.SpecialTrooperType)" />
-                    </div>
-                }
-
-                <div>
-                    <label for="experience">Experience Points</label>
-                    <InputNumber id="experience" @bind-Value="editCharacterDto.Experience" />
-                    <ValidationMessage For="@(() => editCharacterDto.Experience)" />
-                </div>
-            </section>
-
-            <!-- Stat Array Selection -->
-            <section>
-                <StatArraySelector
-                    StatArrays="@availableStatArrays"
-                    InitialAgility="@editCharacterDto.Agility"
-                    InitialPresence="@editCharacterDto.Presence"
-                    InitialStrength="@editCharacterDto.Strength"
-                    InitialToughness="@editCharacterDto.Toughness"
-                    OnStatsChanged="OnStatArrayStatsChanged"
-                    OnArraySelectionChanged="OnStatArraySelectionChanged" />
-            </section>
-
-            <!-- Calculated Stats Display -->
-            <section>
-                <h2>Calculated Stats</h2>
-                <StatsDisplay Stats="@GetCalculatedStats()" />
-            </section>
+                    <StatsDisplay Stats="@GetAllStats()" />
+                </section>
+            </div>
 
             @if (validationErrors.Any())
             {
@@ -138,14 +122,32 @@
                     <i class="fas fa-times"></i>
                     Cancel
                 </button>
-                <button type="submit" disabled="@(!IsValidForm())">
+                <button type="submit" disabled="@(!IsValidForm())" @onclick='() => Console.WriteLine("Save button clicked!")'>
                     <i class="fas fa-save"></i>
                     @(IsNewCharacter ? "Create Character" : "Save Changes")
                 </button>
             </footer>
         </EditForm>
     }
+
+    <!-- Stat Array Selection Modal -->
+    @if (showStatArrayModal)
+    {
+        <Modal IsVisible="true" OnClose="CloseStatArrayModal">
+            <StatArraySelector
+                StatArrays="@availableStatArrays"
+                InitialAgility="@editCharacterDto.Agility"
+                InitialPresence="@editCharacterDto.Presence"
+                InitialStrength="@editCharacterDto.Strength"
+                InitialToughness="@editCharacterDto.Toughness"
+                OnStatsChanged="OnStatArrayStatsChanged"
+                OnArraySelectionChanged="OnStatArraySelectionChanged"
+                OnClose="CloseStatArrayModal" />
+        </Modal>
+    }
 </main>
+
+@using ForbiddenPsalmBuilder.Core.Models.Selection
 
 @code {
     [Parameter] public string WarbandId { get; set; } = string.Empty;
@@ -156,10 +158,21 @@
     private EditCharacterDto editCharacterDto = new();
     private List<string> validationErrors = new();
     private bool isLoading = true;
-    private List<string> availableSpecialTrooperTypes = new();
+    private List<ISelectableItem> availableSpecialClasses = new();
     private List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray> availableStatArrays = new();
+    private bool showStatArrayModal = false;
 
     private bool IsNewCharacter => string.IsNullOrEmpty(CharacterId) || CharacterId == "new";
+
+    private void OpenStatArrayModal()
+    {
+        showStatArrayModal = true;
+    }
+
+    private void CloseStatArrayModal()
+    {
+        showStatArrayModal = false;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -188,8 +201,9 @@
                 return;
             }
 
-            // Load available special trooper types for this game variant
-            availableSpecialTrooperTypes = await StateService.GetSpecialTrooperTypesAsync(warband.GameVariant);
+            // Load available special classes for this game variant
+            var specialClasses = await StateService.GetSpecialClassesAsync(warband.GameVariant);
+            availableSpecialClasses = specialClasses.Cast<ISelectableItem>().ToList();
 
             // Load available stat arrays
             availableStatArrays = await StateService.GetStatArraysAsync();
@@ -199,13 +213,11 @@
                 editCharacterDto = new EditCharacterDto
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Name = $"Member {warband.Members.Count + 1}",
+                    Name = await StateService.GenerateCharacterNameAsync(warband.GameVariant),
                     Agility = 0,
                     Presence = 0,
                     Strength = 0,
-                    Toughness = 0,
-                    Experience = 0,
-                    IsSpellcaster = false
+                    Toughness = 0
                 };
             }
             else
@@ -221,9 +233,7 @@
                         Presence = character.Stats.Presence,
                         Strength = character.Stats.Strength,
                         Toughness = character.Stats.Toughness,
-                        Experience = character.Experience,
-                        IsSpellcaster = character.IsSpellcaster,
-                        SpecialTrooperType = character.SpecialTrooperType
+                        SpecialClassId = character.SpecialClassId
                     };
                 }
             }
@@ -260,9 +270,7 @@
                         editCharacterDto.Strength,
                         editCharacterDto.Toughness
                     ),
-                    Experience = editCharacterDto.Experience,
-                    IsSpellcaster = editCharacterDto.IsSpellcaster,
-                    SpecialTrooperType = editCharacterDto.SpecialTrooperType
+                    SpecialClassId = editCharacterDto.SpecialClassId
                 };
                 newCharacter.CurrentHP = newCharacter.Stats.HP;
 
@@ -279,9 +287,7 @@
                     editCharacterDto.Strength,
                     editCharacterDto.Toughness
                 );
-                character.Experience = editCharacterDto.Experience;
-                character.IsSpellcaster = editCharacterDto.IsSpellcaster;
-                character.SpecialTrooperType = editCharacterDto.SpecialTrooperType;
+                character.SpecialClassId = editCharacterDto.SpecialClassId;
 
                 // Update current HP if toughness changed
                 if (character.CurrentHP > character.Stats.HP)
@@ -347,11 +353,6 @@
             Console.WriteLine($"IsValidForm: Toughness out of range: {editCharacterDto.Toughness}");
             return false;
         }
-        if (editCharacterDto.Experience < 0 || editCharacterDto.Experience > 1000)
-        {
-            Console.WriteLine($"IsValidForm: Experience out of range: {editCharacterDto.Experience}");
-            return false;
-        }
         Console.WriteLine($"IsValidForm: VALID - Stats: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
         return true;
     }
@@ -378,24 +379,44 @@
         };
     }
 
-    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetCalculatedStats()
+    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetAllStats()
     {
         return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
         {
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
+                Value = editCharacterDto.Agility.ToString(),
+                Label = "AGI"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.Presence.ToString(),
+                Label = "PRE"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.Strength.ToString(),
+                Label = "STR"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.Toughness.ToString(),
+                Label = "TGH"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
                 Value = editCharacterDto.Movement.ToString(),
-                Label = "Movement"
+                Label = "MOV"
             },
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
                 Value = editCharacterDto.HP.ToString(),
-                Label = "Hit Points"
+                Label = "HP"
             },
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
                 Value = editCharacterDto.EquipmentSlots.ToString(),
-                Label = "Equipment Slots"
+                Label = "SLOTS"
             }
         };
     }
@@ -422,5 +443,18 @@
         if (warband == null) return;
         editCharacterDto.Name = await StateService.GenerateCharacterNameAsync(warband.GameVariant);
         StateHasChanged();
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        Console.WriteLine("Form is INVALID - submission blocked by DataAnnotationsValidator");
+    }
+
+    private string GetCurrencySymbol()
+    {
+        if (warband == null) return "";
+
+        var gameConfig = StateService.State.GameConfigs.GetValueOrDefault(warband.GameVariant);
+        return gameConfig?.Currency?.Symbol ?? "";
     }
 }

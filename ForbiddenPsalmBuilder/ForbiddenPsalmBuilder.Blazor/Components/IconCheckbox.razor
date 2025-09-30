@@ -1,0 +1,32 @@
+@namespace ForbiddenPsalmBuilder.Components
+
+<label class="icon-checkbox @(Checked ? "checked" : "")">
+    <input type="checkbox"
+           checked="@Checked"
+           @onchange="HandleChange" />
+    <span class="checkbox-visual">
+        @if (Checked)
+        {
+            <i class="@CheckedIcon"></i>
+        }
+        else
+        {
+            <i class="@UncheckedIcon"></i>
+        }
+    </span>
+    <span class="checkbox-label">@Label</span>
+</label>
+
+@code {
+    [Parameter] public bool Checked { get; set; }
+    [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+    [Parameter] public string Label { get; set; } = string.Empty;
+    [Parameter] public string CheckedIcon { get; set; } = "fas fa-check-square";
+    [Parameter] public string UncheckedIcon { get; set; } = "far fa-square";
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        Checked = (bool)(e.Value ?? false);
+        await CheckedChanged.InvokeAsync(Checked);
+    }
+}

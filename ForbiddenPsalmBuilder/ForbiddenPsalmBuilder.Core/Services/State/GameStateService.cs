@@ -2,6 +2,7 @@ using ForbiddenPsalmBuilder.Core.Models.Character;
 using ForbiddenPsalmBuilder.Core.Models.Warband;
 using ForbiddenPsalmBuilder.Core.Models.GameData;
 using ForbiddenPsalmBuilder.Core.Models.NameGeneration;
+using ForbiddenPsalmBuilder.Core.Models.Selection;
 using ForbiddenPsalmBuilder.Core.Repositories;
 using ForbiddenPsalmBuilder.Data.Services;
 using System.Text.Json;
@@ -13,6 +14,7 @@ public class GameStateService : IGameStateService
     private readonly GlobalGameState _state;
     private readonly IWarbandRepository _warbandRepository;
     private readonly IEmbeddedResourceService _resourceService;
+    private readonly SpecialClassService _specialClassService;
     private const string StateStorageKey = "forbidden-psalm-builder-state";
     private static readonly Lazy<WarbandNameGenerator> _nameGenerator = new(LoadNameGenerator);
 
@@ -48,6 +50,7 @@ public class GameStateService : IGameStateService
         _state = state;
         _warbandRepository = warbandRepository;
         _resourceService = resourceService ?? new EmbeddedResourceService();
+        _specialClassService = new SpecialClassService(_resourceService);
     }
 
     // Game variant management
@@ -340,17 +343,6 @@ public class GameStateService : IGameStateService
         await LoadGameDataAsync();
     }
 
-    public async Task<List<string>> GetSpecialTrooperTypesAsync(string gameVariant)
-    {
-        await Task.CompletedTask; // For async consistency
-
-        return gameVariant switch
-        {
-            "last-war" => new List<string> { "Witch", "Sniper", "Anti-Tank Gunner" },
-            _ => new List<string>() // Other game variants don't have special trooper types
-        };
-    }
-
     public async Task<List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray>> GetStatArraysAsync()
     {
         await Task.CompletedTask; // For async consistency
@@ -476,5 +468,88 @@ public class GameStateService : IGameStateService
     {
         _state.ClearError();
         await Task.CompletedTask;
+    }
+
+    // Special Classes
+    public async Task<List<SpecialClass>> GetSpecialClassesAsync(string gameVariant)
+    {
+        return await _specialClassService.GetSpecialClassesAsync(gameVariant);
+    }
+
+    public async Task<SpecialClass?> GetSpecialClassByIdAsync(string specialClassId, string gameVariant)
+    {
+        return await _specialClassService.GetSpecialClassByIdAsync(specialClassId, gameVariant);
+    }
+
+    public async Task<bool> CanAddSpecialClassAsync(string warbandId, string specialClassId)
+    {
+        var error = await ValidateSpecialClassSelectionAsync(warbandId, specialClassId);
+        return error == null;
+    }
+
+    public async Task<string?> ValidateSpecialClassSelectionAsync(string warbandId, string? specialClassId, string? characterIdToExclude = null)
+    {
+        // Null or empty special class is always valid (no special class selected)
+        if (string.IsNullOrEmpty(specialClassId))
+            return null;
+
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            return "Warband not found";
+
+        // Get the special class definition
+        var specialClass = await GetSpecialClassByIdAsync(specialClassId, warband.GameVariant);
+        if (specialClass == null)
+            return $"Special class '{specialClassId}' not found for game variant '{warband.GameVariant}'";
+
+        // Check if this special class has a limit
+        if (!specialClass.Metadata.ContainsKey("limit"))
+            return null; // No limit defined, always valid
+
+        var limitValue = specialClass.Metadata["limit"];
+
+        // Handle null limit (unlimited)
+        if (limitValue == null)
+            return null;
+
+        // Check for canSelectMultiple flag (like Civilian)
+        if (specialClass.Metadata.ContainsKey("canSelectMultiple"))
+        {
+            var canSelectMultiple = specialClass.Metadata["canSelectMultiple"];
+            if (canSelectMultiple is bool boolValue && boolValue)
+                return null; // Can select multiple, no limit
+            if (canSelectMultiple is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.True)
+                return null; // Can select multiple, no limit
+        }
+
+        // Parse limit value (handle JsonElement from JSON deserialization)
+        int limit;
+        if (limitValue is JsonElement jsonLimitElement)
+        {
+            if (jsonLimitElement.ValueKind == JsonValueKind.Number)
+                limit = jsonLimitElement.GetInt32();
+            else
+                return null; // Invalid limit format, skip validation
+        }
+        else if (limitValue is int intValue)
+        {
+            limit = intValue;
+        }
+        else
+        {
+            return null; // Invalid limit format, skip validation
+        }
+
+        // Count existing characters with this special class (excluding the character being edited)
+        var existingCount = warband.Members
+            .Where(m => m.SpecialClassId == specialClassId && m.Id != characterIdToExclude)
+            .Count();
+
+        if (existingCount >= limit)
+        {
+            return $"Warband already has the maximum number ({limit}) of '{specialClass.DisplayName}' special class members";
+        }
+
+        return null; // Validation passed
     }
 }

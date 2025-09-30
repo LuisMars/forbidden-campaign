@@ -18,9 +18,7 @@ public class CharacterTests
         Assert.NotNull(character.Equipment);
         Assert.NotNull(character.Injuries);
         Assert.Equal(0, character.CurrentGold);
-        Assert.Equal(0, character.Experience);
-        Assert.False(character.IsSpellcaster);
-        Assert.Null(character.SpecialTrooperType);
+        Assert.Null(character.SpecialClassId);
     }
 
     [Fact]

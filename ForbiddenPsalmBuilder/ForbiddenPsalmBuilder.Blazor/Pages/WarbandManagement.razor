@@ -8,9 +8,8 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inject IGameStateService StateService
 @inject NavigationManager Navigation
-<PageTitle>
-    @(warband?.Name ?? "Warband") - Forbidden Psalm Builder
-</PageTitle>
+
+<PageTitle>@(warband?.Name ?? "Warband") - Forbidden Psalm Builder</PageTitle>
 
 <PageHeader
     Title="@(warband?.Name ?? "Warband")"
@@ -73,32 +72,30 @@
                     @warband.Members.Count / 5
                 </span>
             </header>
-            <div>
-                @if (warband.Members.Any())
-                {
-                    <section>
-                        @foreach (var character in warband.Members)
-                        {
-                            <CharacterCard
-                                Character="@character"
-                                OnEdit="@(() => EditCharacter(character.Id))"
-                                OnDelete="@(() => RemoveCharacter(character.Id))" />
-                        }
-                    </section>
-                }
-                else
-                {
-                    <section>
-                        <i class="ra ra-muscle-up"></i>
-                        <p>No members in this warband yet.</p>
-                        <p>Add your first character to get started!</p>
-                        <button @onclick="AddCharacter">
-                            <i class="ra ra-person"></i>
-                            Add First Member
-                        </button>
-                    </section>
-                }
-            </div>
+            @if (warband.Members.Any())
+            {
+                <div class="character-grid">
+                    @foreach (var character in warband.Members)
+                    {
+                        <CharacterCard
+                            Character="@character"
+                            OnEdit="@(() => EditCharacter(character.Id))"
+                            OnDelete="@(() => RemoveCharacter(character.Id))" />
+                    }
+                </div>
+            }
+            else
+            {
+                <section>
+                    <i class="ra ra-muscle-up"></i>
+                    <p>No members in this warband yet.</p>
+                    <p>Add your first character to get started!</p>
+                    <button @onclick="AddCharacter">
+                        <i class="ra ra-person"></i>
+                        Add First Member
+                    </button>
+                </section>
+            }
         </section>
     }
     <!-- Edit Warband Info Modal -->
@@ -169,6 +166,7 @@
         </EditForm>
     </Modal>
 </main>
+
 @code {
     [Parameter] public string WarbandId { get; set; } = string.Empty;
 
@@ -308,8 +306,12 @@
     {
         if (editWarbandDto == null) return false;
         if (string.IsNullOrWhiteSpace(editWarbandDto.Name)) return false;
-        if (editWarbandDto.Gold < 0 || editWarbandDto.Gold > 9999) return false;
-        if (editWarbandDto.Experience < 0 || editWarbandDto.Experience > 999) return false;
+        if (editWarbandDto.Gold
+<
+0 || editWarbandDto.Gold > 9999) return false;
+        if (editWarbandDto.Experience
+<
+0 || editWarbandDto.Experience > 999) return false;
         return true;
     }
 
@@ -346,11 +348,17 @@
         };
     }
 
-    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetWarbandStats()
+    private List
+<
+ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetWarbandStats()
     {
-        if (warband == null) return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>();
+        if (warband == null) return new List
+<
+ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>();
 
-        return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
+        return new List
+<
+ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
         {
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
@@ -375,9 +383,13 @@
         };
     }
 
-    private List<ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem> GetBreadcrumbItems()
+    private List
+<
+ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem> GetBreadcrumbItems()
     {
-        return new List<ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem>
+        return new List
+<
+ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem>
         {
             new ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem
             {

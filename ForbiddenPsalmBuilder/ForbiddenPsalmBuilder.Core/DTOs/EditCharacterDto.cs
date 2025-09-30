@@ -23,13 +23,8 @@ public class EditCharacterDto
     [Range(-3, 3, ErrorMessage = "Toughness must be between -3 and 3")]
     public int Toughness { get; set; }
 
-    [Range(0, 1000, ErrorMessage = "Experience must be between 0 and 1000")]
-    public int Experience { get; set; }
-
-    public bool IsSpellcaster { get; set; }
-
-    [StringLength(50, ErrorMessage = "Special trooper type cannot exceed 50 characters")]
-    public string? SpecialTrooperType { get; set; }
+    [StringLength(50, ErrorMessage = "Special class ID cannot exceed 50 characters")]
+    public string? SpecialClassId { get; set; }
 
     // Calculated properties for display
     public int Movement => 5 + Agility;

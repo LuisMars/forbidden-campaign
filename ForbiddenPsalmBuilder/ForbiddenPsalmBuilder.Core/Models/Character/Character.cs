@@ -10,10 +10,9 @@ public class Character
     public List<Equipment> Equipment { get; set; } = new();
     public int CurrentGold { get; set; }
     public int CurrentHP { get; set; }
-    public bool IsSpellcaster { get; set; }
-    public string? SpecialTrooperType { get; set; }
+
+    public string? SpecialClassId { get; set; }
     public List<string> Injuries { get; set; } = new();
-    public int Experience { get; set; }
 
     public Character()
     {
