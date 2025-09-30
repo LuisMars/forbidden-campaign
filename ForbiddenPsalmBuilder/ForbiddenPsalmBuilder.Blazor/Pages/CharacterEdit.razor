@@ -4,8 +4,11 @@
 @using ForbiddenPsalmBuilder.Core.Models.Warband
 @using ForbiddenPsalmBuilder.Core.Models.Character
 @using ForbiddenPsalmBuilder.Core.DTOs
+@using ForbiddenPsalmBuilder.Core.Services
+@using ForbiddenPsalmBuilder.Core.Models.Selection
 @using Microsoft.AspNetCore.Components.Forms
 @inject IGameStateService StateService
+@inject EquipmentService EquipmentService
 @inject NavigationManager Navigation
 
 <PageTitle>
@@ -102,6 +105,43 @@
 
                     <StatsDisplay Stats="@GetAllStats()" />
                 </section>
+
+                <!-- Equipment -->
+                <section class="edit-section">
+                    <h2>Equipment</h2>
+
+                    <SlotUsageBar
+                        UsedSlots="@GetUsedEquipmentSlots()"
+                        TotalSlots="@GetTotalEquipmentSlots()" />
+
+                    @if (character != null && character.Equipment.Any())
+                    {
+                        <div class="equipment-list">
+                            @foreach (var equipment in character.Equipment)
+                            {
+                                <EquipmentCard
+                                    Equipment="equipment"
+                                    ShowActions="true"
+                                    OnRemove="() => RemoveEquipment(equipment.Id)" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="no-equipment-message">No equipment equipped</p>
+                    }
+
+                    <div class="equipment-actions horizontal gap-small">
+                        <button type="button" @onclick="OpenAddFromStashModal" disabled="@(!HasStashEquipment())">
+                            <i class="fas fa-box-open"></i>
+                            Add from Stash
+                        </button>
+                        <button type="button" @onclick="OpenAddEquipmentModal">
+                            <i class="fas fa-gift"></i>
+                            Add New Equipment
+                        </button>
+                    </div>
+                </section>
             </div>
 
             @if (validationErrors.Any())
@@ -145,9 +185,42 @@
                 OnClose="CloseStatArrayModal" />
         </Modal>
     }
-</main>
 
-@using ForbiddenPsalmBuilder.Core.Models.Selection
+    <!-- Add Equipment from Stash Modal -->
+    @if (showAddFromStashModal && character != null)
+    {
+        <Modal IsVisible="true" OnClose="CloseAddFromStashModal">
+            <div class="modal-header">
+                <h2>Add Equipment from Stash</h2>
+            </div>
+            <EquipmentSelector
+                Equipment="@availableStashEquipment"
+                ShowTabs="true"
+                ShowSearch="true"
+                ShowActions="true"
+                OnEquipmentSelected="AddEquipmentFromStash" />
+        </Modal>
+    }
+
+    <!-- Add New Equipment Modal -->
+    @if (showAddEquipmentModal && warband != null)
+    {
+        <Modal IsVisible="true" OnClose="CloseAddEquipmentModal">
+            <div class="modal-header">
+                <h2>Add New Equipment</h2>
+                <p class="modal-subtitle">Directly add equipment (for scenario rewards, bypasses payment)</p>
+            </div>
+            <EquipmentSelector
+                Weapons="@allWeapons"
+                Armors="@allArmors"
+                Items="@allItems"
+                ShowTabs="true"
+                ShowSearch="true"
+                ShowActions="true"
+                OnEquipmentSelected="AddNewEquipment" />
+        </Modal>
+    }
+</main>
 
 @code {
     [Parameter] public string WarbandId { get; set; } = string.Empty;
@@ -161,6 +234,14 @@
     private List<ISelectableItem> availableSpecialClasses = new();
     private List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray> availableStatArrays = new();
     private bool showStatArrayModal = false;
+
+    // Equipment management
+    private bool showAddFromStashModal = false;
+    private bool showAddEquipmentModal = false;
+    private List<Equipment> availableStashEquipment = new();
+    private List<Weapon> allWeapons = new();
+    private List<Armor> allArmors = new();
+    private List<Item> allItems = new();
 
     private bool IsNewCharacter => string.IsNullOrEmpty(CharacterId) || CharacterId == "new";
 
@@ -207,6 +288,11 @@
 
             // Load available stat arrays
             availableStatArrays = await StateService.GetStatArraysAsync();
+
+            // Load all equipment for "Add New Equipment" modal
+            allWeapons = await EquipmentService.GetWeaponsAsync(warband.GameVariant);
+            allArmors = await EquipmentService.GetArmorAsync(warband.GameVariant);
+            allItems = await EquipmentService.GetItemsAsync(warband.GameVariant);
 
             if (IsNewCharacter)
             {
@@ -456,5 +542,102 @@
 
         var gameConfig = StateService.State.GameConfigs.GetValueOrDefault(warband.GameVariant);
         return gameConfig?.Currency?.Symbol ?? "";
+    }
+
+    // Equipment Management Methods
+    private int GetUsedEquipmentSlots()
+    {
+        return character?.Equipment.Sum(e => e.Slots) ?? 0;
+    }
+
+    private int GetTotalEquipmentSlots()
+    {
+        return character?.Stats.EquipmentSlots ?? 10;
+    }
+
+    private bool HasStashEquipment()
+    {
+        return warband?.Stash.Any() ?? false;
+    }
+
+    private async Task OpenAddFromStashModal()
+    {
+        if (character == null || warband == null) return;
+
+        // Load available equipment from stash that this character can equip
+        availableStashEquipment = await StateService.GetAvailableEquipmentForCharacterAsync(WarbandId, character.Id);
+        showAddFromStashModal = true;
+    }
+
+    private void CloseAddFromStashModal()
+    {
+        showAddFromStashModal = false;
+    }
+
+    private async Task AddEquipmentFromStash(Equipment equipment)
+    {
+        if (character == null) return;
+
+        try
+        {
+            await StateService.TransferEquipmentToCharacterAsync(WarbandId, character.Id, equipment.Id);
+
+            // Refresh data
+            await LoadData();
+            CloseAddFromStashModal();
+        }
+        catch (Exception ex)
+        {
+            validationErrors.Add($"Failed to add equipment: {ex.Message}");
+        }
+    }
+
+    private void OpenAddEquipmentModal()
+    {
+        showAddEquipmentModal = true;
+    }
+
+    private void CloseAddEquipmentModal()
+    {
+        showAddEquipmentModal = false;
+    }
+
+    private async Task AddNewEquipment(Equipment equipment)
+    {
+        if (character == null) return;
+
+        try
+        {
+            // Determine equipment type
+            string equipmentType = equipment.Type.ToLower();
+
+            // Add equipment directly (bypasses payment - for scenario rewards)
+            await StateService.AddEquipmentToCharacterAsync(WarbandId, character.Id, equipment.Id, equipmentType);
+
+            // Refresh data
+            await LoadData();
+            CloseAddEquipmentModal();
+        }
+        catch (Exception ex)
+        {
+            validationErrors.Add($"Failed to add equipment: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveEquipment(string equipmentId)
+    {
+        if (character == null) return;
+
+        try
+        {
+            await StateService.RemoveEquipmentFromCharacterAsync(WarbandId, character.Id, equipmentId);
+
+            // Refresh data
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            validationErrors.Add($"Failed to remove equipment: {ex.Message}");
+        }
     }
 }

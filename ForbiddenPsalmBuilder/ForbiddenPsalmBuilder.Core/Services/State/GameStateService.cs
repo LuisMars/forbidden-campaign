@@ -16,6 +16,8 @@ public class GameStateService : IGameStateService
     private readonly IEmbeddedResourceService _resourceService;
     private readonly SpecialClassService _specialClassService;
     private readonly EquipmentService _equipmentService;
+    private readonly EquipmentValidator _equipmentValidator;
+    private readonly TraderService _traderService;
     private const string StateStorageKey = "forbidden-psalm-builder-state";
     private static readonly Lazy<WarbandNameGenerator> _nameGenerator = new(LoadNameGenerator);
 
@@ -53,6 +55,8 @@ public class GameStateService : IGameStateService
         _resourceService = resourceService ?? new EmbeddedResourceService();
         _specialClassService = new SpecialClassService(_resourceService);
         _equipmentService = new EquipmentService(_resourceService);
+        _equipmentValidator = new EquipmentValidator();
+        _traderService = new TraderService(_resourceService);
     }
 
     // Game variant management
@@ -585,7 +589,8 @@ public class GameStateService : IGameStateService
                         Properties = weapon.Properties,
                         Stat = weapon.Stat,
                         Cost = weapon.Cost ?? 0,
-                        Slots = weapon.Slots
+                        Slots = weapon.Slots,
+                        IconClass = weapon.IconClass
                     };
                 }
                 break;
@@ -602,7 +607,9 @@ public class GameStateService : IGameStateService
                         Cost = armor.Cost ?? 0,
                         Slots = armor.Slots,
                         ArmorValue = armor.ArmorValue,
-                        Special = armor.Special
+                        ArmorType = armor.ArmorType,
+                        Special = armor.Special,
+                        IconClass = armor.IconClass
                     };
                 }
                 break;
@@ -618,7 +625,8 @@ public class GameStateService : IGameStateService
                         Type = "item",
                         Cost = item.Cost ?? 0,
                         Slots = item.Slots,
-                        Effect = item.Effect
+                        Effect = item.Effect,
+                        IconClass = item.IconClass
                     };
                 }
                 break;
@@ -630,9 +638,25 @@ public class GameStateService : IGameStateService
         if (equipment == null)
             throw new ArgumentException($"Equipment not found: {equipmentId}");
 
-        // Check if character can equip
-        if (!character.CanEquip(equipment))
-            throw new InvalidOperationException($"Character doesn't have enough equipment slots. Need {equipment.Slots} slots, but only have {character.Stats.EquipmentSlots - character.Equipment.Sum(e => e.Slots)} remaining.");
+        // Extract stat requirements for armor
+        int? reqStr = null, reqAgl = null, reqPrs = null, reqTgh = null;
+        if (equipmentType.ToLower() == "armor")
+        {
+            var armorData = await _equipmentService.GetArmorByIdAsync(equipmentId, warband.GameVariant);
+            if (armorData != null)
+            {
+                var requirements = _equipmentValidator.ExtractStatRequirements(armorData);
+                reqStr = requirements.strength;
+                reqAgl = requirements.agility;
+                reqPrs = requirements.presence;
+                reqTgh = requirements.toughness;
+            }
+        }
+
+        // Validate equipment using the validator
+        var validationError = _equipmentValidator.ValidateEquipment(character, equipment, reqStr, reqAgl, reqPrs, reqTgh);
+        if (validationError != null)
+            throw new InvalidOperationException(validationError);
 
         // Add equipment
         character.Equipment.Add(equipment);
@@ -676,14 +700,43 @@ public class GameStateService : IGameStateService
         return character.CanEquip(equipment);
     }
 
-    public async Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType)
+    public async Task<List<Equipment>> GetAvailableEquipmentForCharacterAsync(string warbandId, string characterId)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            return new List<Equipment>();
+
+        var character = warband.Members.FirstOrDefault(m => m.Id == characterId);
+        if (character == null)
+            return new List<Equipment>();
+
+        // Get all equipment from warband stash that the character can equip
+        var availableEquipment = warband.Stash
+            .Where(equipment => character.CanEquip(equipment))
+            .ToList();
+
+        return availableEquipment;
+    }
+
+    public async Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType, string? traderId = null)
     {
         var warband = await GetWarbandAsync(warbandId);
         if (warband == null)
             throw new InvalidOperationException("Warband not found");
 
+        // Load trader if specified
+        Trader? trader = null;
+        if (!string.IsNullOrEmpty(traderId))
+        {
+            trader = await _traderService.GetTraderByIdAsync(traderId, warband.GameVariant);
+            if (trader == null)
+                throw new InvalidOperationException("Trader not found");
+        }
+
         // Load equipment from service
         Equipment? newEquipment = null;
+        int buyPrice = 0;
+
         switch (equipmentType.ToLower())
         {
             case "weapon":
@@ -694,8 +747,13 @@ public class GameStateService : IGameStateService
                 if (weapon.Cost == null)
                     throw new InvalidOperationException("This weapon cannot be purchased");
 
-                if (!warband.CanAfford(weapon.Cost.Value))
-                    throw new InvalidOperationException($"Not enough gold. Need {weapon.Cost}, have {warband.Gold}");
+                // Calculate buy price with trader or use base cost
+                buyPrice = trader != null
+                    ? trader.CalculateBuyPrice(weapon.Cost.Value)
+                    : weapon.Cost.Value;
+
+                if (!warband.CanAfford(buyPrice))
+                    throw new InvalidOperationException($"Not enough gold. Need {buyPrice}, have {warband.Gold}");
 
                 newEquipment = new Equipment
                 {
@@ -705,7 +763,8 @@ public class GameStateService : IGameStateService
                     Properties = weapon.Properties,
                     Stat = weapon.Stat,
                     Cost = weapon.Cost.Value,
-                    Slots = weapon.Slots
+                    Slots = weapon.Slots,
+                    IconClass = weapon.IconClass
                 };
                 break;
 
@@ -717,17 +776,24 @@ public class GameStateService : IGameStateService
                 if (armor.Cost == null)
                     throw new InvalidOperationException("This armor cannot be purchased");
 
-                if (!warband.CanAfford(armor.Cost.Value))
-                    throw new InvalidOperationException($"Not enough gold. Need {armor.Cost}, have {warband.Gold}");
+                // Calculate buy price with trader or use base cost
+                buyPrice = trader != null
+                    ? trader.CalculateBuyPrice(armor.Cost.Value)
+                    : armor.Cost.Value;
+
+                if (!warband.CanAfford(buyPrice))
+                    throw new InvalidOperationException($"Not enough gold. Need {buyPrice}, have {warband.Gold}");
 
                 newEquipment = new Equipment
                 {
                     Name = armor.Name,
                     Type = "armor",
                     ArmorValue = armor.ArmorValue,
+                    ArmorType = armor.ArmorType,
                     Special = armor.Special,
                     Cost = armor.Cost.Value,
-                    Slots = armor.Slots
+                    Slots = armor.Slots,
+                    IconClass = armor.IconClass
                 };
                 break;
 
@@ -739,8 +805,13 @@ public class GameStateService : IGameStateService
                 if (item.Cost == null)
                     throw new InvalidOperationException("This item cannot be purchased");
 
-                if (!warband.CanAfford(item.Cost.Value))
-                    throw new InvalidOperationException($"Not enough gold. Need {item.Cost}, have {warband.Gold}");
+                // Calculate buy price with trader or use base cost
+                buyPrice = trader != null
+                    ? trader.CalculateBuyPrice(item.Cost.Value)
+                    : item.Cost.Value;
+
+                if (!warband.CanAfford(buyPrice))
+                    throw new InvalidOperationException($"Not enough gold. Need {buyPrice}, have {warband.Gold}");
 
                 newEquipment = new Equipment
                 {
@@ -748,7 +819,8 @@ public class GameStateService : IGameStateService
                     Type = "item",
                     Effect = item.Effect,
                     Cost = item.Cost.Value,
-                    Slots = item.Slots
+                    Slots = item.Slots,
+                    IconClass = item.IconClass
                 };
                 break;
 
@@ -757,7 +829,7 @@ public class GameStateService : IGameStateService
         }
 
         // Deduct gold and add to stash
-        warband.Gold -= newEquipment.Cost;
+        warband.Gold -= buyPrice;
         warband.Stash.Add(newEquipment);
         warband.UpdateLastModified();
 
@@ -766,7 +838,7 @@ public class GameStateService : IGameStateService
         _state.NotifyWarbandChanged(warbandId);
     }
 
-    public async Task SellEquipmentAsync(string warbandId, string equipmentId)
+    public async Task SellEquipmentAsync(string warbandId, string equipmentId, string? traderId = null)
     {
         var warband = await GetWarbandAsync(warbandId);
         if (warband == null)
@@ -776,8 +848,22 @@ public class GameStateService : IGameStateService
         if (equipment == null)
             throw new InvalidOperationException("Equipment not found in stash");
 
+        // Load trader if specified
+        Trader? trader = null;
+        if (!string.IsNullOrEmpty(traderId))
+        {
+            trader = await _traderService.GetTraderByIdAsync(traderId, warband.GameVariant);
+            if (trader == null)
+                throw new InvalidOperationException("Trader not found");
+        }
+
+        // Calculate sell price with trader or use base cost
+        int sellPrice = trader != null
+            ? trader.CalculateSellPrice(equipment.Cost)
+            : equipment.Cost;
+
         // Add gold and remove from stash
-        warband.Gold += equipment.Cost;
+        warband.Gold += sellPrice;
         warband.Stash.Remove(equipment);
         warband.UpdateLastModified();
 
@@ -800,9 +886,10 @@ public class GameStateService : IGameStateService
         if (equipment == null)
             throw new InvalidOperationException("Equipment not found in stash");
 
-        // Check if character can equip
-        if (!character.CanEquip(equipment))
-            throw new InvalidOperationException($"Not enough equipment slots. Character has {character.Stats.EquipmentSlots} slots, {character.Equipment.Sum(e => e.Slots)} used.");
+        // Validate equipment using the validator
+        var validationError = _equipmentValidator.ValidateEquipment(character, equipment);
+        if (validationError != null)
+            throw new InvalidOperationException(validationError);
 
         // Transfer equipment
         warband.Stash.Remove(equipment);

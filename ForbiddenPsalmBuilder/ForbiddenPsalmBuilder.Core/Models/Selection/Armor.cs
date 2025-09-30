@@ -15,6 +15,7 @@ public class Armor : ISelectableItem
 
     // Armor-specific properties
     public int ArmorValue { get; set; }
+    public string? ArmorType { get; set; } // body, accessory, pet
     public string? Special { get; set; }
     public int Slots { get; set; } = 1;
     public List<Dictionary<string, object>> Effects { get; set; } = new();

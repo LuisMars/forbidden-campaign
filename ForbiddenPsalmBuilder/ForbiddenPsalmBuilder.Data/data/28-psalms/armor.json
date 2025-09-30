@@ -2,6 +2,7 @@
   {
     "name": "Light",
     "armorValue": 1,
+    "armorType": "body",
     "special": null,
     "cost": 2,
     "slots": 1,
@@ -12,6 +13,7 @@
   {
     "name": "Medium",
     "armorValue": 2,
+    "armorType": "body",
     "special": null,
     "cost": 10,
     "slots": 1,
@@ -22,6 +24,7 @@
   {
     "name": "Heavy",
     "armorValue": 3,
+    "armorType": "body",
     "special": null,
     "cost": 20,
     "slots": 1,
@@ -32,6 +35,7 @@
   {
     "name": "Power/Plate",
     "armorValue": 4,
+    "armorType": "body",
     "special": "Must have 2+ Strength to use",
     "cost": 50,
     "slots": 1,
@@ -48,6 +52,7 @@
   {
     "name": "Homemade",
     "armorValue": 1,
+    "armorType": "body",
     "special": "-1 movement",
     "cost": 0,
     "slots": 1,

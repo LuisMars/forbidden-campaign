@@ -51,10 +51,11 @@ public interface IGameStateService
     Task AddEquipmentToCharacterAsync(string warbandId, string characterId, string equipmentId, string equipmentType);
     Task RemoveEquipmentFromCharacterAsync(string warbandId, string characterId, string equipmentId);
     bool CanCharacterEquip(string warbandId, string characterId, Equipment equipment);
+    Task<List<Equipment>> GetAvailableEquipmentForCharacterAsync(string warbandId, string characterId);
 
     // Equipment Economy & Transfers
-    Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType);
-    Task SellEquipmentAsync(string warbandId, string equipmentId);
+    Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType, string? traderId = null);
+    Task SellEquipmentAsync(string warbandId, string equipmentId, string? traderId = null);
     Task TransferEquipmentToCharacterAsync(string warbandId, string characterId, string equipmentId);
     Task TransferEquipmentToStashAsync(string warbandId, string characterId, string equipmentId);
 

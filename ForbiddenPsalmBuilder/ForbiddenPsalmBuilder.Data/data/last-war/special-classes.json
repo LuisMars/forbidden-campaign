@@ -181,7 +181,7 @@
     "displayName": "Hunter",
     "description": "Vampire hunter with specialized equipment and resistance",
     "cost": 5,
-    "iconClass": "ra ra-bow-arrow",
+    "iconClass": "ra ra-crossbow",
     "gameVariant": "last-war",
     "startingEquipment": ["dayfield body shield", "whisky", "rifle", "Ammo (5)"],
     "statBonuses": {},

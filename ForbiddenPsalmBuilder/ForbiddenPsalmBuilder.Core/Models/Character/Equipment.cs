@@ -11,9 +11,11 @@ public class Equipment
     public int Cost { get; set; }
     public int Slots { get; set; } = 1;
     public int ArmorValue { get; set; }
+    public string? ArmorType { get; set; } // body, accessory, pet (for armor only)
     public string? Special { get; set; }
     public string? Effect { get; set; }
     public string? RollRange { get; set; }
+    public string? IconClass { get; set; } // Icon class for displaying in UI
 
     public bool IsWeapon => Type.Equals("weapon", StringComparison.OrdinalIgnoreCase);
     public bool IsArmor => Type.Equals("armor", StringComparison.OrdinalIgnoreCase);

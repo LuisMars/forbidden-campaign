@@ -1,0 +1,274 @@
+@namespace ForbiddenPsalmBuilder.Components
+@using ForbiddenPsalmBuilder.Core.Models.Selection
+@using ForbiddenPsalmBuilder.Core.Models.Character
+
+<div class="equipment-selector">
+    @if (ShowTabs)
+    {
+        <div class="equipment-tabs">
+            <button type="button"
+                    class="tab-button @(activeTab == "all" ? "active" : "")"
+                    @onclick="SetTabAll">
+                All (@GetFilteredEquipment("all").Count)
+            </button>
+            <button type="button"
+                    class="tab-button @(activeTab == "weapons" ? "active" : "")"
+                    @onclick="SetTabWeapons">
+                <i class="ra ra-crossed-swords"></i> Weapons (@GetFilteredEquipment("weapons").Count)
+            </button>
+            <button type="button"
+                    class="tab-button @(activeTab == "armor" ? "active" : "")"
+                    @onclick="SetTabArmor">
+                <i class="ra ra-shield"></i> Armor (@GetFilteredEquipment("armor").Count)
+            </button>
+            <button type="button"
+                    class="tab-button @(activeTab == "items" ? "active" : "")"
+                    @onclick="SetTabItems">
+                <i class="fas fa-box"></i> Items (@GetFilteredEquipment("items").Count)
+            </button>
+        </div>
+    }
+
+    @if (ShowSearch)
+    {
+        <div class="equipment-search">
+            <input type="text"
+                   class="search-input"
+                   placeholder="Search equipment..."
+                   @bind="searchQuery"
+                   @bind:event="oninput" />
+            @if (!string.IsNullOrEmpty(searchQuery))
+            {
+                <button type="button" class="clear-search" @onclick="ClearSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+        </div>
+    }
+
+    <div class="equipment-grid">
+        @{
+            var filteredEquipment = GetFilteredEquipment(activeTab);
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                var query = searchQuery.ToLower();
+                filteredEquipment = filteredEquipment
+                    .Where(e =>
+                        e.Name.ToLower().Contains(query) ||
+                        (e.Special?.ToLower().Contains(query) ?? false) ||
+                        (e.Effect?.ToLower().Contains(query) ?? false) ||
+                        e.Properties.Any(p => p.ToLower().Contains(query)))
+                    .ToList();
+            }
+
+            if (filteredEquipment.Count == 0)
+            {
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <p>No equipment found</p>
+                </div>
+            }
+            else
+            {
+                foreach (var equipment in filteredEquipment)
+                {
+                    var isSelected = SelectedEquipmentId == equipment.Id;
+                    var isDisabled = DisabledEquipmentIds?.Contains(equipment.Id) ?? false;
+                    var price = PriceCalculator?.Invoke(equipment);
+
+                    <EquipmentCard Equipment="equipment"
+                                   ShowPrice="ShowPrice"
+                                   Price="price"
+                                   ShowActions="ShowActions"
+                                   IsSelected="isSelected"
+                                   IsDisabled="isDisabled"
+                                   OnClick="() => HandleEquipmentClick(equipment)"
+                                   OnBuy="() => HandleBuy(equipment)"
+                                   OnSell="() => HandleSell(equipment)"
+                                   OnRemove="() => HandleRemove(equipment)"
+                                   OnAssign="() => HandleAssign(equipment)" />
+                }
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<Equipment> Equipment { get; set; } = new();
+
+    [Parameter]
+    public List<Weapon> Weapons { get; set; } = new();
+
+    [Parameter]
+    public List<Armor> Armors { get; set; } = new();
+
+    [Parameter]
+    public List<Item> Items { get; set; } = new();
+
+    [Parameter]
+    public string? SelectedEquipmentId { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipment> OnEquipmentSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipment> OnBuy { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipment> OnSell { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipment> OnRemove { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipment> OnAssign { get; set; }
+
+    [Parameter]
+    public bool ShowTabs { get; set; } = true;
+
+    [Parameter]
+    public bool ShowSearch { get; set; } = true;
+
+    [Parameter]
+    public bool ShowPrice { get; set; } = false;
+
+    [Parameter]
+    public bool ShowActions { get; set; } = false;
+
+    [Parameter]
+    public Func<Equipment, int?>? PriceCalculator { get; set; }
+
+    [Parameter]
+    public List<string>? DisabledEquipmentIds { get; set; }
+
+    [Parameter]
+    public string InitialTab { get; set; } = "all";
+
+    private string activeTab = "all";
+    private string searchQuery = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        activeTab = InitialTab;
+    }
+
+    private void SetActiveTab(string tab)
+    {
+        activeTab = tab;
+        searchQuery = string.Empty;
+    }
+
+    private void SetTabAll() => SetActiveTab("all");
+    private void SetTabWeapons() => SetActiveTab("weapons");
+    private void SetTabArmor() => SetActiveTab("armor");
+    private void SetTabItems() => SetActiveTab("items");
+
+    private void ClearSearch()
+    {
+        searchQuery = string.Empty;
+    }
+
+    private List<Equipment> GetFilteredEquipment(string tab)
+    {
+        var allEquipment = new List<Equipment>(Equipment);
+
+        // Convert Weapons to Equipment
+        foreach (var weapon in Weapons)
+        {
+            allEquipment.Add(new Equipment
+            {
+                Id = weapon.Id,
+                Name = weapon.Name,
+                Type = "weapon",
+                Damage = weapon.Damage,
+                Properties = weapon.Properties,
+                Stat = weapon.Stat,
+                Cost = weapon.Cost ?? 0,
+                Slots = weapon.Slots,
+                IconClass = weapon.IconClass
+            });
+        }
+
+        // Convert Armors to Equipment
+        foreach (var armor in Armors)
+        {
+            allEquipment.Add(new Equipment
+            {
+                Id = armor.Id,
+                Name = armor.Name,
+                Type = "armor",
+                Cost = armor.Cost ?? 0,
+                Slots = armor.Slots,
+                ArmorValue = armor.ArmorValue,
+                ArmorType = armor.ArmorType,
+                Special = armor.Special,
+                IconClass = armor.IconClass
+            });
+        }
+
+        // Convert Items to Equipment
+        foreach (var item in Items)
+        {
+            allEquipment.Add(new Equipment
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Type = "item",
+                Cost = item.Cost ?? 0,
+                Slots = item.Slots,
+                Effect = item.Effect,
+                IconClass = item.IconClass
+            });
+        }
+
+        return tab switch
+        {
+            "weapons" => allEquipment.Where(e => e.IsWeapon).OrderBy(e => e.Name).ToList(),
+            "armor" => allEquipment.Where(e => e.IsArmor).OrderBy(e => e.Name).ToList(),
+            "items" => allEquipment.Where(e => e.IsItem).OrderBy(e => e.Name).ToList(),
+            _ => allEquipment.OrderBy(e => e.Name).ToList()
+        };
+    }
+
+    private async Task HandleEquipmentClick(Equipment equipment)
+    {
+        if (OnEquipmentSelected.HasDelegate)
+        {
+            await OnEquipmentSelected.InvokeAsync(equipment);
+        }
+    }
+
+    private async Task HandleBuy(Equipment equipment)
+    {
+        if (OnBuy.HasDelegate)
+        {
+            await OnBuy.InvokeAsync(equipment);
+        }
+    }
+
+    private async Task HandleSell(Equipment equipment)
+    {
+        if (OnSell.HasDelegate)
+        {
+            await OnSell.InvokeAsync(equipment);
+        }
+    }
+
+    private async Task HandleRemove(Equipment equipment)
+    {
+        if (OnRemove.HasDelegate)
+        {
+            await OnRemove.InvokeAsync(equipment);
+        }
+    }
+
+    private async Task HandleAssign(Equipment equipment)
+    {
+        if (OnAssign.HasDelegate)
+        {
+            await OnAssign.InvokeAsync(equipment);
+        }
+    }
+}

@@ -1,10 +1,12 @@
 [
   {
-    "name": "Quartermaster",
-    "sellMultiplier": 0.5,
-    "roundingRule": "down",
-    "minimumValue": 1,
-    "minimumValueRule": "doesnt_buy_if_rounds_to_zero",
-    "cannotSell": ["Manuscripts"]
+    "id": "quartermaster",
+    "name": "The Quartermaster",
+    "gameVariant": "last-war",
+    "description": "The Quartermaster is the only reliable source of weapons, items and armor. Buys at half price rounded down (doesn't buy items that round to 0), sells at full price.",
+    "buyMultiplier": 0.5,
+    "sellMultiplier": 1.0,
+    "hasLimitedInventory": false,
+    "iconClass": "ra ra-wooden-crate"
   }
 ]

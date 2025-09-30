@@ -1,0 +1,186 @@
+@namespace ForbiddenPsalmBuilder.Components
+@using ForbiddenPsalmBuilder.Core.Models.Character
+
+<div class="equipment-card @(IsSelected ? "selected" : "") @(IsDisabled ? "disabled" : "")" @onclick="HandleClick">
+    @if (!string.IsNullOrEmpty(Equipment.IconClass))
+    {
+        <i class="@Equipment.IconClass equipment-icon"></i>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(Equipment.Damage))
+        {
+            <i class="ra ra-crossed-swords equipment-icon"></i>
+        }
+        else if (Equipment.IsArmor)
+        {
+            <i class="ra ra-shield equipment-icon"></i>
+        }
+        else
+        {
+            <i class="fas fa-box equipment-icon"></i>
+        }
+    }
+
+    <div class="equipment-info">
+        <div class="equipment-name">@Equipment.Name</div>
+
+        <div class="equipment-stats">
+            @if (!string.IsNullOrEmpty(Equipment.Damage))
+            {
+                <span class="stat-badge damage">
+                    <i class="ra ra-crossed-swords"></i> @Equipment.Damage
+                </span>
+            }
+
+            @if (Equipment.ArmorValue > 0)
+            {
+                <span class="stat-badge armor">
+                    <i class="ra ra-shield"></i> @Equipment.ArmorValue
+                </span>
+            }
+
+            @if (Equipment.Slots > 0)
+            {
+                <span class="stat-badge slots">
+                    <i class="fas fa-box"></i> @Equipment.Slots
+                </span>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Equipment.Special))
+        {
+            <div class="equipment-special">@Equipment.Special</div>
+        }
+    </div>
+
+    @if (ShowPrice && Price.HasValue)
+    {
+        <div class="equipment-price">
+            @if (Price.Value > 0)
+            {
+                <span>@Price.Value@CurrencySymbol</span>
+            }
+            else
+            {
+                <span class="price-free">FREE</span>
+            }
+        </div>
+    }
+
+    @if (ShowActions)
+    {
+        <div class="equipment-actions" @onclick:stopPropagation="true">
+            @if (OnRemove.HasDelegate)
+            {
+                <button type="button" @onclick="HandleRemove" class="button-small button-danger" title="Remove">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+
+            @if (OnBuy.HasDelegate)
+            {
+                <button type="button" @onclick="HandleBuy" class="button-small" title="Buy" disabled="@IsDisabled">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+            }
+
+            @if (OnSell.HasDelegate)
+            {
+                <button type="button" @onclick="HandleSell" class="button-small" title="Sell">
+                    <i class="fas fa-coins"></i>
+                </button>
+            }
+
+            @if (OnAssign.HasDelegate)
+            {
+                <button type="button" @onclick="HandleAssign" class="button-small" title="Assign to character">
+                    <i class="ra ra-person"></i>
+                </button>
+            }
+        </div>
+    }
+
+    @if (IsSelected)
+    {
+        <i class="fas fa-check-circle card-selected"></i>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Equipment Equipment { get; set; } = null!;
+
+    [Parameter]
+    public bool ShowPrice { get; set; } = false;
+
+    [Parameter]
+    public int? Price { get; set; }
+
+    [Parameter]
+    public string CurrencySymbol { get; set; } = "G";
+
+    [Parameter]
+    public bool ShowActions { get; set; } = false;
+
+    [Parameter]
+    public bool IsSelected { get; set; } = false;
+
+    [Parameter]
+    public bool IsDisabled { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    [Parameter]
+    public EventCallback OnBuy { get; set; }
+
+    [Parameter]
+    public EventCallback OnSell { get; set; }
+
+    [Parameter]
+    public EventCallback OnRemove { get; set; }
+
+    [Parameter]
+    public EventCallback OnAssign { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (!IsDisabled && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
+
+    private async Task HandleBuy()
+    {
+        if (!IsDisabled && OnBuy.HasDelegate)
+        {
+            await OnBuy.InvokeAsync();
+        }
+    }
+
+    private async Task HandleSell()
+    {
+        if (OnSell.HasDelegate)
+        {
+            await OnSell.InvokeAsync();
+        }
+    }
+
+    private async Task HandleRemove()
+    {
+        if (OnRemove.HasDelegate)
+        {
+            await OnRemove.InvokeAsync();
+        }
+    }
+
+    private async Task HandleAssign()
+    {
+        if (OnAssign.HasDelegate)
+        {
+            await OnAssign.InvokeAsync();
+        }
+    }
+}

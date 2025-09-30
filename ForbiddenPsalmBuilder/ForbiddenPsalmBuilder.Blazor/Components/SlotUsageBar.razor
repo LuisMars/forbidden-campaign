@@ -1,0 +1,43 @@
+@namespace ForbiddenPsalmBuilder.Components
+
+<div class="slot-usage-bar">
+    <div class="slot-usage-label">
+        <span>@UsedSlots/@TotalSlots slots used</span>
+        @if (UsedSlots > TotalSlots)
+        {
+            <span class="slot-overflow">⚠️ Over capacity!</span>
+        }
+    </div>
+    <div class="slot-usage-track">
+        <div class="slot-usage-fill @GetFillClass()" style="width: @GetFillPercentage()%"></div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public int UsedSlots { get; set; }
+
+    [Parameter, EditorRequired]
+    public int TotalSlots { get; set; }
+
+    private double GetFillPercentage()
+    {
+        if (TotalSlots == 0) return 0;
+        var percentage = (double)UsedSlots / TotalSlots * 100;
+        return Math.Min(percentage, 100); // Cap at 100% for visual display
+    }
+
+    private string GetFillClass()
+    {
+        var percentage = (double)UsedSlots / TotalSlots * 100;
+
+        if (UsedSlots > TotalSlots)
+            return "slot-overflow-fill";
+        else if (percentage >= 80)
+            return "slot-almost-full";
+        else if (percentage >= 50)
+            return "slot-half-full";
+        else
+            return "slot-plenty";
+    }
+}

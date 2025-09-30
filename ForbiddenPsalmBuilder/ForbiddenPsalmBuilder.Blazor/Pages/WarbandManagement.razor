@@ -54,6 +54,10 @@
                         <i class="fas fa-edit"></i>
                         Edit
                     </button>
+                    <button @onclick="() => showStashModal = true">
+                        <i class="fas fa-box-open"></i>
+                        Stash
+                    </button>
                     <button @onclick="AddCharacter" disabled="@(!warband.CanAddMember)">
                         <i class="ra ra-person"></i>
                         Add Member
@@ -170,6 +174,13 @@
             </footer>
         </EditForm>
     </Modal>
+
+    <!-- Stash Modal -->
+    <StashModal
+        Warband="@warband"
+        IsVisible="@showStashModal"
+        OnClose="CloseStashModal"
+        OnEquipmentChanged="LoadWarband" />
 </main>
 
 @code {
@@ -180,6 +191,7 @@
     private List<string> validationErrors = new();
     private bool isLoading = true;
     private bool showEditModal = false;
+    private bool showStashModal = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -375,11 +387,6 @@ ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
         {
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
-                Value = $"{warband.Members.Count}/5",
-                Label = "Members"
-            },
-            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
-            {
                 Value = $"{warband.Gold}{GetCurrencySymbol()}",
                 Label = GetCurrencyName()
             },
@@ -387,11 +394,6 @@ ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
             {
                 Value = $"{warband.Experience}",
                 Label = "Experience"
-            },
-            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
-            {
-                Value = $"{warband.TotalValue}{GetCurrencySymbol()}",
-                Label = "Total Value"
             }
         };
     }
@@ -420,5 +422,10 @@ ForbiddenPsalmBuilder.Components.PageHeader.BreadcrumbItem>
     private async Task PrintWarband()
     {
         await JSRuntime.InvokeVoidAsync("window.print");
+    }
+
+    private void CloseStashModal()
+    {
+        showStashModal = false;
     }
 }

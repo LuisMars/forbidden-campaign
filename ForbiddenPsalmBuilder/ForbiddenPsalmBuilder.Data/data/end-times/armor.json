@@ -2,6 +2,7 @@
   {
     "name": "Light Armor",
     "armorValue": 1,
+    "armorType": "body",
     "special": null,
     "cost": 2,
     "slots": 1,
@@ -12,6 +13,7 @@
   {
     "name": "Medium Armor",
     "armorValue": 2,
+    "armorType": "body",
     "special": null,
     "cost": 10,
     "slots": 1,
@@ -22,6 +24,7 @@
   {
     "name": "Heavy Armor",
     "armorValue": 3,
+    "armorType": "body",
     "special": "Spellcasters cannot wear",
     "cost": 20,
     "slots": 1,
@@ -35,9 +38,26 @@
     "iconClass": "ra ra-heavy-armor"
   },
   {
+    "name": "Helm",
+    "armorValue": 0,
+    "armorType": "accessory",
+    "special": "Ignores Dazed",
+    "cost": 5,
+    "slots": 1,
+    "effects": [
+      {
+        "type": "immunity",
+        "immunities": ["dazed"]
+      }
+    ],
+    "restrictions": [],
+    "iconClass": "ra ra-helmet"
+  },
+  {
     "name": "Shield",
     "armorValue": 1,
-    "special": "Blocks ranged attacks",
+    "armorType": "accessory",
+    "special": "Blocks ranged attacks, can be destroyed to ignore damage",
     "cost": 3,
     "slots": 1,
     "effects": [
@@ -52,6 +72,7 @@
   {
     "name": "Tower Shield",
     "armorValue": 0,
+    "armorType": "accessory",
     "special": "Acts as cover, -3 to ranged attacks against bearer",
     "cost": 5,
     "slots": 2,
@@ -69,6 +90,7 @@
   {
     "name": "Full Plate",
     "armorValue": 4,
+    "armorType": "body",
     "special": "+2 Strength required or -1 Agility",
     "cost": 50,
     "slots": 2,
@@ -90,6 +112,7 @@
   {
     "name": "Pet Armor",
     "armorValue": 1,
+    "armorType": "pet",
     "special": "Can be used on any pet",
     "cost": 10,
     "slots": 1,
@@ -105,6 +128,7 @@
   {
     "name": "Improvised Armor",
     "armorValue": 1,
+    "armorType": "body",
     "special": "-1 Agility",
     "cost": 0,
     "slots": 1,
@@ -121,6 +145,7 @@
   {
     "name": "Comfy Socks",
     "armorValue": 0,
+    "armorType": "accessory",
     "special": "1 AV if has Scroll, Takes up no Equipment slots",
     "cost": 15,
     "slots": 0,

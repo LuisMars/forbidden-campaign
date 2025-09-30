@@ -1,6 +1,7 @@
 using ForbiddenPsalmBuilder.Core.Models.GameData;
 using ForbiddenPsalmBuilder.Core.Models.Warband;
 using ForbiddenPsalmBuilder.Core.Models.Character;
+using ForbiddenPsalmBuilder.Core.Models.Selection;
 using ForbiddenPsalmBuilder.Core.Repositories;
 using ForbiddenPsalmBuilder.Core.Services.State;
 using ForbiddenPsalmBuilder.Data.Services;
@@ -94,6 +95,90 @@ public class GameStateServiceTests
         _mockResourceService
             .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "equipment.json"))
             .ReturnsAsync(itemsData);
+
+        // Setup traders data for end-times (for trader pricing tests)
+        var tradersData = new List<Trader>
+        {
+            new Trader
+            {
+                Id = "vriprix",
+                Name = "Vriprix the Mad Wizard",
+                BuyMultiplier = 0.5m,
+                BuyModifier = 0,
+                SellMultiplier = 1.0m,
+                SellModifier = 0
+            },
+            new Trader
+            {
+                Id = "the-merchant",
+                Name = "The Merchant",
+                BuyMultiplier = 0.5m,
+                BuyModifier = 1,
+                SellMultiplier = 1.0m,
+                SellModifier = -1,
+                MinimumSellPrice = 1
+            }
+        };
+
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<List<Trader>>("end-times", "traders.json"))
+            .ReturnsAsync(tradersData);
+
+        // Setup weapons data for end-times (for trader pricing tests)
+        var endTimesWeaponsData = new Dictionary<string, List<object>>
+        {
+            ["melee"] = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["id"] = "sword",
+                    ["name"] = "Sword",
+                    ["damage"] = "1D6",
+                    ["properties"] = new List<string>(),
+                    ["cost"] = 3,
+                    ["slots"] = 1
+                }
+            }
+        };
+
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("end-times", "weapons.json"))
+            .ReturnsAsync(endTimesWeaponsData);
+
+        // Setup names data for 28-psalms
+        var names28Psalms = new ForbiddenPsalmBuilder.Core.Models.NameGeneration.CharacterNameData28Psalms
+        {
+            Names = new List<string>
+            {
+                "Rex", "Gridotus", "Mister Quimper", "Inquisitor Lucius", "David C. Moore",
+                "Ophelia", "Alex Goode", "John R. Young", "Merlin", "Filthor"
+            }
+        };
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<ForbiddenPsalmBuilder.Core.Models.NameGeneration.CharacterNameData28Psalms>("28-psalms", "names.json"))
+            .ReturnsAsync(names28Psalms);
+
+        // Setup names data for end-times
+        var namesEndTimes = new ForbiddenPsalmBuilder.Core.Models.NameGeneration.CharacterNameDataEndTimes
+        {
+            FirstNames = new List<string> { "Nohr", "Ash", "Darkest", "Saint", "Mother" },
+            Titles = new List<string> { "The Saint", "The Wet", "The Lefty", "The Dire" },
+            CompleteNames = new List<string> { "Hugo Stieglitz", "Ryan R", "Willnox" }
+        };
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<ForbiddenPsalmBuilder.Core.Models.NameGeneration.CharacterNameDataEndTimes>("end-times", "names.json"))
+            .ReturnsAsync(namesEndTimes);
+
+        // Setup names data for last-war
+        var namesLastWar = new ForbiddenPsalmBuilder.Core.Models.NameGeneration.CharacterNameDataLastWar
+        {
+            FirstNames = new List<string> { "Wilhelm", "René", "Edward", "Shakes", "Tommy" },
+            TitlesPrefixes = new List<string> { "Private", "Captain", "Major", "Lieutenant" },
+            TitlesSuffixes = new List<string> { "Jr", "The Hellfighter", "the Conscientious Objector" }
+        };
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<ForbiddenPsalmBuilder.Core.Models.NameGeneration.CharacterNameDataLastWar>("last-war", "names.json"))
+            .ReturnsAsync(namesLastWar);
     }
 
 
@@ -941,6 +1026,112 @@ public class GameStateServiceTests
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.SellEquipmentAsync(warband.Id, "nonexistent"));
         Assert.Contains("Equipment not found in stash", exception.Message);
+    }
+
+    [Fact]
+    public async Task BuyEquipmentAsync_WithTrader_ShouldUseTraderBuyPrice()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync();
+        var warband = new Warband("Test Warband", "end-times") { Id = "warband-1", Gold = 50 };
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act - Buy with Vriprix (standard trader: 50% buy)
+        // Sword base cost is 3G, so buy price should be 1G (50% of 3 = 1.5, rounded down = 1)
+        await _service.BuyEquipmentAsync(warband.Id, "sword", "weapon", "vriprix");
+
+        // Assert
+        Assert.Single(warband.Stash);
+        Assert.Equal("Sword", warband.Stash[0].Name);
+        Assert.Equal(49, warband.Gold); // 50 - 1 (trader buy price)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task BuyEquipmentAsync_WithTheMerchant_ShouldAddOneGold()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync();
+        var warband = new Warband("Test Warband", "end-times") { Id = "warband-1", Gold = 50 };
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act - Buy with The Merchant (50% + 1G)
+        // Sword base cost is 3G, so buy price should be 2G (50% of 3 = 1.5, +1 = 2.5, rounded down = 2)
+        await _service.BuyEquipmentAsync(warband.Id, "sword", "weapon", "the-merchant");
+
+        // Assert
+        Assert.Single(warband.Stash);
+        Assert.Equal(48, warband.Gold); // 50 - 2 (1G base + 1G modifier, rounded down)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task SellEquipmentAsync_WithTrader_ShouldUseTraderSellPrice()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "end-times") { Id = "warband-1", Gold = 50 };
+        var equipment = new Equipment { Id = "eq-1", Name = "Sword", Cost = 3, Type = "weapon" };
+        warband.Stash.Add(equipment);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act - Sell to Vriprix (standard trader: 100% sell)
+        await _service.SellEquipmentAsync(warband.Id, "eq-1", "vriprix");
+
+        // Assert
+        Assert.Empty(warband.Stash);
+        Assert.Equal(53, warband.Gold); // 50 + 3 (100% of base cost)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task SellEquipmentAsync_WithTheMerchant_ShouldSubtractOneGold()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "end-times") { Id = "warband-1", Gold = 50 };
+        var equipment = new Equipment { Id = "eq-1", Name = "Sword", Cost = 3, Type = "weapon" };
+        warband.Stash.Add(equipment);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act - Sell to The Merchant (100% - 1G, min 1G)
+        await _service.SellEquipmentAsync(warband.Id, "eq-1", "the-merchant");
+
+        // Assert
+        Assert.Empty(warband.Stash);
+        Assert.Equal(52, warband.Gold); // 50 + 2 (3G - 1G modifier)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task SellEquipmentAsync_WithTheMerchant_ShouldEnforceMinimumOneGold()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "end-times") { Id = "warband-1", Gold = 50 };
+        var equipment = new Equipment { Id = "eq-1", Name = "Cheap Item", Cost = 1, Type = "item" };
+        warband.Stash.Add(equipment);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act - Sell to The Merchant (1G - 1G = 0, but min is 1G)
+        await _service.SellEquipmentAsync(warband.Id, "eq-1", "the-merchant");
+
+        // Assert
+        Assert.Empty(warband.Stash);
+        Assert.Equal(51, warband.Gold); // 50 + 1 (minimum enforced)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
     }
 
     [Fact]
