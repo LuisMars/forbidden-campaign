@@ -1,15 +1,14 @@
 using ForbiddenPsalmBuilder.Core.Models.Warband;
-using ForbiddenPsalmBuilder.Core.Services.Storage;
-using System.Text.Json;
+using ForbiddenPsalmBuilder.Core.Services.State;
 
 namespace ForbiddenPsalmBuilder.Core.Repositories;
 
 public class WarbandRepository : IWarbandRepository
 {
-    private readonly IStorageService _storageService;
+    private readonly IStateStorageService _storageService;
     private const string WARBANDS_KEY = "warbands";
 
-    public WarbandRepository(IStorageService storageService)
+    public WarbandRepository(IStateStorageService storageService)
     {
         _storageService = storageService;
     }

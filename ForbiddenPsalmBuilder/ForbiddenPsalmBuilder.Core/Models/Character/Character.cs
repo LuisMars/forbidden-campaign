@@ -24,8 +24,8 @@ public class Character
         Name = name;
     }
 
-    // Calculate effective stats including equipment bonuses
-    public Stats EffectiveStats => Stats; // TODO: Add equipment modifiers
+    // Calculate effective stats (currently same as base stats - equipment modifiers not in game rules)
+    public Stats EffectiveStats => Stats;
 
     // Check if character can equip more items
     public bool CanEquip(Equipment item) =>

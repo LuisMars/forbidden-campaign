@@ -1,9 +1,12 @@
-using ForbiddenPsalmBuilder.Core.Services.Storage;
+using ForbiddenPsalmBuilder.Core.Services.State;
 using System.Text.Json;
 
 namespace ForbiddenPsalmBuilder.Core.Tests.Storage;
 
-public class InMemoryStorageService : IStorageService
+/// <summary>
+/// In-memory storage service for testing (implements IStateStorageService)
+/// </summary>
+public class InMemoryStorageService : IStateStorageService
 {
     private readonly Dictionary<string, string> _storage = new();
 
@@ -28,11 +31,6 @@ public class InMemoryStorageService : IStorageService
     {
         _storage.Remove(key);
         return Task.CompletedTask;
-    }
-
-    public Task<bool> ContainsKeyAsync(string key)
-    {
-        return Task.FromResult(_storage.ContainsKey(key));
     }
 
     public Task ClearAsync()
