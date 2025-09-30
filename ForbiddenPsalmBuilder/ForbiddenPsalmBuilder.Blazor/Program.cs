@@ -19,6 +19,8 @@ builder.Services.AddBlazoredLocalStorage();
 
 // Data services
 builder.Services.AddSingleton<IEmbeddedResourceService, EmbeddedResourceService>();
+builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.EquipmentService>();
+builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.TraderService>();
 
 // Storage services
 builder.Services.AddScoped<IStateStorageService, LocalStorageService>();
