@@ -22,6 +22,12 @@ builder.Services.AddSingleton<IEmbeddedResourceService, EmbeddedResourceService>
 
 // Storage services
 builder.Services.AddScoped<IStateStorageService, LocalStorageService>();
+// Register LocalStorageService for legacy IStorageService (used by WarbandRepository)
+builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.Storage.IStorageService>(sp =>
+{
+    var localStorage = sp.GetRequiredService<Blazored.LocalStorage.ILocalStorageService>();
+    return new LegacyStorageAdapter(localStorage);
+});
 builder.Services.AddScoped<IWarbandRepository, WarbandRepository>();
 
 // Global state management - Singleton to persist across the entire app lifetime
