@@ -14,11 +14,12 @@ public class GameStateService : IGameStateService
     private readonly GlobalGameState _state;
     private readonly IWarbandRepository _warbandRepository;
     private readonly IEmbeddedResourceService _resourceService;
+    private readonly IStateStorageService? _storageService;
     private readonly SpecialClassService _specialClassService;
     private readonly EquipmentService _equipmentService;
     private readonly EquipmentValidator _equipmentValidator;
     private readonly TraderService _traderService;
-    private const string StateStorageKey = "forbidden-psalm-builder-state";
+    private const string StateStorageKey = "forbidden-psalm-state";
     private static readonly Lazy<WarbandNameGenerator> _nameGenerator = new(LoadNameGenerator);
 
     public GlobalGameState State => _state;
@@ -48,11 +49,16 @@ public class GameStateService : IGameStateService
         remove => _state.ActiveWarbandChanged -= value;
     }
 
-    public GameStateService(GlobalGameState state, IWarbandRepository warbandRepository, IEmbeddedResourceService? resourceService = null)
+    public GameStateService(
+        GlobalGameState state,
+        IWarbandRepository warbandRepository,
+        IEmbeddedResourceService? resourceService = null,
+        IStateStorageService? storageService = null)
     {
         _state = state;
         _warbandRepository = warbandRepository;
         _resourceService = resourceService ?? new EmbeddedResourceService();
+        _storageService = storageService;
         _specialClassService = new SpecialClassService(_resourceService);
         _equipmentService = new EquipmentService(_resourceService);
         _equipmentValidator = new EquipmentValidator();
@@ -378,8 +384,10 @@ public class GameStateService : IGameStateService
     {
         try
         {
-            // TODO: Save to localStorage
-            await Task.CompletedTask;
+            if (_storageService == null)
+                return; // No storage service configured, skip persistence
+
+            await _storageService.SetItemAsync(StateStorageKey, _state);
         }
         catch (Exception ex)
         {
@@ -391,8 +399,21 @@ public class GameStateService : IGameStateService
     {
         try
         {
-            // TODO: Load from localStorage
-            await Task.CompletedTask;
+            if (_storageService == null)
+                return; // No storage service configured, skip persistence
+
+            var savedState = await _storageService.GetItemAsync<GlobalGameState>(StateStorageKey);
+            if (savedState != null)
+            {
+                // Restore warbands
+                _state.Warbands = savedState.Warbands;
+                _state.ActiveWarbandId = savedState.ActiveWarbandId;
+                _state.SelectedGameVariant = savedState.SelectedGameVariant;
+                _state.CharacterBeingBuilt = savedState.CharacterBeingBuilt;
+                _state.CharacterBuilderWarbandId = savedState.CharacterBuilderWarbandId;
+
+                _state.NotifyStateChanged();
+            }
         }
         catch (Exception ex)
         {
@@ -408,7 +429,12 @@ public class GameStateService : IGameStateService
         _state.CharacterBuilderWarbandId = null;
         _state.ClearError();
         _state.NotifyStateChanged();
-        await SaveStateAsync();
+
+        // Remove persisted state
+        if (_storageService != null)
+        {
+            await _storageService.RemoveItemAsync(StateStorageKey);
+        }
     }
 
     // Name generation

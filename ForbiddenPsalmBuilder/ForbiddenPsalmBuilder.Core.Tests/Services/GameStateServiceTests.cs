@@ -1222,4 +1222,88 @@ public class GameStateServiceTests
         Assert.Contains("Equipment not found on character", exception.Message);
     }
 
+    // State Persistence Tests
+    [Fact]
+    public async Task SaveStateAsync_ShouldPersistWarbandsToStorage()
+    {
+        // Arrange
+        var mockStorage = new Mock<IStateStorageService>();
+        var serviceWithStorage = new GameStateService(_state, _mockRepository.Object, _mockResourceService.Object, mockStorage.Object);
+
+        var warband = new Warband("Test Warband", "end-times") { Id = "warband-1", Gold = 100 };
+        _state.Warbands[warband.Id] = warband;
+
+        // Act
+        await serviceWithStorage.SaveStateAsync();
+
+        // Assert
+        mockStorage.Verify(s => s.SetItemAsync("forbidden-psalm-state", It.IsAny<GlobalGameState>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoadStateAsync_ShouldRestoreWarbandsFromStorage()
+    {
+        // Arrange
+        var mockStorage = new Mock<IStateStorageService>();
+        var savedState = new GlobalGameState
+        {
+            SelectedGameVariant = "end-times",
+            Warbands = new Dictionary<string, Warband>
+            {
+                ["warband-1"] = new Warband("Saved Warband", "end-times") { Id = "warband-1", Gold = 200 }
+            },
+            ActiveWarbandId = "warband-1"
+        };
+
+        mockStorage.Setup(s => s.GetItemAsync<GlobalGameState>("forbidden-psalm-state"))
+            .ReturnsAsync(savedState);
+
+        var emptyState = new GlobalGameState();
+        var serviceWithStorage = new GameStateService(emptyState, _mockRepository.Object, _mockResourceService.Object, mockStorage.Object);
+
+        // Act
+        await serviceWithStorage.LoadStateAsync();
+
+        // Assert
+        Assert.Single(emptyState.Warbands);
+        Assert.Equal("Saved Warband", emptyState.Warbands["warband-1"].Name);
+        Assert.Equal(200, emptyState.Warbands["warband-1"].Gold);
+        Assert.Equal("warband-1", emptyState.ActiveWarbandId);
+        mockStorage.Verify(s => s.GetItemAsync<GlobalGameState>("forbidden-psalm-state"), Times.Once);
+    }
+
+    [Fact]
+    public async Task LoadStateAsync_ShouldHandleNoSavedState()
+    {
+        // Arrange
+        var mockStorage = new Mock<IStateStorageService>();
+        mockStorage.Setup(s => s.GetItemAsync<GlobalGameState>("forbidden-psalm-state"))
+            .ReturnsAsync((GlobalGameState?)null);
+
+        var emptyState = new GlobalGameState();
+        var serviceWithStorage = new GameStateService(emptyState, _mockRepository.Object, _mockResourceService.Object, mockStorage.Object);
+
+        // Act
+        await serviceWithStorage.LoadStateAsync();
+
+        // Assert - should not crash, state should remain empty
+        Assert.Empty(emptyState.Warbands);
+    }
+
+    [Fact]
+    public async Task ClearStateAsync_ShouldRemovePersistedState()
+    {
+        // Arrange
+        var mockStorage = new Mock<IStateStorageService>();
+        var serviceWithStorage = new GameStateService(_state, _mockRepository.Object, _mockResourceService.Object, mockStorage.Object);
+
+        // Act
+        await serviceWithStorage.ClearStateAsync();
+
+        // Assert
+        mockStorage.Verify(s => s.RemoveItemAsync("forbidden-psalm-state"), Times.Once);
+        Assert.Empty(_state.Warbands);
+        Assert.Null(_state.ActiveWarbandId);
+    }
+
 }
