@@ -106,6 +106,10 @@
             <section>
                 <StatArraySelector
                     StatArrays="@availableStatArrays"
+                    InitialAgility="@editCharacterDto.Agility"
+                    InitialPresence="@editCharacterDto.Presence"
+                    InitialStrength="@editCharacterDto.Strength"
+                    InitialToughness="@editCharacterDto.Toughness"
                     OnStatsChanged="OnStatArrayStatsChanged"
                     OnArraySelectionChanged="OnStatArraySelectionChanged" />
             </section>
@@ -237,12 +241,16 @@
 
     private async Task SaveCharacter()
     {
+        Console.WriteLine($"SaveCharacter called - IsNewCharacter: {IsNewCharacter}");
+        Console.WriteLine($"Stats: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
+
         validationErrors.Clear();
 
         try
         {
             if (IsNewCharacter)
             {
+                Console.WriteLine("Creating new character...");
                 var newCharacter = new Character(editCharacterDto.Name)
                 {
                     Id = editCharacterDto.Id,
@@ -259,9 +267,11 @@
                 newCharacter.CurrentHP = newCharacter.Stats.HP;
 
                 await StateService.AddCharacterToWarbandAsync(WarbandId, newCharacter);
+                Console.WriteLine("Character created successfully");
             }
             else if (character != null)
             {
+                Console.WriteLine($"Updating existing character {CharacterId}...");
                 character.Name = editCharacterDto.Name.Trim();
                 character.Stats = new Stats(
                     editCharacterDto.Agility,
@@ -279,13 +289,18 @@
                     character.CurrentHP = character.Stats.HP;
                 }
 
-                await StateService.UpdateWarbandAsync(warband!);
+                Console.WriteLine($"Calling UpdateCharacterAsync with stats: AGI={character.Stats.Agility}, PRE={character.Stats.Presence}, STR={character.Stats.Strength}, TGH={character.Stats.Toughness}");
+                await StateService.UpdateCharacterAsync(WarbandId, CharacterId!, character);
+                Console.WriteLine("Character updated successfully");
             }
 
+            Console.WriteLine($"Navigating to /warband/{WarbandId}");
             Navigation.NavigateTo($"/warband/{WarbandId}");
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"ERROR in SaveCharacter: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             await StateService.SetErrorAsync($"Failed to save character: {ex.Message}");
         }
     }
@@ -302,13 +317,42 @@
 
     private bool IsValidForm()
     {
-        if (editCharacterDto == null) return false;
-        if (string.IsNullOrWhiteSpace(editCharacterDto.Name)) return false;
-        if (editCharacterDto.Agility < -3 || editCharacterDto.Agility > 3) return false;
-        if (editCharacterDto.Presence < -3 || editCharacterDto.Presence > 3) return false;
-        if (editCharacterDto.Strength < -3 || editCharacterDto.Strength > 3) return false;
-        if (editCharacterDto.Toughness < -3 || editCharacterDto.Toughness > 3) return false;
-        if (editCharacterDto.Experience < 0 || editCharacterDto.Experience > 1000) return false;
+        if (editCharacterDto == null)
+        {
+            Console.WriteLine("IsValidForm: editCharacterDto is null");
+            return false;
+        }
+        if (string.IsNullOrWhiteSpace(editCharacterDto.Name))
+        {
+            Console.WriteLine("IsValidForm: Name is empty");
+            return false;
+        }
+        if (editCharacterDto.Agility < -3 || editCharacterDto.Agility > 3)
+        {
+            Console.WriteLine($"IsValidForm: Agility out of range: {editCharacterDto.Agility}");
+            return false;
+        }
+        if (editCharacterDto.Presence < -3 || editCharacterDto.Presence > 3)
+        {
+            Console.WriteLine($"IsValidForm: Presence out of range: {editCharacterDto.Presence}");
+            return false;
+        }
+        if (editCharacterDto.Strength < -3 || editCharacterDto.Strength > 3)
+        {
+            Console.WriteLine($"IsValidForm: Strength out of range: {editCharacterDto.Strength}");
+            return false;
+        }
+        if (editCharacterDto.Toughness < -3 || editCharacterDto.Toughness > 3)
+        {
+            Console.WriteLine($"IsValidForm: Toughness out of range: {editCharacterDto.Toughness}");
+            return false;
+        }
+        if (editCharacterDto.Experience < 0 || editCharacterDto.Experience > 1000)
+        {
+            Console.WriteLine($"IsValidForm: Experience out of range: {editCharacterDto.Experience}");
+            return false;
+        }
+        Console.WriteLine($"IsValidForm: VALID - Stats: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
         return true;
     }
 
@@ -358,10 +402,12 @@
 
     private void OnStatArrayStatsChanged((int Agility, int Presence, int Strength, int Toughness) stats)
     {
+        Console.WriteLine($"OnStatArrayStatsChanged called: AGI={stats.Agility}, PRE={stats.Presence}, STR={stats.Strength}, TGH={stats.Toughness}");
         editCharacterDto.Agility = stats.Agility;
         editCharacterDto.Presence = stats.Presence;
         editCharacterDto.Strength = stats.Strength;
         editCharacterDto.Toughness = stats.Toughness;
+        Console.WriteLine($"Updated editCharacterDto: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
         StateHasChanged();
     }
 

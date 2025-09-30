@@ -240,11 +240,16 @@ public class GameStateServiceTests
     [Fact]
     public async Task GenerateCharacterNameAsync_28Psalms_ShouldPickFrom28PsalmsData()
     {
-        // Known names from 28-psalms data (sample from names.json)
+        // Known names from 28-psalms data (expanded list from names.json)
         var known28PsalmsNames = new HashSet<string>
         {
             "Rex", "Gridotus", "Mister Quimper", "Inquisitor Lucius", "David C. Moore",
-            "Ophelia", "Alex Goode", "John R. Young", "Merlin", "Filthor"
+            "Ophelia", "Alex Goode", "John R. Young", "Merlin", "Filthor",
+            "Zachary Knippel", "Capitald", "Matthias Mencel", "William B", "Zac Mazey",
+            "The Dour Kin", "Gabe Benavides", "Robert Lee", "Paul Wilson", "Abby",
+            "Cecil", "George Kaldis", "Shawn Turpin", "Kiral", "Charles Chapman",
+            "Dennis McGeen", "ElDavePhoto", "Fenrikson", "Nick", "shawn hakl",
+            "Alexander", "(_><)", "DerOlfork", "Devon Tackett", "Christopher Moses"
         };
 
         // Act - Generate 50 names to get good coverage
@@ -408,6 +413,257 @@ public class GameStateServiceTests
         // Assert - Should not contain any 28-psalms-only names
         var wrongDataMatches = generated.Intersect(psalmsOnlyNames).ToList();
         Assert.Empty(wrongDataMatches);
+    }
+
+    [Fact]
+    public async Task UpdateCharacterAsync_ShouldUpdateCharacterAndSaveToRepository()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "last-war");
+        var character = new Character("Original Name")
+        {
+            Stats = new Stats(1, 1, 1, 1),
+            Experience = 10
+        };
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        var updatedCharacter = new Character("Updated Name")
+        {
+            Stats = new Stats(2, 2, 2, 2),
+            Experience = 20,
+            IsSpellcaster = true
+        };
+
+        // Setup mock repository to return the warband when SaveAsync is called
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>()))
+                      .ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.UpdateCharacterAsync(warband.Id, character.Id, updatedCharacter);
+
+        // Assert
+        Assert.Single(warband.Members);
+        Assert.Equal("Updated Name", warband.Members.First().Name);
+        Assert.Equal(2, warband.Members.First().Stats.Agility);
+        Assert.Equal(20, warband.Members.First().Experience);
+        Assert.True(warband.Members.First().IsSpellcaster);
+
+        // Verify the repository SaveAsync was called
+        _mockRepository.Verify(r => r.SaveAsync(warband), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateCharacterAsync_CharacterNotFound_ShouldThrowException()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "last-war");
+        _state.Warbands[warband.Id] = warband;
+
+        var updatedCharacter = new Character("Updated Name")
+        {
+            Stats = new Stats(2, 2, 2, 2)
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            _service.UpdateCharacterAsync(warband.Id, "non-existent-id", updatedCharacter));
+
+        Assert.Contains("Character not found", exception.Message);
+
+        // Verify the repository SaveAsync was NOT called since the operation should fail
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RemoveCharacterFromWarbandAsync_ShouldRemoveCharacterAndSaveToRepository()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "last-war");
+        var character1 = new Character("Character 1");
+        var character2 = new Character("Character 2");
+        warband.Members.Add(character1);
+        warband.Members.Add(character2);
+        _state.Warbands[warband.Id] = warband;
+
+        // Setup mock repository to return the warband when SaveAsync is called
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>()))
+                      .ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.RemoveCharacterFromWarbandAsync(warband.Id, character1.Id);
+
+        // Assert
+        Assert.Single(warband.Members);
+        Assert.Equal("Character 2", warband.Members.First().Name);
+
+        // Verify the repository SaveAsync was called
+        _mockRepository.Verify(r => r.SaveAsync(warband), Times.Once);
+    }
+
+    [Fact]
+    public async Task RemoveCharacterFromWarbandAsync_CharacterNotFound_ShouldThrowException()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "last-war");
+        _state.Warbands[warband.Id] = warband;
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            _service.RemoveCharacterFromWarbandAsync(warband.Id, "non-existent-id"));
+
+        Assert.Contains("Character not found", exception.Message);
+
+        // Verify the repository SaveAsync was NOT called since the operation should fail
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateWarbandAsync_ShouldSaveToRepository()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync(); // Ensure game configs are loaded
+        var warbandName = "New Warband";
+        var gameVariant = "last-war";
+
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>()))
+                      .ReturnsAsync((Warband w) => w);
+
+        // Act
+        var warbandId = await _service.CreateWarbandAsync(warbandName, gameVariant);
+
+        // Assert
+        Assert.NotNull(warbandId);
+
+        // Verify the repository SaveAsync was called
+        _mockRepository.Verify(r => r.SaveAsync(It.Is<Warband>(w =>
+            w.Name == warbandName && w.GameVariant == gameVariant)), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteWarbandAsync_ShouldCallRepositoryDelete()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "last-war");
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.DeleteAsync(warband.Id))
+                      .ReturnsAsync(true);
+
+        // Act
+        await _service.DeleteWarbandAsync(warband.Id);
+
+        // Assert
+        // Verify the repository DeleteAsync was called
+        _mockRepository.Verify(r => r.DeleteAsync(warband.Id), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateWarbandAsync_ShouldSaveToRepository()
+    {
+        // Arrange
+        var warband = new Warband("Original Name", "last-war");
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.ExistsAsync(warband.Id))
+                      .ReturnsAsync(true);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>()))
+                      .ReturnsAsync((Warband w) => w);
+
+        // Modify warband
+        warband.Name = "Updated Name";
+
+        // Act
+        await _service.UpdateWarbandAsync(warband);
+
+        // Assert
+        // Verify the repository SaveAsync was called
+        _mockRepository.Verify(r => r.SaveAsync(It.Is<Warband>(w =>
+            w.Id == warband.Id && w.Name == "Updated Name")), Times.Once);
+    }
+
+    /// <summary>
+    /// This test ensures all state-modifying methods persist changes to the repository.
+    /// If you add a new method that modifies warband state, add a test case here.
+    /// This prevents bugs where in-memory state is updated but not persisted.
+    /// </summary>
+    [Theory]
+    [InlineData("CreateWarband")]
+    [InlineData("UpdateWarband")]
+    [InlineData("DeleteWarband")]
+    [InlineData("AddCharacter")]
+    [InlineData("UpdateCharacter")]
+    [InlineData("RemoveCharacter")]
+    public async Task AllStateModifyingMethods_ShouldPersistToRepository(string operation)
+    {
+        // This test serves as documentation and a reminder that all operations
+        // that modify warband state MUST persist changes to the repository.
+        //
+        // When adding new state-modifying methods to GameStateService:
+        // 1. Add a new test case to this Theory with the method name
+        // 2. Implement the actual test in the switch statement below
+        // 3. Verify the repository Save/Delete method is called
+        //
+        // This pattern ensures we don't forget to persist changes in the future.
+
+        await _service.LoadGameDataAsync(); // Ensure game configs are loaded
+
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>()))
+                      .ReturnsAsync((Warband w) => w);
+        _mockRepository.Setup(r => r.DeleteAsync(It.IsAny<string>()))
+                      .ReturnsAsync(true);
+        _mockRepository.Setup(r => r.ExistsAsync(It.IsAny<string>()))
+                      .ReturnsAsync(true);
+
+        switch (operation)
+        {
+            case "CreateWarband":
+                await _service.CreateWarbandAsync("Test", "last-war");
+                _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+                break;
+
+            case "UpdateWarband":
+                var warband1 = new Warband("Test", "last-war");
+                _state.Warbands[warband1.Id] = warband1;
+                await _service.UpdateWarbandAsync(warband1);
+                _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+                break;
+
+            case "DeleteWarband":
+                var warband2 = new Warband("Test", "last-war");
+                _state.Warbands[warband2.Id] = warband2;
+                await _service.DeleteWarbandAsync(warband2.Id);
+                _mockRepository.Verify(r => r.DeleteAsync(warband2.Id), Times.Once);
+                break;
+
+            case "AddCharacter":
+                var warband3 = new Warband("Test", "last-war");
+                _state.Warbands[warband3.Id] = warband3;
+                await _service.AddCharacterToWarbandAsync(warband3.Id, new Character("Test"));
+                _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+                break;
+
+            case "UpdateCharacter":
+                var warband4 = new Warband("Test", "last-war");
+                var character = new Character("Original");
+                warband4.Members.Add(character);
+                _state.Warbands[warband4.Id] = warband4;
+                await _service.UpdateCharacterAsync(warband4.Id, character.Id, new Character("Updated"));
+                _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+                break;
+
+            case "RemoveCharacter":
+                var warband5 = new Warband("Test", "last-war");
+                var character2 = new Character("Test");
+                warband5.Members.Add(character2);
+                _state.Warbands[warband5.Id] = warband5;
+                await _service.RemoveCharacterFromWarbandAsync(warband5.Id, character2.Id);
+                _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+                break;
+
+            default:
+                throw new ArgumentException($"Unknown operation: {operation}. Please implement the test case.");
+        }
     }
 
 }

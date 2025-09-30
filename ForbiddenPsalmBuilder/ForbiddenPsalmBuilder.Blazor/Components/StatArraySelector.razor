@@ -142,12 +142,17 @@
     [Parameter] public List<ForbiddenPsalmBuilder.Core.Models.Character.StatArray> StatArrays { get; set; } = new();
     [Parameter] public EventCallback<(int Agility, int Presence, int Strength, int Toughness)> OnStatsChanged { get; set; }
     [Parameter] public EventCallback<string> OnArraySelectionChanged { get; set; }
+    [Parameter] public int? InitialAgility { get; set; }
+    [Parameter] public int? InitialPresence { get; set; }
+    [Parameter] public int? InitialStrength { get; set; }
+    [Parameter] public int? InitialToughness { get; set; }
 
     private string SelectedArrayId = string.Empty;
     private int AgilityIndex = -1;
     private int PresenceIndex = -1;
     private int StrengthIndex = -1;
     private int ToughnessIndex = -1;
+    private bool _initialized = false;
 
     // Manual stat values
     private int ManualAgility = 0;
@@ -157,10 +162,50 @@
 
     protected override void OnParametersSet()
     {
-        // Default to the first stat array (Specialist) instead of Custom
-        if (string.IsNullOrEmpty(SelectedArrayId))
+        if (_initialized) return;
+
+        // Try to match existing stats to a stat array
+        if (InitialAgility.HasValue && InitialPresence.HasValue && InitialStrength.HasValue && InitialToughness.HasValue)
         {
-            SelectedArrayId = StatArrays.FirstOrDefault()?.Id ?? "unset";
+            var stats = new[] { InitialAgility.Value, InitialPresence.Value, InitialStrength.Value, InitialToughness.Value };
+            var sortedStats = stats.OrderBy(s => s).ToArray();
+
+            // Try to find a matching stat array
+            foreach (var array in StatArrays)
+            {
+                var sortedArrayValues = array.Values.OrderBy(v => v).ToArray();
+                if (sortedArrayValues.SequenceEqual(sortedStats))
+                {
+                    // Found matching array, now find the exact assignment
+                    // Handle duplicate values by tracking which indices are already used
+                    SelectedArrayId = array.Id;
+                    var usedIndices = new HashSet<int>();
+
+                    AgilityIndex = FindIndexForValue(array.Values, InitialAgility.Value, usedIndices);
+                    PresenceIndex = FindIndexForValue(array.Values, InitialPresence.Value, usedIndices);
+                    StrengthIndex = FindIndexForValue(array.Values, InitialStrength.Value, usedIndices);
+                    ToughnessIndex = FindIndexForValue(array.Values, InitialToughness.Value, usedIndices);
+
+                    _initialized = true;
+                    return;
+                }
+            }
+
+            // No match found, use custom/manual
+            SelectedArrayId = "unset";
+            ManualAgility = InitialAgility.Value;
+            ManualPresence = InitialPresence.Value;
+            ManualStrength = InitialStrength.Value;
+            ManualToughness = InitialToughness.Value;
+            _initialized = true;
+        }
+        else
+        {
+            // Default to the first stat array (Specialist) for new characters
+            if (string.IsNullOrEmpty(SelectedArrayId))
+            {
+                SelectedArrayId = StatArrays.FirstOrDefault()?.Id ?? "unset";
+            }
         }
     }
 
@@ -211,16 +256,29 @@
         return indices.Length != indices.Distinct().Count();
     }
 
+    private int FindIndexForValue(int[] arrayValues, int value, HashSet<int> usedIndices)
+    {
+        for (int i = 0; i < arrayValues.Length; i++)
+        {
+            if (arrayValues[i] == value && !usedIndices.Contains(i))
+            {
+                usedIndices.Add(i);
+                return i;
+            }
+        }
+        return -1; // Should never happen if the array was matched correctly
+    }
+
     private async Task NotifyStatsChanged()
     {
         if (GetSelectedArray() == null) return;
 
         var array = GetSelectedArray()!;
 
-        var agility = AgilityIndex >= 0 ? Math.Max(0, array.Values[AgilityIndex]) : 0;
-        var presence = PresenceIndex >= 0 ? Math.Max(0, array.Values[PresenceIndex]) : 0;
-        var strength = StrengthIndex >= 0 ? Math.Max(0, array.Values[StrengthIndex]) : 0;
-        var toughness = ToughnessIndex >= 0 ? Math.Max(0, array.Values[ToughnessIndex]) : 0;
+        var agility = AgilityIndex >= 0 ? array.Values[AgilityIndex] : 0;
+        var presence = PresenceIndex >= 0 ? array.Values[PresenceIndex] : 0;
+        var strength = StrengthIndex >= 0 ? array.Values[StrengthIndex] : 0;
+        var toughness = ToughnessIndex >= 0 ? array.Values[ToughnessIndex] : 0;
 
         await OnStatsChanged.InvokeAsync((agility, presence, strength, toughness));
     }

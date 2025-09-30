@@ -1,0 +1,87 @@
+@namespace ForbiddenPsalmBuilder.Blazor.Components
+@using ForbiddenPsalmBuilder.Core.Models.Character
+@using ForbiddenPsalmBuilder.Components
+@using static ForbiddenPsalmBuilder.Components.StatsDisplay
+
+<article class="character-card">
+    <div class="horizontal space">
+        <h3>@Character.Name</h3>
+        <div class="horizontal">
+            <button @onclick="OnEdit">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button @onclick="OnDelete">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+
+    <StatsDisplay Stats="@MainStats" />
+    <StatsDisplay Stats="@CalculatedStats" />
+
+    @if (Character.IsSpellcaster || !string.IsNullOrEmpty(Character.SpecialTrooperType))
+    {
+        <div class="character-tags">
+            @if (Character.IsSpellcaster)
+            {
+                <span class="tag">Spellcaster</span>
+            }
+            @if (!string.IsNullOrEmpty(Character.SpecialTrooperType))
+            {
+                <span class="tag">@Character.SpecialTrooperType</span>
+            }
+        </div>
+    }
+
+    @if (Character.Equipment.Any())
+    {
+        <hr />
+        <small>Equipment:</small>
+        <div class="character-equipment">
+            @foreach (var equipment in Character.Equipment)
+            {
+                <span class="equipment-item">@equipment.Name</span>
+            }
+        </div>
+    }
+
+    @if (Character.Injuries.Any())
+    {
+        <hr />
+        <small>Injuries:</small>
+        <div class="character-injuries">
+            @foreach (var injury in Character.Injuries)
+            {
+                <span class="injury-item">@injury</span>
+            }
+        </div>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public Character Character { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    private int UsedSlots => Character.Equipment.Sum(e => e.Slots);
+
+    private List<StatItem> MainStats => new()
+    {
+        new StatItem { Value = Character.Stats.Agility.ToString(), Label = "AGI" },
+        new StatItem { Value = Character.Stats.Presence.ToString(), Label = "PRE" },
+        new StatItem { Value = Character.Stats.Strength.ToString(), Label = "STR" },
+        new StatItem { Value = Character.Stats.Toughness.ToString(), Label = "TGH" }
+    };
+
+    private List<StatItem> CalculatedStats => new()
+    {
+        new StatItem { Value = Character.Stats.HP.ToString(), Label = "HP" },
+        new StatItem { Value = $"{Character.Stats.Movement}\"", Label = "MOV" },
+        new StatItem { Value = $"{UsedSlots}/{Character.Stats.EquipmentSlots}", Label = "SLOTS" }
+    };
+}

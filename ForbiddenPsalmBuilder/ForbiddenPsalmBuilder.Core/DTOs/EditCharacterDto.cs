@@ -11,16 +11,16 @@ public class EditCharacterDto
     [StringLength(50, ErrorMessage = "Character name cannot exceed 50 characters")]
     public string Name { get; set; } = string.Empty;
 
-    [Range(0, 10, ErrorMessage = "Agility must be between 0 and 10")]
+    [Range(-3, 3, ErrorMessage = "Agility must be between -3 and 3")]
     public int Agility { get; set; }
 
-    [Range(0, 10, ErrorMessage = "Presence must be between 0 and 10")]
+    [Range(-3, 3, ErrorMessage = "Presence must be between -3 and 3")]
     public int Presence { get; set; }
 
-    [Range(0, 10, ErrorMessage = "Strength must be between 0 and 10")]
+    [Range(-3, 3, ErrorMessage = "Strength must be between -3 and 3")]
     public int Strength { get; set; }
 
-    [Range(0, 10, ErrorMessage = "Toughness must be between 0 and 10")]
+    [Range(-3, 3, ErrorMessage = "Toughness must be between -3 and 3")]
     public int Toughness { get; set; }
 
     [Range(0, 1000, ErrorMessage = "Experience must be between 0 and 1000")]

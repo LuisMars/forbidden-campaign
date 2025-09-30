@@ -221,6 +221,11 @@ public class GameStateService : IGameStateService
         character.Id = characterId; // Preserve ID
         warband.Members[index] = character;
         warband.UpdateLastModified();
+
+        // Save to repository
+        var updatedWarband = await _warbandRepository.SaveAsync(warband);
+        _state.Warbands[updatedWarband.Id] = updatedWarband;
+
         _state.NotifyWarbandChanged(warbandId);
         await SaveStateAsync();
     }
@@ -236,6 +241,11 @@ public class GameStateService : IGameStateService
 
         warband.Members.Remove(character);
         warband.UpdateLastModified();
+
+        // Save to repository
+        var updatedWarband = await _warbandRepository.SaveAsync(warband);
+        _state.Warbands[updatedWarband.Id] = updatedWarband;
+
         _state.NotifyWarbandChanged(warbandId);
         await SaveStateAsync();
     }

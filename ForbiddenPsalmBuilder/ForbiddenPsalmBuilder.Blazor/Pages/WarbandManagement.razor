@@ -4,6 +4,7 @@
 @using ForbiddenPsalmBuilder.Core.Models.Character
 @using ForbiddenPsalmBuilder.Core.DTOs
 @using ForbiddenPsalmBuilder.Core.Validation
+@using ForbiddenPsalmBuilder.Blazor.Components
 @using Microsoft.AspNetCore.Components.Forms
 @inject IGameStateService StateService
 @inject NavigationManager Navigation
@@ -78,77 +79,10 @@
                     <section>
                         @foreach (var character in warband.Members)
                         {
-                            <article>
-                                <div>
-                                    <div class="horizontal space">
-                                        <h3>
-                                        @character.Name
-                                        </h3>
-                                        <div class="horizontal">
-                                            <button @onclick="() => EditCharacter(character.Id)">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button @onclick="() => RemoveCharacter(character.Id)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div>
-                                            <small>HP:</small>
-                                            @character.CurrentHP
-                                            /
-                                            @character.Stats.HP<br />
-                                            <small>Toughness:</small>
-                                            @character.Stats.Toughness<br />
-                                            <small>Movement:</small>
-                                            @character.Stats.Movement
-                                            "
-                                        </div>
-                                        <div>
-                                            <small>XP:</small>
-                                            @character.Experience<br />
-                                            @if (character.IsSpellcaster)
-                                            {
-                                                <span>Spellcaster</span>
-                                                <br />
-                                            }
-                                            @if (!string.IsNullOrEmpty(character.SpecialTrooperType))
-                                            {
-                                                <span>
-                                                @character.SpecialTrooperType
-                                                </span>
-                                            }
-                                        </div>
-                                    </div>
-                                    @if (character.Equipment.Any())
-                                    {
-                                        <hr />
-                                        <small>Equipment:</small>
-                                        <div>
-                                            @foreach (var equipment in character.Equipment)
-                                            {
-                                                <span>
-                                                @equipment.Name
-                                                </span>
-                                            }
-                                        </div>
-                                    }
-                                    @if (character.Injuries.Any())
-                                    {
-                                        <hr />
-                                        <small>Injuries:</small>
-                                        <div>
-                                            @foreach (var injury in character.Injuries)
-                                            {
-                                                <span>
-                                                @injury
-                                                </span>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            </article>
+                            <CharacterCard
+                                Character="@character"
+                                OnEdit="@(() => EditCharacter(character.Id))"
+                                OnDelete="@(() => RemoveCharacter(character.Id))" />
                         }
                     </section>
                 }
