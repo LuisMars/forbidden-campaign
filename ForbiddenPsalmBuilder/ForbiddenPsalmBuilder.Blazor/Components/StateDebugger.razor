@@ -1,4 +1,5 @@
 @using ForbiddenPsalmBuilder.Core.Services.State
+@using Microsoft.Extensions.Logging
 @inject IGameStateService StateService
 @implements IDisposable
 
@@ -92,21 +93,24 @@
         InvokeAsync(StateHasChanged);
     }
 
+    [Inject]
+    public ILogger<StateDebugger> Logger { get; set; } = null!;
+
     private void OnWarbandChanged(string warbandId)
     {
-        Console.WriteLine($"Warband changed: {warbandId}");
+        Logger.LogInformation("Warband changed: {WarbandId}", warbandId);
         OnStateChanged();
     }
 
     private void OnGameVariantChanged(string gameVariant)
     {
-        Console.WriteLine($"Game variant changed: {gameVariant}");
+        Logger.LogInformation("Game variant changed: {GameVariant}", gameVariant);
         OnStateChanged();
     }
 
     private void OnActiveWarbandChanged(string? warbandId)
     {
-        Console.WriteLine($"Active warband changed: {warbandId}");
+        Logger.LogInformation("Active warband changed: {WarbandId}", warbandId);
         OnStateChanged();
     }
 

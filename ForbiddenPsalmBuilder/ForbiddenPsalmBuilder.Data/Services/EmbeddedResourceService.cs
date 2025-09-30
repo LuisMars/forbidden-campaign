@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace ForbiddenPsalmBuilder.Data.Services;
 
@@ -7,22 +8,24 @@ public class EmbeddedResourceService : IEmbeddedResourceService
 {
     private readonly Assembly _assembly;
     private readonly string _baseNamespace;
+    private readonly ILogger<EmbeddedResourceService>? _logger;
 
-    public EmbeddedResourceService()
+    public EmbeddedResourceService(ILogger<EmbeddedResourceService>? logger = null)
     {
         // Load resources from the Data assembly where they are embedded
         _assembly = Assembly.GetExecutingAssembly();
         _baseNamespace = "ForbiddenPsalmBuilder.Data";
+        _logger = logger;
 
         // Debug: Log available resources
         var resources = _assembly.GetManifestResourceNames();
-        Console.WriteLine($"[EmbeddedResourceService] Assembly: {_assembly.GetName().Name}");
-        Console.WriteLine($"[EmbeddedResourceService] Total resources: {resources.Length}");
+        _logger?.LogInformation("Assembly: {AssemblyName}", _assembly.GetName().Name);
+        _logger?.LogInformation("Total resources: {Count}", resources.Length);
         var nameResources = resources.Where(r => r.Contains("names")).ToList();
-        Console.WriteLine($"[EmbeddedResourceService] Name resources: {nameResources.Count}");
+        _logger?.LogInformation("Name resources: {Count}", nameResources.Count);
         foreach (var res in nameResources)
         {
-            Console.WriteLine($"  - {res}");
+            _logger?.LogDebug("  - {ResourceName}", res);
         }
     }
 
@@ -58,9 +61,9 @@ public class EmbeddedResourceService : IEmbeddedResourceService
             ? $"data._{resourceGameVariant}.{resourceFileName}"
             : $"data.{resourceGameVariant}.{resourceFileName}";
 
-        Console.WriteLine($"[EmbeddedResourceService] Loading game resource: {gameVariant}/{fileName} -> {resourcePath}");
+        _logger?.LogInformation("Loading game resource: {GameVariant}/{FileName} -> {ResourcePath}", gameVariant, fileName, resourcePath);
         var result = await GetResourceAsJsonAsync<T>(resourcePath);
-        Console.WriteLine($"[EmbeddedResourceService] Loaded: {result != null}");
+        _logger?.LogInformation("Loaded: {Success}", result != null);
         return result;
     }
 

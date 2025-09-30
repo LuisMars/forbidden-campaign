@@ -1,5 +1,6 @@
 using ForbiddenPsalmBuilder.Core.Models.Selection;
 using ForbiddenPsalmBuilder.Data.Services;
+using Microsoft.Extensions.Logging;
 
 namespace ForbiddenPsalmBuilder.Core.Services;
 
@@ -9,11 +10,13 @@ namespace ForbiddenPsalmBuilder.Core.Services;
 public class TraderService
 {
     private readonly IEmbeddedResourceService _resourceService;
+    private readonly ILogger<TraderService>? _logger;
     private readonly Dictionary<string, List<Trader>> _cache = new();
 
-    public TraderService(IEmbeddedResourceService resourceService)
+    public TraderService(IEmbeddedResourceService resourceService, ILogger<TraderService>? logger = null)
     {
         _resourceService = resourceService;
+        _logger = logger;
     }
 
     /// <summary>

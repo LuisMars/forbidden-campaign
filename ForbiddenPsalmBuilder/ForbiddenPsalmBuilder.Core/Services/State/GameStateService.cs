@@ -5,6 +5,7 @@ using ForbiddenPsalmBuilder.Core.Models.NameGeneration;
 using ForbiddenPsalmBuilder.Core.Models.Selection;
 using ForbiddenPsalmBuilder.Core.Repositories;
 using ForbiddenPsalmBuilder.Data.Services;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace ForbiddenPsalmBuilder.Core.Services.State;
@@ -15,6 +16,7 @@ public class GameStateService : IGameStateService
     private readonly IWarbandRepository _warbandRepository;
     private readonly IEmbeddedResourceService _resourceService;
     private readonly IStateStorageService? _storageService;
+    private readonly ILogger<GameStateService>? _logger;
     private readonly SpecialClassService _specialClassService;
     private readonly EquipmentService _equipmentService;
     private readonly EquipmentValidator _equipmentValidator;
@@ -53,11 +55,13 @@ public class GameStateService : IGameStateService
         GlobalGameState state,
         IWarbandRepository warbandRepository,
         IEmbeddedResourceService? resourceService = null,
-        IStateStorageService? storageService = null)
+        IStateStorageService? storageService = null,
+        ILogger<GameStateService>? logger = null)
     {
         _state = state;
         _warbandRepository = warbandRepository;
         _resourceService = resourceService ?? new EmbeddedResourceService();
+        _logger = logger;
         _storageService = storageService;
         _specialClassService = new SpecialClassService(_resourceService);
         _equipmentService = new EquipmentService(_resourceService);
@@ -342,6 +346,7 @@ public class GameStateService : IGameStateService
         }
         catch (Exception ex)
         {
+            _logger?.LogError(ex, "Failed to load game data");
             _state.SetError($"Failed to load game data: {ex.Message}");
         }
         finally
@@ -391,6 +396,7 @@ public class GameStateService : IGameStateService
         }
         catch (Exception ex)
         {
+            _logger?.LogError(ex, "Failed to save state");
             _state.SetError($"Failed to save state: {ex.Message}");
         }
     }
@@ -417,6 +423,7 @@ public class GameStateService : IGameStateService
         }
         catch (Exception ex)
         {
+            _logger?.LogError(ex, "Failed to load state");
             _state.SetError($"Failed to load state: {ex.Message}");
         }
     }
@@ -746,9 +753,17 @@ public class GameStateService : IGameStateService
 
     public async Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType, string? traderId = null)
     {
+        _logger?.LogInformation("BuyEquipmentAsync called: WarbandId={WarbandId}, EquipmentId={EquipmentId}, Type={Type}, TraderId={TraderId}",
+            warbandId, equipmentId, equipmentType, traderId);
+
         var warband = await GetWarbandAsync(warbandId);
         if (warband == null)
+        {
+            _logger?.LogError("Warband not found: {WarbandId}", warbandId);
             throw new InvalidOperationException("Warband not found");
+        }
+
+        _logger?.LogInformation("Warband found: {WarbandName}, Gold={Gold}", warband.Name, warband.Gold);
 
         // Load trader if specified
         Trader? trader = null;
@@ -756,7 +771,11 @@ public class GameStateService : IGameStateService
         {
             trader = await _traderService.GetTraderByIdAsync(traderId, warband.GameVariant);
             if (trader == null)
+            {
+                _logger?.LogError("Trader not found: {TraderId}", traderId);
                 throw new InvalidOperationException("Trader not found");
+            }
+            _logger?.LogInformation("Trader loaded: {TraderName}", trader.Name);
         }
 
         // Load equipment from service
@@ -855,13 +874,18 @@ public class GameStateService : IGameStateService
         }
 
         // Deduct gold and add to stash
+        _logger?.LogInformation("Buying {EquipmentName} for {Price} gold. Gold before: {GoldBefore}", newEquipment.Name, buyPrice, warband.Gold);
         warband.Gold -= buyPrice;
         warband.Stash.Add(newEquipment);
         warband.UpdateLastModified();
+        _logger?.LogInformation("Gold after purchase: {GoldAfter}, Stash count: {StashCount}", warband.Gold, warband.Stash.Count);
 
         await _warbandRepository.SaveAsync(warband);
+        _logger?.LogInformation("Warband saved to repository");
+
         _state.NotifyStateChanged();
         _state.NotifyWarbandChanged(warbandId);
+        _logger?.LogInformation("State change notifications sent");
     }
 
     public async Task SellEquipmentAsync(string warbandId, string equipmentId, string? traderId = null)

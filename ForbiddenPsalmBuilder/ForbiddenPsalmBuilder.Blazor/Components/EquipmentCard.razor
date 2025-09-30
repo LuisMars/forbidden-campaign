@@ -82,6 +82,7 @@
             {
                 <button type="button" @onclick="HandleBuy" class="button-small" title="Buy" disabled="@IsDisabled">
                     <i class="fas fa-shopping-cart"></i>
+                    Buy
                 </button>
             }
 
@@ -89,6 +90,7 @@
             {
                 <button type="button" @onclick="HandleSell" class="button-small" title="Sell">
                     <i class="fas fa-coins"></i>
+                    Sell
                 </button>
             }
 
@@ -108,12 +110,17 @@
     }
 </div>
 
+@using Microsoft.Extensions.Logging
+
 @code {
     [Parameter, EditorRequired]
     public Equipment Equipment { get; set; } = null!;
 
     [Parameter]
     public bool ShowPrice { get; set; } = false;
+
+    [Inject]
+    public ILogger<EquipmentCard> Logger { get; set; } = null!;
 
     [Parameter]
     public int? Price { get; set; }
@@ -134,16 +141,16 @@
     public EventCallback OnClick { get; set; }
 
     [Parameter]
-    public EventCallback OnBuy { get; set; }
+    public EventCallback<Equipment> OnBuy { get; set; }
 
     [Parameter]
-    public EventCallback OnSell { get; set; }
+    public EventCallback<Equipment> OnSell { get; set; }
 
     [Parameter]
-    public EventCallback OnRemove { get; set; }
+    public EventCallback<Equipment> OnRemove { get; set; }
 
     [Parameter]
-    public EventCallback OnAssign { get; set; }
+    public EventCallback<Equipment> OnAssign { get; set; }
 
     private async Task HandleClick()
     {
@@ -155,33 +162,37 @@
 
     private async Task HandleBuy()
     {
+        Logger.LogInformation("HandleBuy clicked for {EquipmentName}, IsDisabled: {IsDisabled}, HasDelegate: {HasDelegate}", Equipment?.Name, IsDisabled, OnBuy.HasDelegate);
         if (!IsDisabled && OnBuy.HasDelegate)
         {
-            await OnBuy.InvokeAsync();
+            await OnBuy.InvokeAsync(Equipment);
         }
     }
 
     private async Task HandleSell()
     {
+        Logger.LogInformation("HandleSell clicked for {EquipmentName}, HasDelegate: {HasDelegate}", Equipment?.Name, OnSell.HasDelegate);
         if (OnSell.HasDelegate)
         {
-            await OnSell.InvokeAsync();
+            await OnSell.InvokeAsync(Equipment);
         }
     }
 
     private async Task HandleRemove()
     {
+        Logger.LogInformation("HandleRemove clicked for {EquipmentName}, HasDelegate: {HasDelegate}", Equipment?.Name, OnRemove.HasDelegate);
         if (OnRemove.HasDelegate)
         {
-            await OnRemove.InvokeAsync();
+            await OnRemove.InvokeAsync(Equipment);
         }
     }
 
     private async Task HandleAssign()
     {
+        Logger.LogInformation("HandleAssign clicked for {EquipmentName}, HasDelegate: {HasDelegate}", Equipment?.Name, OnAssign.HasDelegate);
         if (OnAssign.HasDelegate)
         {
-            await OnAssign.InvokeAsync();
+            await OnAssign.InvokeAsync(Equipment);
         }
     }
 }

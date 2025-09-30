@@ -1,5 +1,6 @@
 using ForbiddenPsalmBuilder.Core.Models.Selection;
 using ForbiddenPsalmBuilder.Data.Services;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace ForbiddenPsalmBuilder.Core.Services;
@@ -7,6 +8,7 @@ namespace ForbiddenPsalmBuilder.Core.Services;
 public class EquipmentService
 {
     private readonly IEmbeddedResourceService _resourceService;
+    private readonly ILogger<EquipmentService>? _logger;
     private Dictionary<string, List<Weapon>> _weaponCache = new();
     private Dictionary<string, List<Armor>> _armorCache = new();
     private Dictionary<string, List<Item>> _itemCache = new();
@@ -16,9 +18,10 @@ public class EquipmentService
         _resourceService = new EmbeddedResourceService();
     }
 
-    public EquipmentService(IEmbeddedResourceService resourceService)
+    public EquipmentService(IEmbeddedResourceService resourceService, ILogger<EquipmentService>? logger = null)
     {
         _resourceService = resourceService;
+        _logger = logger;
     }
 
     public async Task<List<Weapon>> GetWeaponsAsync(string gameVariant)
@@ -32,7 +35,7 @@ public class EquipmentService
 
         try
         {
-            var weaponData = await _resourceService.GetGameResourceAsync<Dictionary<string, List<object>>>(
+            var weaponData = await _resourceService.GetGameResourceAsync<Dictionary<string, JsonElement>>(
                 gameVariant,
                 "weapons.json"
             );
@@ -42,13 +45,17 @@ public class EquipmentService
 
             var weapons = new List<Weapon>();
 
-            // Parse each weapon category
+            // Parse each weapon category (skip non-array fields like "notes")
             foreach (var category in weaponData)
             {
+                // Skip if not an array (e.g., "notes" field)
+                if (category.Value.ValueKind != JsonValueKind.Array)
+                    continue;
+
                 var categoryName = category.Key;
-                foreach (var weaponObj in category.Value)
+                foreach (var weaponElement in category.Value.EnumerateArray())
                 {
-                    var weapon = ParseWeapon(weaponObj, categoryName);
+                    var weapon = ParseWeapon(weaponElement, categoryName);
                     if (weapon != null)
                         weapons.Add(weapon);
                 }
@@ -57,8 +64,9 @@ public class EquipmentService
             _weaponCache[gameVariant] = weapons;
             return weapons;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger?.LogError(ex, "Error loading weapons for {GameVariant}", gameVariant);
             return new List<Weapon>();
         }
     }
@@ -102,8 +110,9 @@ public class EquipmentService
             _armorCache[gameVariant] = armorList;
             return armorList;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger?.LogError(ex, "Error loading armor for {GameVariant}", gameVariant);
             return new List<Armor>();
         }
     }
@@ -163,8 +172,9 @@ public class EquipmentService
             _itemCache[gameVariant] = items;
             return items;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger?.LogError(ex, "Error loading items for {GameVariant}", gameVariant);
             return new List<Item>();
         }
     }
@@ -178,12 +188,12 @@ public class EquipmentService
         return items.FirstOrDefault(i => i.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
     }
 
-    private Weapon? ParseWeapon(object weaponObj, string category)
+    private Weapon? ParseWeapon(JsonElement weaponElement, string category)
     {
         try
         {
             var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
-                JsonSerializer.Serialize(weaponObj)
+                weaponElement.GetRawText()
             );
 
             if (dict == null) return null;

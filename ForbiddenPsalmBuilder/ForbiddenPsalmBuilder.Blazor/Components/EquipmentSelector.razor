@@ -1,6 +1,7 @@
 @namespace ForbiddenPsalmBuilder.Components
 @using ForbiddenPsalmBuilder.Core.Models.Selection
 @using ForbiddenPsalmBuilder.Core.Models.Character
+@using Microsoft.Extensions.Logging
 
 <div class="equipment-selector">
     @if (ShowTabs)
@@ -84,10 +85,10 @@
                                    IsSelected="isSelected"
                                    IsDisabled="isDisabled"
                                    OnClick="() => HandleEquipmentClick(equipment)"
-                                   OnBuy="() => HandleBuy(equipment)"
-                                   OnSell="() => HandleSell(equipment)"
-                                   OnRemove="() => HandleRemove(equipment)"
-                                   OnAssign="() => HandleAssign(equipment)" />
+                                   OnBuy="@HandleBuy"
+                                   OnSell="@HandleSell"
+                                   OnRemove="@HandleRemove"
+                                   OnAssign="@HandleAssign" />
                 }
             }
         }
@@ -152,6 +153,12 @@
     protected override void OnInitialized()
     {
         activeTab = InitialTab;
+        Logger.LogInformation("EquipmentSelector OnInitialized - OnBuy.HasDelegate: {HasDelegate}", OnBuy.HasDelegate);
+    }
+
+    protected override void OnParametersSet()
+    {
+        Logger.LogInformation("EquipmentSelector OnParametersSet - OnBuy.HasDelegate: {HasDelegate}", OnBuy.HasDelegate);
     }
 
     private void SetActiveTab(string tab)
@@ -240,16 +247,35 @@
         }
     }
 
+    [Inject]
+    public ILogger<EquipmentSelector> Logger { get; set; } = null!;
+
     private async Task HandleBuy(Equipment equipment)
     {
+        Logger.LogInformation("HandleBuy called for {EquipmentName}, HasDelegate: {HasDelegate}, Equipment null: {EquipmentNull}",
+            equipment?.Name, OnBuy.HasDelegate, equipment == null);
+
+        if (equipment == null)
+        {
+            Logger.LogWarning("Equipment is null in HandleBuy");
+            return;
+        }
+
         if (OnBuy.HasDelegate)
         {
+            Logger.LogInformation("Invoking OnBuy callback with equipment: {EquipmentId}", equipment.Id);
             await OnBuy.InvokeAsync(equipment);
+            Logger.LogInformation("OnBuy callback completed");
+        }
+        else
+        {
+            Logger.LogWarning("OnBuy has no delegate - callback not set from parent");
         }
     }
 
     private async Task HandleSell(Equipment equipment)
     {
+        Logger.LogInformation("HandleSell called for {EquipmentName}, HasDelegate: {HasDelegate}", equipment?.Name, OnSell.HasDelegate);
         if (OnSell.HasDelegate)
         {
             await OnSell.InvokeAsync(equipment);

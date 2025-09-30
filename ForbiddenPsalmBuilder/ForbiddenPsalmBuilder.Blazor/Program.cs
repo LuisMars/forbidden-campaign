@@ -18,9 +18,23 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddBlazoredLocalStorage();
 
 // Data services
-builder.Services.AddSingleton<IEmbeddedResourceService, EmbeddedResourceService>();
-builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.EquipmentService>();
-builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.TraderService>();
+builder.Services.AddSingleton<IEmbeddedResourceService>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<EmbeddedResourceService>>();
+    return new EmbeddedResourceService(logger);
+});
+builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.EquipmentService>(sp =>
+{
+    var resourceService = sp.GetRequiredService<IEmbeddedResourceService>();
+    var logger = sp.GetRequiredService<ILogger<ForbiddenPsalmBuilder.Core.Services.EquipmentService>>();
+    return new ForbiddenPsalmBuilder.Core.Services.EquipmentService(resourceService, logger);
+});
+builder.Services.AddScoped<ForbiddenPsalmBuilder.Core.Services.TraderService>(sp =>
+{
+    var resourceService = sp.GetRequiredService<IEmbeddedResourceService>();
+    var logger = sp.GetRequiredService<ILogger<ForbiddenPsalmBuilder.Core.Services.TraderService>>();
+    return new ForbiddenPsalmBuilder.Core.Services.TraderService(resourceService, logger);
+});
 
 // Storage services
 builder.Services.AddScoped<IStateStorageService, LocalStorageService>();
@@ -36,7 +50,8 @@ builder.Services.AddScoped<IGameStateService>(sp =>
     var repository = sp.GetRequiredService<IWarbandRepository>();
     var resourceService = sp.GetRequiredService<IEmbeddedResourceService>();
     var storageService = sp.GetRequiredService<IStateStorageService>();
-    return new GameStateService(state, repository, resourceService, storageService);
+    var logger = sp.GetRequiredService<ILogger<GameStateService>>();
+    return new GameStateService(state, repository, resourceService, storageService, logger);
 });
 
 

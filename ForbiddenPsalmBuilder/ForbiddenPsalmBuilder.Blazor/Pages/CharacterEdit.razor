@@ -9,7 +9,10 @@
 @using Microsoft.AspNetCore.Components.Forms
 @inject IGameStateService StateService
 @inject EquipmentService EquipmentService
+@inject TraderService TraderService
 @inject NavigationManager Navigation
+@inject ILogger<CharacterEdit> Logger
+@using Microsoft.Extensions.Logging
 
 <PageTitle>
     @(IsNewCharacter ? "New Character" : $"Edit {character?.Name}") - Forbidden Psalm Builder
@@ -162,7 +165,7 @@
                     <i class="fas fa-times"></i>
                     Cancel
                 </button>
-                <button type="submit" disabled="@(!IsValidForm())" @onclick='() => Console.WriteLine("Save button clicked!")'>
+                <button type="submit" disabled="@(!IsValidForm())">
                     <i class="fas fa-save"></i>
                     @(IsNewCharacter ? "Create Character" : "Save Changes")
                 </button>
@@ -207,17 +210,34 @@
     {
         <Modal IsVisible="true" OnClose="CloseAddEquipmentModal">
             <div class="modal-header">
-                <h2>Add New Equipment</h2>
-                <p class="modal-subtitle">Directly add equipment (for scenario rewards, bypasses payment)</p>
+                <div class="modal-header-content">
+                    <h2>Add Equipment to Character</h2>
+                </div>
+                <button type="button" class="modal-close-button" @onclick="CloseAddEquipmentModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+
+            <TraderSelector
+                Traders="@availableTraders"
+                SelectedTraderId="@selectedTraderId"
+                SelectedTraderIdChanged="@OnTraderChanged"
+                Label="Select Trader (optional - leave blank for free)"
+                AllowNone="true"
+                ShowPricingInfo="true" />
+
             <EquipmentSelector
                 Weapons="@allWeapons"
                 Armors="@allArmors"
                 Items="@allItems"
                 ShowTabs="true"
                 ShowSearch="true"
+                ShowPrice="@(!string.IsNullOrEmpty(selectedTraderId))"
                 ShowActions="true"
-                OnEquipmentSelected="AddNewEquipment" />
+                PriceCalculator="@CalculateBuyPrice"
+                DisabledEquipmentIds="@GetUnaffordableEquipmentIds()"
+                OnBuy="@_handleBuyEquipment"
+                OnAssign="@AddNewEquipment" />
         </Modal>
     }
 </main>
@@ -242,6 +262,10 @@
     private List<Weapon> allWeapons = new();
     private List<Armor> allArmors = new();
     private List<Item> allItems = new();
+    private List<Trader> availableTraders = new();
+    private string? selectedTraderId;
+    private Trader? selectedTrader;
+    private EventCallback<Equipment> _handleBuyEquipment;
 
     private bool IsNewCharacter => string.IsNullOrEmpty(CharacterId) || CharacterId == "new";
 
@@ -257,6 +281,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _handleBuyEquipment = EventCallback.Factory.Create<Equipment>(this, BuyEquipment);
         await LoadData();
     }
 
@@ -293,6 +318,7 @@
             allWeapons = await EquipmentService.GetWeaponsAsync(warband.GameVariant);
             allArmors = await EquipmentService.GetArmorAsync(warband.GameVariant);
             allItems = await EquipmentService.GetItemsAsync(warband.GameVariant);
+            availableTraders = await TraderService.GetTradersAsync(warband.GameVariant);
 
             if (IsNewCharacter)
             {
@@ -326,6 +352,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Failed to load data");
             await StateService.SetErrorAsync($"Failed to load data: {ex.Message}");
         }
         finally
@@ -337,8 +364,8 @@
 
     private async Task SaveCharacter()
     {
-        Console.WriteLine($"SaveCharacter called - IsNewCharacter: {IsNewCharacter}");
-        Console.WriteLine($"Stats: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
+        Logger.LogInformation("SaveCharacter called - IsNewCharacter: {IsNew}, Stats: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
+            IsNewCharacter, editCharacterDto.Agility, editCharacterDto.Presence, editCharacterDto.Strength, editCharacterDto.Toughness);
 
         validationErrors.Clear();
 
@@ -346,7 +373,7 @@
         {
             if (IsNewCharacter)
             {
-                Console.WriteLine("Creating new character...");
+                Logger.LogInformation("Creating new character...");
                 var newCharacter = new Character(editCharacterDto.Name)
                 {
                     Id = editCharacterDto.Id,
@@ -361,11 +388,11 @@
                 newCharacter.CurrentHP = newCharacter.Stats.HP;
 
                 await StateService.AddCharacterToWarbandAsync(WarbandId, newCharacter);
-                Console.WriteLine("Character created successfully");
+                Logger.LogInformation("Character created successfully");
             }
             else if (character != null)
             {
-                Console.WriteLine($"Updating existing character {CharacterId}...");
+                Logger.LogInformation("Updating existing character {CharacterId}...", CharacterId);
                 character.Name = editCharacterDto.Name.Trim();
                 character.Stats = new Stats(
                     editCharacterDto.Agility,
@@ -381,18 +408,18 @@
                     character.CurrentHP = character.Stats.HP;
                 }
 
-                Console.WriteLine($"Calling UpdateCharacterAsync with stats: AGI={character.Stats.Agility}, PRE={character.Stats.Presence}, STR={character.Stats.Strength}, TGH={character.Stats.Toughness}");
+                Logger.LogInformation("Calling UpdateCharacterAsync with stats: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
+                    character.Stats.Agility, character.Stats.Presence, character.Stats.Strength, character.Stats.Toughness);
                 await StateService.UpdateCharacterAsync(WarbandId, CharacterId!, character);
-                Console.WriteLine("Character updated successfully");
+                Logger.LogInformation("Character updated successfully");
             }
 
-            Console.WriteLine($"Navigating to /warband/{WarbandId}");
+            Logger.LogInformation("Navigating to /warband/{WarbandId}", WarbandId);
             Navigation.NavigateTo($"/warband/{WarbandId}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR in SaveCharacter: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            Logger.LogError(ex, "Error in SaveCharacter");
             await StateService.SetErrorAsync($"Failed to save character: {ex.Message}");
         }
     }
@@ -409,37 +436,12 @@
 
     private bool IsValidForm()
     {
-        if (editCharacterDto == null)
-        {
-            Console.WriteLine("IsValidForm: editCharacterDto is null");
-            return false;
-        }
-        if (string.IsNullOrWhiteSpace(editCharacterDto.Name))
-        {
-            Console.WriteLine("IsValidForm: Name is empty");
-            return false;
-        }
-        if (editCharacterDto.Agility < -3 || editCharacterDto.Agility > 3)
-        {
-            Console.WriteLine($"IsValidForm: Agility out of range: {editCharacterDto.Agility}");
-            return false;
-        }
-        if (editCharacterDto.Presence < -3 || editCharacterDto.Presence > 3)
-        {
-            Console.WriteLine($"IsValidForm: Presence out of range: {editCharacterDto.Presence}");
-            return false;
-        }
-        if (editCharacterDto.Strength < -3 || editCharacterDto.Strength > 3)
-        {
-            Console.WriteLine($"IsValidForm: Strength out of range: {editCharacterDto.Strength}");
-            return false;
-        }
-        if (editCharacterDto.Toughness < -3 || editCharacterDto.Toughness > 3)
-        {
-            Console.WriteLine($"IsValidForm: Toughness out of range: {editCharacterDto.Toughness}");
-            return false;
-        }
-        Console.WriteLine($"IsValidForm: VALID - Stats: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
+        if (editCharacterDto == null) return false;
+        if (string.IsNullOrWhiteSpace(editCharacterDto.Name)) return false;
+        if (editCharacterDto.Agility < -3 || editCharacterDto.Agility > 3) return false;
+        if (editCharacterDto.Presence < -3 || editCharacterDto.Presence > 3) return false;
+        if (editCharacterDto.Strength < -3 || editCharacterDto.Strength > 3) return false;
+        if (editCharacterDto.Toughness < -3 || editCharacterDto.Toughness > 3) return false;
         return true;
     }
 
@@ -509,12 +511,14 @@
 
     private void OnStatArrayStatsChanged((int Agility, int Presence, int Strength, int Toughness) stats)
     {
-        Console.WriteLine($"OnStatArrayStatsChanged called: AGI={stats.Agility}, PRE={stats.Presence}, STR={stats.Strength}, TGH={stats.Toughness}");
+        Logger.LogInformation("OnStatArrayStatsChanged called: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
+            stats.Agility, stats.Presence, stats.Strength, stats.Toughness);
         editCharacterDto.Agility = stats.Agility;
         editCharacterDto.Presence = stats.Presence;
         editCharacterDto.Strength = stats.Strength;
         editCharacterDto.Toughness = stats.Toughness;
-        Console.WriteLine($"Updated editCharacterDto: AGI={editCharacterDto.Agility}, PRE={editCharacterDto.Presence}, STR={editCharacterDto.Strength}, TGH={editCharacterDto.Toughness}");
+        Logger.LogInformation("Updated editCharacterDto: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
+            editCharacterDto.Agility, editCharacterDto.Presence, editCharacterDto.Strength, editCharacterDto.Toughness);
         StateHasChanged();
     }
 
@@ -533,7 +537,7 @@
 
     private void HandleInvalidSubmit()
     {
-        Console.WriteLine("Form is INVALID - submission blocked by DataAnnotationsValidator");
+        Logger.LogWarning("Form is INVALID - submission blocked by DataAnnotationsValidator");
     }
 
     private string GetCurrencySymbol()
@@ -588,6 +592,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Failed to add new equipment");
             validationErrors.Add($"Failed to add equipment: {ex.Message}");
         }
     }
@@ -600,6 +605,58 @@
     private void CloseAddEquipmentModal()
     {
         showAddEquipmentModal = false;
+    }
+
+    private async Task BuyEquipment(Equipment equipment)
+    {
+        if (character == null || warband == null || string.IsNullOrEmpty(selectedTraderId)) return;
+
+        try
+        {
+            Logger.LogInformation("Buying equipment {EquipmentName} (template ID: {TemplateId}) with trader {TraderId}",
+                equipment.Name, equipment.Id, selectedTraderId);
+
+            // Get stash count before buying
+            var stashCountBefore = warband.Stash.Count;
+
+            // Buy equipment (deducts gold, adds to warband stash)
+            await StateService.BuyEquipmentAsync(warband.Id, equipment.Id, equipment.Type, selectedTraderId);
+
+            // Reload warband to get updated stash
+            var updatedWarband = await StateService.GetWarbandAsync(warband.Id);
+            if (updatedWarband == null)
+            {
+                Logger.LogError("Failed to reload warband after buy");
+                validationErrors.Add("Failed to reload warband");
+                return;
+            }
+
+            Logger.LogInformation("Stash count before: {Before}, after: {After}", stashCountBefore, updatedWarband.Stash.Count);
+
+            // Find the newly added equipment (last item in stash)
+            if (updatedWarband.Stash.Count > stashCountBefore)
+            {
+                var newEquipment = updatedWarband.Stash[updatedWarband.Stash.Count - 1];
+                Logger.LogInformation("Found new equipment in stash: {EquipmentName}, Instance ID: {InstanceId}",
+                    newEquipment.Name, newEquipment.Id);
+
+                await StateService.TransferEquipmentToCharacterAsync(warband.Id, character.Id, newEquipment.Id);
+                Logger.LogInformation("Transferred equipment to character");
+            }
+            else
+            {
+                Logger.LogWarning("Equipment not found in stash after purchase");
+            }
+
+            // Refresh data and close modal
+            await LoadData();
+            CloseAddEquipmentModal();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to buy equipment");
+            validationErrors.Add($"Failed to buy equipment: {ex.Message}");
+        }
     }
 
     private async Task AddNewEquipment(Equipment equipment)
@@ -620,8 +677,79 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Failed to add equipment from stash");
             validationErrors.Add($"Failed to add equipment: {ex.Message}");
         }
+    }
+
+    private async Task OnTraderChanged(string? traderId)
+    {
+        selectedTraderId = traderId;
+        selectedTrader = !string.IsNullOrEmpty(traderId) && warband != null
+            ? await TraderService.GetTraderByIdAsync(traderId, warband.GameVariant)
+            : null;
+    }
+
+    private int? CalculateBuyPrice(Equipment equipment)
+    {
+        if (selectedTrader == null) return equipment.Cost;
+        return selectedTrader.CalculateBuyPrice(equipment.Cost);
+    }
+
+    private List<string> GetUnaffordableEquipmentIds()
+    {
+        if (warband == null) return new();
+
+        var disabled = new List<string>();
+
+        // If no trader selected, disable all buy buttons (user must use Assign for free)
+        if (selectedTrader == null)
+        {
+            // Disable buy for all equipment
+            disabled.AddRange(allWeapons.Select(w => w.Id));
+            disabled.AddRange(allArmors.Select(a => a.Id));
+            disabled.AddRange(allItems.Select(i => i.Id));
+            return disabled;
+        }
+
+        // Trader selected - disable buy for equipment the warband can't afford
+        foreach (var weapon in allWeapons)
+        {
+            if (weapon.Cost.HasValue)
+            {
+                var price = selectedTrader.CalculateBuyPrice(weapon.Cost.Value);
+                if (!warband.CanAfford(price))
+                {
+                    disabled.Add(weapon.Id);
+                }
+            }
+        }
+
+        foreach (var armor in allArmors)
+        {
+            if (armor.Cost.HasValue)
+            {
+                var price = selectedTrader.CalculateBuyPrice(armor.Cost.Value);
+                if (!warband.CanAfford(price))
+                {
+                    disabled.Add(armor.Id);
+                }
+            }
+        }
+
+        foreach (var item in allItems)
+        {
+            if (item.Cost.HasValue)
+            {
+                var price = selectedTrader.CalculateBuyPrice(item.Cost.Value);
+                if (!warband.CanAfford(price))
+                {
+                    disabled.Add(item.Id);
+                }
+            }
+        }
+
+        return disabled;
     }
 
     private async Task RemoveEquipment(string equipmentId)
@@ -637,6 +765,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Failed to remove equipment");
             validationErrors.Add($"Failed to remove equipment: {ex.Message}");
         }
     }

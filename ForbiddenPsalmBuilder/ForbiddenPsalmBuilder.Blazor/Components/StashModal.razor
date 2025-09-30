@@ -4,6 +4,7 @@
 @using ForbiddenPsalmBuilder.Core.Models.Selection
 @using ForbiddenPsalmBuilder.Core.Services
 @using ForbiddenPsalmBuilder.Core.Services.State
+@using Microsoft.Extensions.Logging
 
 <Modal IsVisible="@IsVisible" OnClose="@OnClose">
     <div class="stash-modal">
@@ -95,7 +96,7 @@
                             ShowActions="true"
                             PriceCalculator="@CalculateBuyPrice"
                             DisabledEquipmentIds="@GetUnaffordableEquipmentIds()"
-                            OnBuy="@BuyEquipment" />
+                            OnBuy="@_handleBuyEquipment" />
                     }
                     else
                     {
@@ -126,7 +127,7 @@
                             ShowPrice="true"
                             ShowActions="true"
                             PriceCalculator="@CalculateSellPrice"
-                            OnSell="@SellEquipment" />
+                            OnSell="@_handleSellEquipment" />
                     }
                     else
                     {
@@ -207,6 +208,9 @@
     [Inject]
     public TraderService TraderService { get; set; } = null!;
 
+    [Inject]
+    public ILogger<StashModal> Logger { get; set; } = null!;
+
     private string activeTab = "stash";
     private string? selectedTraderId;
     private List<Trader> availableTraders = new();
@@ -218,12 +222,21 @@
     private Equipment? equipmentToAssign;
     private string? errorMessage;
 
+    protected override void OnInitialized()
+    {
+        _handleBuyEquipment = EventCallback.Factory.Create<Equipment>(this, BuyEquipment);
+        _handleSellEquipment = EventCallback.Factory.Create<Equipment>(this, SellEquipment);
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         if (Warband != null && IsVisible)
         {
             await LoadData();
         }
+
+        Logger.LogInformation("StashModal OnParametersSetAsync - activeTab: {ActiveTab}, selectedTraderId: {TraderId}",
+            activeTab, selectedTraderId);
     }
 
     private async Task LoadData()
@@ -329,34 +342,64 @@
         return unaffordable;
     }
 
+    private EventCallback<Equipment> _handleBuyEquipment;
+    private EventCallback<Equipment> _handleSellEquipment;
+
     private async Task BuyEquipment(Equipment equipment)
     {
-        if (Warband == null || string.IsNullOrEmpty(selectedTraderId)) return;
+        Logger.LogInformation("BuyEquipment called for {EquipmentName}, WarbandId: {WarbandId}, TraderId: {TraderId}, Equipment null: {EquipmentNull}",
+            equipment?.Name, Warband?.Id, selectedTraderId, equipment == null);
+
+        if (equipment == null)
+        {
+            Logger.LogError("BuyEquipment called with null equipment");
+            errorMessage = "Equipment is null";
+            return;
+        }
+
+        if (Warband == null || string.IsNullOrEmpty(selectedTraderId))
+        {
+            Logger.LogWarning("BuyEquipment aborted - Warband is null: {WarbandNull}, TraderId empty: {TraderIdEmpty}",
+                Warband == null, string.IsNullOrEmpty(selectedTraderId));
+            return;
+        }
 
         try
         {
+            Logger.LogInformation("Calling StateService.BuyEquipmentAsync with EquipmentId: {EquipmentId}, Type: {Type}",
+                equipment.Id, equipment.Type);
             await StateService.BuyEquipmentAsync(Warband.Id, equipment.Id, equipment.Type, selectedTraderId);
+            Logger.LogInformation("BuyEquipmentAsync succeeded");
             await NotifyEquipmentChanged();
             ClearError();
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "BuyEquipment error");
             errorMessage = ex.Message;
         }
     }
 
     private async Task SellEquipment(Equipment equipment)
     {
-        if (Warband == null || string.IsNullOrEmpty(selectedTraderId)) return;
+        Logger.LogInformation("SellEquipment called for {EquipmentName}, WarbandId: {WarbandId}, TraderId: {TraderId}", equipment?.Name, Warband?.Id, selectedTraderId);
+        if (Warband == null || string.IsNullOrEmpty(selectedTraderId))
+        {
+            Logger.LogWarning("SellEquipment aborted - Warband is null: {WarbandNull}, TraderId empty: {TraderIdEmpty}", Warband == null, string.IsNullOrEmpty(selectedTraderId));
+            return;
+        }
 
         try
         {
+            Logger.LogInformation("Calling StateService.SellEquipmentAsync");
             await StateService.SellEquipmentAsync(Warband.Id, equipment.Id, selectedTraderId);
+            Logger.LogInformation("SellEquipmentAsync succeeded");
             await NotifyEquipmentChanged();
             ClearError();
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "SellEquipment error");
             errorMessage = ex.Message;
         }
     }
@@ -386,6 +429,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "AssignToCharacter error");
             errorMessage = ex.Message;
             CloseCharacterSelector();
         }
@@ -409,6 +453,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "RemoveFromStash error");
             errorMessage = ex.Message;
         }
     }
