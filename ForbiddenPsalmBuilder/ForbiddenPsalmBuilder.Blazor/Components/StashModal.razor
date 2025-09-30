@@ -8,14 +8,19 @@
 <Modal IsVisible="@IsVisible" OnClose="@OnClose">
     <div class="stash-modal">
         <div class="modal-header">
-            <h2>Equipment Management</h2>
-            <div class="warband-info">
-                <span class="warband-name">@Warband?.Name</span>
-                <span class="warband-gold">
-                    <i class="fas fa-coins"></i>
-                    @Warband?.Gold@GetCurrencySymbol()
-                </span>
+            <div class="modal-header-content">
+                <h2>Equipment Management</h2>
+                <div class="warband-info">
+                    <span class="warband-name">@Warband?.Name</span>
+                    <span class="warband-gold">
+                        <i class="fas fa-coins"></i>
+                        @Warband?.Gold@GetCurrencySymbol()
+                    </span>
+                </div>
             </div>
+            <button type="button" class="modal-close-button" @onclick="OnClose">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
 
         <div class="stash-tabs">

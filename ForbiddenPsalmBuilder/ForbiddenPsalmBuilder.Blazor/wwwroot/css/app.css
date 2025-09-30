@@ -2042,12 +2042,34 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 }
 
 .stash-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   padding: var(--spacing-two);
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
+.stash-modal .modal-header-content {
+  flex: 1;
+}
+
 .stash-modal .modal-header h2 {
   margin: 0 0 var(--spacing-one) 0;
+}
+
+.modal-close-button {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-xl);
+  padding: var(--spacing-quarter);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.modal-close-button:hover {
+  color: var(--color-text);
 }
 
 .warband-info {
