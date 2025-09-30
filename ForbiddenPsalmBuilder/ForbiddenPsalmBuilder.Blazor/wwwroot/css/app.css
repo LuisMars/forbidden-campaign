@@ -23,6 +23,7 @@
   --color-bg-secondary: rgba(255, 255, 255, 0.03);
   --color-border: rgba(255, 255, 255, 0.1);
   --color-text: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
 
   /* Fonts */
   --font-primary: 'Grenze Gotisch', serif;
@@ -1723,6 +1724,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   border: var(--border-width) solid var(--color-border);
   font-size: var(--font-size-small);
   border-radius: 2px;
+  color: var(--color-text); /* Default white text */
 }
 
 .stat-badge.damage {
