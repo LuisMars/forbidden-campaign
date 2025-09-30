@@ -8,6 +8,7 @@
       "cost": 15,
       "slots": 1,
       "rollRange": "1-4",
+      "iconClass": "ra ra-pistol",
       "special": "Can be fired into air for battlefield light (5 rounds). Roll D10, on 1: artillery mistake, all models take Agility test or 1D6 damage",
       "effects": [
         {
@@ -31,7 +32,8 @@
       "stat": "Presence",
       "cost": 15,
       "slots": 1,
-      "rollRange": "5-9"
+      "rollRange": "5-9",
+      "iconClass": "ra ra-pistol"
     },
     {
       "name": "Aerial Dart",
@@ -40,7 +42,8 @@
       "stat": "Agility",
       "cost": 2,
       "slots": 1,
-      "rollRange": "10-15"
+      "rollRange": "10-15",
+      "iconClass": "ra ra-arrow"
     }
   ],
   "twoHandedRanged": [
@@ -51,7 +54,8 @@
       "stat": "Presence",
       "cost": 25,
       "slots": 2,
-      "rollRange": "16-19"
+      "rollRange": "16-19",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Shotgun",
@@ -60,7 +64,8 @@
       "stat": "Presence",
       "cost": 20,
       "slots": 2,
-      "rollRange": "20-23"
+      "rollRange": "20-23",
+      "iconClass": "ra ra-shotgun"
     },
     {
       "name": "Sniper Rifle",
@@ -69,7 +74,8 @@
       "stat": "Presence",
       "cost": 35,
       "slots": 2,
-      "rollRange": "24"
+      "rollRange": "24",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "BuzzSaw",
@@ -78,7 +84,8 @@
       "stat": "Strength",
       "cost": 50,
       "slots": 2,
-      "rollRange": "25"
+      "rollRange": "25",
+      "iconClass": "ra ra-gears"
     },
     {
       "name": "Automatic Rifle",
@@ -87,7 +94,8 @@
       "stat": "Presence",
       "cost": 30,
       "slots": 2,
-      "rollRange": "26-27"
+      "rollRange": "26-27",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Anti-tank Rifle",
@@ -96,7 +104,8 @@
       "stat": "Strength",
       "cost": 50,
       "slots": 2,
-      "rollRange": "28-34"
+      "rollRange": "28-34",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Flamethrower",
@@ -106,6 +115,7 @@
       "cost": 50,
       "slots": 2,
       "rollRange": "35",
+      "iconClass": "ra ra-fire",
       "special": "Requires fuel tank (replaced after 3 uses, 1 action to replace). Can attack all models within 6 inches (consumes all fuel). If Critically hit: tank explodes for 8 damage to all within 3 inches",
       "effects": [
         {
@@ -137,6 +147,7 @@
       "cost": 2,
       "slots": 1,
       "rollRange": "36-38",
+      "iconClass": "ra ra-dagger",
       "special": "Can attach to rifle (gains Reach but -3 penalty to shooting). Takes action to attach/remove",
       "effects": [
         {
@@ -157,7 +168,8 @@
       "stat": "Agility",
       "cost": 1,
       "slots": 1,
-      "rollRange": "39-44"
+      "rollRange": "39-44",
+      "iconClass": "ra ra-dagger"
     },
     {
       "name": "Gauntlet Dagger",
@@ -166,7 +178,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "rollRange": "45-46"
+      "rollRange": "45-46",
+      "iconClass": "ra ra-dagger"
     },
     {
       "name": "Trench Club",
@@ -175,7 +188,8 @@
       "stat": "Strength",
       "cost": 4,
       "slots": 1,
-      "rollRange": "47-50"
+      "rollRange": "47-50",
+      "iconClass": "ra ra-club"
     },
     {
       "name": "Fist",
@@ -184,7 +198,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 0,
-      "rollRange": "-"
+      "rollRange": "-",
+      "iconClass": "ra ra-hand-rock"
     },
     {
       "name": "Dud Grenade Club",
@@ -193,7 +208,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 1,
-      "rollRange": "51-55"
+      "rollRange": "51-55",
+      "iconClass": "ra ra-bomb"
     },
     {
       "name": "Saber",
@@ -202,7 +218,8 @@
       "stat": "Agility or Strength",
       "cost": 1,
       "slots": 1,
-      "rollRange": "56-60"
+      "rollRange": "56-60",
+      "iconClass": "ra ra-sword"
     },
     {
       "name": "Makeshift Weapon",
@@ -211,7 +228,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 1,
-      "rollRange": "61-66"
+      "rollRange": "61-66",
+      "iconClass": "ra ra-wooden-club"
     },
     {
       "name": "Entrenching Tool",
@@ -221,6 +239,7 @@
       "cost": 5,
       "slots": 1,
       "rollRange": "67-70",
+      "iconClass": "fas fa-wrench",
       "special": "Can dig holes for cover (1 action). Roll D4: 1-2 nothing, 3 find treasure, 4 find corpse (morale test)",
       "effects": [
         {
@@ -246,7 +265,8 @@
       "stat": "Strength",
       "cost": 4,
       "slots": 1,
-      "rollRange": "71-75"
+      "rollRange": "71-75",
+      "iconClass": "ra ra-axe"
     },
     {
       "name": "Wood Axe",
@@ -255,7 +275,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "rollRange": "75-79"
+      "rollRange": "75-79",
+      "iconClass": "ra ra-axe"
     }
   ],
   "twoHandedMelee": [
@@ -266,7 +287,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 2,
-      "rollRange": "80-86"
+      "rollRange": "80-86",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Makeshift Weapon",
@@ -275,7 +297,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 2,
-      "rollRange": "87-91"
+      "rollRange": "87-91",
+      "iconClass": "ra ra-wooden-club"
     },
     {
       "name": "Cavalry Lance",
@@ -284,7 +307,8 @@
       "stat": "Agility",
       "cost": 5,
       "slots": 2,
-      "rollRange": "91-92"
+      "rollRange": "91-92",
+      "iconClass": "ra ra-lance"
     }
   ],
   "throwables": [
@@ -295,7 +319,8 @@
       "stat": "Agility",
       "cost": 5,
       "slots": 1,
-      "rollRange": "93-94"
+      "rollRange": "93-94",
+      "iconClass": "ra ra-bottle"
     },
     {
       "name": "Smoke Grenade",
@@ -304,7 +329,8 @@
       "stat": "Agility",
       "cost": 4,
       "slots": 1,
-      "rollRange": "95-96"
+      "rollRange": "95-96",
+      "iconClass": "ra ra-bomb"
     },
     {
       "name": "Gas Grenade",
@@ -313,7 +339,8 @@
       "stat": "Agility",
       "cost": 4,
       "slots": 1,
-      "rollRange": "97"
+      "rollRange": "97",
+      "iconClass": "ra ra-bomb"
     },
     {
       "name": "Makeshift Explosive",
@@ -322,7 +349,8 @@
       "stat": "Strength",
       "cost": 2,
       "slots": 1,
-      "rollRange": "98-99"
+      "rollRange": "98-99",
+      "iconClass": "ra ra-bomb"
     },
     {
       "name": "Grenade",
@@ -331,7 +359,8 @@
       "stat": "Agility",
       "cost": 4,
       "slots": 1,
-      "rollRange": "100"
+      "rollRange": "100",
+      "iconClass": "ra ra-bomb"
     }
   ],
   "notes": "Weapons come fully loaded"

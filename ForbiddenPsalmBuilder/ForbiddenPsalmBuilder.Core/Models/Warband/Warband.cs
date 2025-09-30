@@ -8,6 +8,7 @@ public class Warband
     public string Name { get; set; } = string.Empty;
     public string GameVariant { get; set; } = string.Empty;
     public List<Character.Character> Members { get; set; } = new();
+    public List<Character.Equipment> Stash { get; set; } = new(); // Warband equipment storage
     public int Gold { get; set; } = 50; // Starting budget
     public int Experience { get; set; }
     public List<string> UpgradesPurchased { get; set; } = new();
@@ -25,8 +26,14 @@ public class Warband
     // Validation
     public bool IsValid => Members.Count <= 5 && Members.Count > 0;
 
-    // Get total warband value
-    public int TotalValue => Gold + Members.Sum(m => m.TotalEquipmentValue);
+    // Get total warband value (gold + character equipment + stash equipment)
+    public int TotalValue => Gold + Members.Sum(m => m.TotalEquipmentValue) + StashValue;
+
+    // Get total stash equipment value
+    public int StashValue => Stash.Sum(e => e.Cost);
+
+    // Check if warband can afford a purchase
+    public bool CanAfford(int cost) => Gold >= cost;
 
     // Check warband composition rules
     public bool CanAddMember => Members.Count < 5;

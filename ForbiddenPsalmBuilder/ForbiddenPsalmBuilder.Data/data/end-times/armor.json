@@ -6,7 +6,8 @@
     "cost": 2,
     "slots": 1,
     "effects": [],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Medium Armor",
@@ -15,7 +16,8 @@
     "cost": 10,
     "slots": 1,
     "effects": [],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-chest-armor"
   },
   {
     "name": "Heavy Armor",
@@ -29,7 +31,8 @@
         "type": "class_restriction",
         "excludedClasses": ["spellcaster"]
       }
-    ]
+    ],
+    "iconClass": "ra ra-heavy-armor"
   },
   {
     "name": "Shield",
@@ -43,7 +46,8 @@
         "benefit": "blocks_ranged_attacks"
       }
     ],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-shield"
   },
   {
     "name": "Tower Shield",
@@ -59,7 +63,8 @@
         "appliesTo": "ranged_attacks_against_bearer"
       }
     ],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-tower-shield"
   },
   {
     "name": "Full Plate",
@@ -79,7 +84,8 @@
           "modifier": -1
         }
       }
-    ]
+    ],
+    "iconClass": "ra ra-heavy-armor"
   },
   {
     "name": "Pet Armor",
@@ -93,7 +99,8 @@
         "type": "target_restriction",
         "allowedTargets": ["pets"]
       }
-    ]
+    ],
+    "iconClass": "fas fa-paw"
   },
   {
     "name": "Improvised Armor",
@@ -108,7 +115,8 @@
         "modifier": -1
       }
     ],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Comfy Socks",
@@ -123,6 +131,7 @@
         "armorValue": 1
       }
     ],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "fas fa-socks"
   }
 ]

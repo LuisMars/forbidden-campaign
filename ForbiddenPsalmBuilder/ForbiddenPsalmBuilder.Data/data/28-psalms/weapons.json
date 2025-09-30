@@ -8,6 +8,7 @@
       "cost": 1,
       "slots": 1,
       "techLevel": "past",
+      "iconClass": "ra ra-dagger",
       "rollRange": null,
       "special": null,
       "effects": []
@@ -19,7 +20,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-sword"
     },
     {
       "name": "Axe",
@@ -28,7 +30,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-axe"
     },
     {
       "name": "Flail",
@@ -37,7 +40,8 @@
       "stat": "Strength",
       "cost": 5,
       "slots": 1,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-flail"
     },
     {
       "name": "Makeshift",
@@ -46,7 +50,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 1,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-wooden-club"
     },
     {
       "name": "Torch",
@@ -55,7 +60,8 @@
       "stat": "Strength",
       "cost": 1,
       "slots": 1,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-torch"
     },
     {
       "name": "Space Sword",
@@ -64,7 +70,8 @@
       "stat": "Strength",
       "cost": 10,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-laser-sword"
     },
     {
       "name": "Space Axe",
@@ -73,7 +80,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-axe"
     },
     {
       "name": "Space Flail",
@@ -82,7 +90,8 @@
       "stat": "Strength",
       "cost": 5,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-flail"
     },
     {
       "name": "Baton",
@@ -91,7 +100,8 @@
       "stat": "Strength",
       "cost": 5,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-trident"
     }
   ],
   "twoHandedMelee": [
@@ -102,7 +112,8 @@
       "stat": "Strength",
       "cost": 10,
       "slots": 2,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-double-axe"
     },
     {
       "name": "Bastard Sword",
@@ -111,7 +122,8 @@
       "stat": "Strength",
       "cost": 10,
       "slots": 2,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-large-sword"
     },
     {
       "name": "Spear",
@@ -120,7 +132,8 @@
       "stat": "Agility",
       "cost": 8,
       "slots": 2,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-spear"
     },
     {
       "name": "Makeshift",
@@ -129,7 +142,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 2,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-wooden-club"
     },
     {
       "name": "Power Tool",
@@ -138,7 +152,8 @@
       "stat": "Strength",
       "cost": 5,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "fas fa-wrench"
     },
     {
       "name": "Katana",
@@ -147,7 +162,8 @@
       "stat": "Agility",
       "cost": 20,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-katana"
     }
   ],
   "oneHandedRanged": [
@@ -158,7 +174,8 @@
       "stat": "Presence",
       "cost": 10,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-revolver"
     },
     {
       "name": "Pistol",
@@ -167,7 +184,8 @@
       "stat": "Presence",
       "cost": 11,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-pistol"
     }
   ],
   "twoHandedRanged": [
@@ -178,7 +196,8 @@
       "stat": "Presence",
       "cost": 5,
       "slots": 2,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-bow"
     },
     {
       "name": "Crossbow",
@@ -187,7 +206,8 @@
       "stat": "Presence",
       "cost": 8,
       "slots": 2,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-crossbow"
     },
     {
       "name": "Rifle",
@@ -196,7 +216,8 @@
       "stat": "Presence",
       "cost": 15,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Plas-mar",
@@ -205,7 +226,8 @@
       "stat": "Presence",
       "cost": 25,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-plasma"
     },
     {
       "name": "Pulse Rifle",
@@ -214,7 +236,8 @@
       "stat": "Presence",
       "cost": 30,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Shotgun",
@@ -223,7 +246,8 @@
       "stat": "Strength",
       "cost": 12,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-shotgun"
     },
     {
       "name": "Molten Slug Gun",
@@ -232,7 +256,8 @@
       "stat": "Strength",
       "cost": 18,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-shotgun"
     },
     {
       "name": "Flamethrower",
@@ -241,7 +266,8 @@
       "stat": "Strength",
       "cost": 20,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-flame"
     },
     {
       "name": "Laser",
@@ -250,7 +276,8 @@
       "stat": "Presence",
       "cost": 15,
       "slots": 2,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-laser-gun"
     }
   ],
   "throwables": [
@@ -261,7 +288,8 @@
       "stat": "Agility",
       "cost": 3,
       "slots": 1,
-      "techLevel": "past"
+      "techLevel": "past",
+      "iconClass": "ra ra-bottle"
     },
     {
       "name": "Space Grenade",
@@ -270,7 +298,8 @@
       "stat": "Agility",
       "cost": 3,
       "slots": 1,
-      "techLevel": "future"
+      "techLevel": "future",
+      "iconClass": "ra ra-bomb"
     }
   ],
   "notes": "All ranged weapons come with one stack of ammo"

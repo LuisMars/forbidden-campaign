@@ -7,7 +7,8 @@
       "stat": "Presence",
       "cost": 15,
       "slots": 1,
-      "rollRange": "1-3"
+      "rollRange": "1-3",
+      "iconClass": "ra ra-pistol"
     },
     {
       "name": "Sling",
@@ -16,7 +17,8 @@
       "stat": "Agility",
       "cost": 1,
       "slots": 1,
-      "rollRange": "4-7"
+      "rollRange": "4-7",
+      "iconClass": "ra ra-slingshot"
     }
   ],
   "twoHandedRanged": [
@@ -27,7 +29,8 @@
       "stat": "Presence",
       "cost": 20,
       "slots": 2,
-      "rollRange": "8-9"
+      "rollRange": "8-9",
+      "iconClass": "ra ra-rifle"
     },
     {
       "name": "Cannon",
@@ -37,7 +40,8 @@
       "cost": 100,
       "slots": 2,
       "rollRange": "10",
-      "special": "Does not come with ammo"
+      "special": "Does not come with ammo",
+      "iconClass": "ra ra-cannon"
     },
     {
       "name": "Crossbow",
@@ -46,7 +50,8 @@
       "stat": "Presence",
       "cost": 8,
       "slots": 2,
-      "rollRange": "11-15"
+      "rollRange": "11-15",
+      "iconClass": "ra ra-crossbow"
     },
     {
       "name": "Bow",
@@ -55,7 +60,8 @@
       "stat": "Presence",
       "cost": 5,
       "slots": 2,
-      "rollRange": "16-19"
+      "rollRange": "16-19",
+      "iconClass": "ra ra-bow"
     }
   ],
   "oneHandedMelee": [
@@ -66,7 +72,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 1,
-      "rollRange": "20-25"
+      "rollRange": "20-25",
+      "iconClass": "ra ra-wooden-club"
     },
     {
       "name": "Staff",
@@ -75,7 +82,8 @@
       "stat": "Strength",
       "cost": 1,
       "slots": 1,
-      "rollRange": "26-29"
+      "rollRange": "26-29",
+      "iconClass": "ra ra-wizard-staff"
     },
     {
       "name": "Shortsword",
@@ -84,7 +92,8 @@
       "stat": "Agility",
       "cost": 2,
       "slots": 1,
-      "rollRange": "30-35"
+      "rollRange": "30-35",
+      "iconClass": "ra ra-sword"
     },
     {
       "name": "Dagger",
@@ -93,7 +102,8 @@
       "stat": "Agility",
       "cost": 1,
       "slots": 1,
-      "rollRange": "36-40"
+      "rollRange": "36-40",
+      "iconClass": "ra ra-dagger"
     },
     {
       "name": "Hand Axe",
@@ -102,7 +112,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "rollRange": "41-43"
+      "rollRange": "41-43",
+      "iconClass": "ra ra-axe"
     },
     {
       "name": "Ulfberht Sword",
@@ -111,7 +122,8 @@
       "stat": "Strength",
       "cost": 10,
       "slots": 1,
-      "rollRange": "43-46"
+      "rollRange": "43-46",
+      "iconClass": "ra ra-sword"
     },
     {
       "name": "Morning Star",
@@ -120,7 +132,8 @@
       "stat": "Strength",
       "cost": 8,
       "slots": 1,
-      "rollRange": "47-50"
+      "rollRange": "47-50",
+      "iconClass": "ra ra-flanged-mace"
     },
     {
       "name": "Horseman's Pick",
@@ -129,7 +142,8 @@
       "stat": "Strength",
       "cost": 8,
       "slots": 1,
-      "rollRange": "51-55"
+      "rollRange": "51-55",
+      "iconClass": "ra ra-mining"
     },
     {
       "name": "Flail",
@@ -138,7 +152,8 @@
       "stat": "Strength",
       "cost": 7,
       "slots": 1,
-      "rollRange": "56-60"
+      "rollRange": "56-60",
+      "iconClass": "ra ra-flail"
     },
     {
       "name": "Brass Knuckles",
@@ -147,7 +162,8 @@
       "stat": "Agility",
       "cost": 9,
       "slots": 0,
-      "rollRange": "61-65"
+      "rollRange": "61-65",
+      "iconClass": "fas fa-hand-rock"
     },
     {
       "name": "Bone Flail",
@@ -156,7 +172,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "rollRange": "66-69"
+      "rollRange": "66-69",
+      "iconClass": "ra ra-flail"
     },
     {
       "name": "Net",
@@ -165,7 +182,8 @@
       "stat": "Agility",
       "cost": 4,
       "slots": 1,
-      "rollRange": "70-73"
+      "rollRange": "70-73",
+      "iconClass": "fas fa-fish"
     },
     {
       "name": "Warhammer",
@@ -174,7 +192,8 @@
       "stat": "Strength",
       "cost": 3,
       "slots": 1,
-      "rollRange": "74-75"
+      "rollRange": "74-75",
+      "iconClass": "ra ra-hammer"
     },
     {
       "name": "Sword",
@@ -183,7 +202,8 @@
       "stat": "Strength",
       "cost": 4,
       "slots": 1,
-      "rollRange": "76-77"
+      "rollRange": "76-77",
+      "iconClass": "ra ra-sword"
     },
     {
       "name": "Rapier",
@@ -192,7 +212,8 @@
       "stat": "Agility",
       "cost": null,
       "slots": 1,
-      "rollRange": "78-79"
+      "rollRange": "78-79",
+      "iconClass": "ra ra-knife"
     }
   ],
   "twoHandedMelee": [
@@ -203,7 +224,8 @@
       "stat": "Strength",
       "cost": 0,
       "slots": 2,
-      "rollRange": "80-84"
+      "rollRange": "80-84",
+      "iconClass": "ra ra-wooden-club"
     },
     {
       "name": "Bastard Sword",
@@ -212,7 +234,8 @@
       "stat": "Strength",
       "cost": null,
       "slots": 2,
-      "rollRange": "85-89"
+      "rollRange": "85-89",
+      "iconClass": "ra ra-large-sword"
     },
     {
       "name": "Great Axe",
@@ -221,7 +244,8 @@
       "stat": "Strength",
       "cost": null,
       "slots": 2,
-      "rollRange": "90-91"
+      "rollRange": "90-91",
+      "iconClass": "ra ra-double-axe"
     },
     {
       "name": "Glaive",
@@ -230,7 +254,8 @@
       "stat": "Strength",
       "cost": null,
       "slots": 2,
-      "rollRange": "92-93"
+      "rollRange": "92-93",
+      "iconClass": "ra ra-glaive"
     },
     {
       "name": "Spear",
@@ -239,7 +264,8 @@
       "stat": "Agility",
       "cost": null,
       "slots": 2,
-      "rollRange": "94"
+      "rollRange": "94",
+      "iconClass": "ra ra-spear"
     },
     {
       "name": "Trident",
@@ -248,7 +274,8 @@
       "stat": "Agility",
       "cost": null,
       "slots": 2,
-      "rollRange": "95-96"
+      "rollRange": "95-96",
+      "iconClass": "ra ra-trident"
     }
   ],
   "throwables": [
@@ -260,7 +287,8 @@
       "cost": 6,
       "slots": 1,
       "rollRange": "95-96",
-      "consumable": true
+      "consumable": true,
+      "iconClass": "ra ra-bomb"
     },
     {
       "name": "Bag o' Rats",
@@ -270,7 +298,8 @@
       "cost": 3,
       "slots": 1,
       "rollRange": "97-100",
-      "consumable": true
+      "consumable": true,
+      "iconClass": "fas fa-sack"
     }
   ],
   "notes": "All ranged weapons come with 5 Ammo except Cannon"

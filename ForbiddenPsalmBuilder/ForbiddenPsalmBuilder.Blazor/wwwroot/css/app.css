@@ -1575,3 +1575,8 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   background: var(--color-black);
   border-color: var(--color-accent-2);
 }
+
+.warband-name {
+  width: 100%;
+  flex-grow: 1;
+}

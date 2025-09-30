@@ -15,6 +15,7 @@ public class GameStateService : IGameStateService
     private readonly IWarbandRepository _warbandRepository;
     private readonly IEmbeddedResourceService _resourceService;
     private readonly SpecialClassService _specialClassService;
+    private readonly EquipmentService _equipmentService;
     private const string StateStorageKey = "forbidden-psalm-builder-state";
     private static readonly Lazy<WarbandNameGenerator> _nameGenerator = new(LoadNameGenerator);
 
@@ -51,6 +52,7 @@ public class GameStateService : IGameStateService
         _warbandRepository = warbandRepository;
         _resourceService = resourceService ?? new EmbeddedResourceService();
         _specialClassService = new SpecialClassService(_resourceService);
+        _equipmentService = new EquipmentService(_resourceService);
     }
 
     // Game variant management
@@ -551,5 +553,288 @@ public class GameStateService : IGameStateService
         }
 
         return null; // Validation passed
+    }
+
+    // Equipment Management
+
+    public async Task AddEquipmentToCharacterAsync(string warbandId, string characterId, string equipmentId, string equipmentType)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            throw new ArgumentException($"Warband not found: {warbandId}");
+
+        var character = warband.Members.FirstOrDefault(m => m.Id == characterId);
+        if (character == null)
+            throw new ArgumentException($"Character not found: {characterId}");
+
+        // Load equipment from service based on type
+        Equipment? equipment = null;
+
+        switch (equipmentType.ToLower())
+        {
+            case "weapon":
+                var weapon = await _equipmentService.GetWeaponByIdAsync(equipmentId, warband.GameVariant);
+                if (weapon != null)
+                {
+                    equipment = new Equipment
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = weapon.Name,
+                        Type = "weapon",
+                        Damage = weapon.Damage,
+                        Properties = weapon.Properties,
+                        Stat = weapon.Stat,
+                        Cost = weapon.Cost ?? 0,
+                        Slots = weapon.Slots
+                    };
+                }
+                break;
+
+            case "armor":
+                var armor = await _equipmentService.GetArmorByIdAsync(equipmentId, warband.GameVariant);
+                if (armor != null)
+                {
+                    equipment = new Equipment
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = armor.Name,
+                        Type = "armor",
+                        Cost = armor.Cost ?? 0,
+                        Slots = armor.Slots,
+                        ArmorValue = armor.ArmorValue,
+                        Special = armor.Special
+                    };
+                }
+                break;
+
+            case "item":
+                var item = await _equipmentService.GetItemByIdAsync(equipmentId, warband.GameVariant);
+                if (item != null)
+                {
+                    equipment = new Equipment
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = item.Name,
+                        Type = "item",
+                        Cost = item.Cost ?? 0,
+                        Slots = item.Slots,
+                        Effect = item.Effect
+                    };
+                }
+                break;
+
+            default:
+                throw new ArgumentException($"Unknown equipment type: {equipmentType}");
+        }
+
+        if (equipment == null)
+            throw new ArgumentException($"Equipment not found: {equipmentId}");
+
+        // Check if character can equip
+        if (!character.CanEquip(equipment))
+            throw new InvalidOperationException($"Character doesn't have enough equipment slots. Need {equipment.Slots} slots, but only have {character.Stats.EquipmentSlots - character.Equipment.Sum(e => e.Slots)} remaining.");
+
+        // Add equipment
+        character.Equipment.Add(equipment);
+
+        // Save warband
+        await _warbandRepository.SaveAsync(warband);
+        _state.NotifyWarbandChanged(warbandId);
+    }
+
+    public async Task RemoveEquipmentFromCharacterAsync(string warbandId, string characterId, string equipmentId)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            throw new ArgumentException($"Warband not found: {warbandId}");
+
+        var character = warband.Members.FirstOrDefault(m => m.Id == characterId);
+        if (character == null)
+            throw new ArgumentException($"Character not found: {characterId}");
+
+        var equipment = character.Equipment.FirstOrDefault(e => e.Id == equipmentId);
+        if (equipment == null)
+            throw new ArgumentException($"Equipment not found: {equipmentId}");
+
+        character.Equipment.Remove(equipment);
+
+        await _warbandRepository.SaveAsync(warband);
+        _state.NotifyWarbandChanged(warbandId);
+    }
+
+    public bool CanCharacterEquip(string warbandId, string characterId, Equipment equipment)
+    {
+        if (!_state.Warbands.ContainsKey(warbandId))
+            return false;
+
+        var warband = _state.Warbands[warbandId];
+        var character = warband.Members.FirstOrDefault(m => m.Id == characterId);
+
+        if (character == null)
+            return false;
+
+        return character.CanEquip(equipment);
+    }
+
+    public async Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            throw new InvalidOperationException("Warband not found");
+
+        // Load equipment from service
+        Equipment? newEquipment = null;
+        switch (equipmentType.ToLower())
+        {
+            case "weapon":
+                var weapon = await _equipmentService.GetWeaponByIdAsync(equipmentId, warband.GameVariant);
+                if (weapon == null)
+                    throw new InvalidOperationException("Weapon not found");
+
+                if (weapon.Cost == null)
+                    throw new InvalidOperationException("This weapon cannot be purchased");
+
+                if (!warband.CanAfford(weapon.Cost.Value))
+                    throw new InvalidOperationException($"Not enough gold. Need {weapon.Cost}, have {warband.Gold}");
+
+                newEquipment = new Equipment
+                {
+                    Name = weapon.Name,
+                    Type = "weapon",
+                    Damage = weapon.Damage,
+                    Properties = weapon.Properties,
+                    Stat = weapon.Stat,
+                    Cost = weapon.Cost.Value,
+                    Slots = weapon.Slots
+                };
+                break;
+
+            case "armor":
+                var armor = await _equipmentService.GetArmorByIdAsync(equipmentId, warband.GameVariant);
+                if (armor == null)
+                    throw new InvalidOperationException("Armor not found");
+
+                if (armor.Cost == null)
+                    throw new InvalidOperationException("This armor cannot be purchased");
+
+                if (!warband.CanAfford(armor.Cost.Value))
+                    throw new InvalidOperationException($"Not enough gold. Need {armor.Cost}, have {warband.Gold}");
+
+                newEquipment = new Equipment
+                {
+                    Name = armor.Name,
+                    Type = "armor",
+                    ArmorValue = armor.ArmorValue,
+                    Special = armor.Special,
+                    Cost = armor.Cost.Value,
+                    Slots = armor.Slots
+                };
+                break;
+
+            case "item":
+                var item = await _equipmentService.GetItemByIdAsync(equipmentId, warband.GameVariant);
+                if (item == null)
+                    throw new InvalidOperationException("Item not found");
+
+                if (item.Cost == null)
+                    throw new InvalidOperationException("This item cannot be purchased");
+
+                if (!warband.CanAfford(item.Cost.Value))
+                    throw new InvalidOperationException($"Not enough gold. Need {item.Cost}, have {warband.Gold}");
+
+                newEquipment = new Equipment
+                {
+                    Name = item.Name,
+                    Type = "item",
+                    Effect = item.Effect,
+                    Cost = item.Cost.Value,
+                    Slots = item.Slots
+                };
+                break;
+
+            default:
+                throw new InvalidOperationException($"Unknown equipment type: {equipmentType}");
+        }
+
+        // Deduct gold and add to stash
+        warband.Gold -= newEquipment.Cost;
+        warband.Stash.Add(newEquipment);
+        warband.UpdateLastModified();
+
+        await _warbandRepository.SaveAsync(warband);
+        _state.NotifyStateChanged();
+        _state.NotifyWarbandChanged(warbandId);
+    }
+
+    public async Task SellEquipmentAsync(string warbandId, string equipmentId)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            throw new InvalidOperationException("Warband not found");
+
+        var equipment = warband.Stash.FirstOrDefault(e => e.Id == equipmentId);
+        if (equipment == null)
+            throw new InvalidOperationException("Equipment not found in stash");
+
+        // Add gold and remove from stash
+        warband.Gold += equipment.Cost;
+        warband.Stash.Remove(equipment);
+        warband.UpdateLastModified();
+
+        await _warbandRepository.SaveAsync(warband);
+        _state.NotifyStateChanged();
+        _state.NotifyWarbandChanged(warbandId);
+    }
+
+    public async Task TransferEquipmentToCharacterAsync(string warbandId, string characterId, string equipmentId)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            throw new InvalidOperationException("Warband not found");
+
+        var character = warband.Members.FirstOrDefault(m => m.Id == characterId);
+        if (character == null)
+            throw new InvalidOperationException("Character not found");
+
+        var equipment = warband.Stash.FirstOrDefault(e => e.Id == equipmentId);
+        if (equipment == null)
+            throw new InvalidOperationException("Equipment not found in stash");
+
+        // Check if character can equip
+        if (!character.CanEquip(equipment))
+            throw new InvalidOperationException($"Not enough equipment slots. Character has {character.Stats.EquipmentSlots} slots, {character.Equipment.Sum(e => e.Slots)} used.");
+
+        // Transfer equipment
+        warband.Stash.Remove(equipment);
+        character.Equipment.Add(equipment);
+        warband.UpdateLastModified();
+
+        await _warbandRepository.SaveAsync(warband);
+        _state.NotifyStateChanged();
+        _state.NotifyWarbandChanged(warbandId);
+    }
+
+    public async Task TransferEquipmentToStashAsync(string warbandId, string characterId, string equipmentId)
+    {
+        var warband = await GetWarbandAsync(warbandId);
+        if (warband == null)
+            throw new InvalidOperationException("Warband not found");
+
+        var character = warband.Members.FirstOrDefault(m => m.Id == characterId);
+        if (character == null)
+            throw new InvalidOperationException("Character not found");
+
+        var equipment = character.Equipment.FirstOrDefault(e => e.Id == equipmentId);
+        if (equipment == null)
+            throw new InvalidOperationException("Equipment not found on character");
+
+        // Transfer equipment
+        character.Equipment.Remove(equipment);
+        warband.Stash.Add(equipment);
+        warband.UpdateLastModified();
+
+        await _warbandRepository.SaveAsync(warband);
+        _state.NotifyStateChanged();
+        _state.NotifyWarbandChanged(warbandId);
     }
 }

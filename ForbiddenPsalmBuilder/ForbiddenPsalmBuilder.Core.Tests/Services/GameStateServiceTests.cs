@@ -3,6 +3,7 @@ using ForbiddenPsalmBuilder.Core.Models.Warband;
 using ForbiddenPsalmBuilder.Core.Models.Character;
 using ForbiddenPsalmBuilder.Core.Repositories;
 using ForbiddenPsalmBuilder.Core.Services.State;
+using ForbiddenPsalmBuilder.Data.Services;
 using Moq;
 using Xunit;
 
@@ -11,14 +12,88 @@ namespace ForbiddenPsalmBuilder.Core.Tests.Services;
 public class GameStateServiceTests
 {
     private readonly Mock<IWarbandRepository> _mockRepository;
+    private readonly Mock<IEmbeddedResourceService> _mockResourceService;
     private readonly GlobalGameState _state;
     private readonly GameStateService _service;
 
     public GameStateServiceTests()
     {
         _mockRepository = new Mock<IWarbandRepository>();
+        _mockResourceService = new Mock<IEmbeddedResourceService>();
         _state = new GlobalGameState();
-        _service = new GameStateService(_state, _mockRepository.Object);
+
+        // Setup mock equipment data
+        SetupMockEquipmentData();
+
+        _service = new GameStateService(_state, _mockRepository.Object, _mockResourceService.Object);
+    }
+
+    private void SetupMockEquipmentData()
+    {
+        // Setup weapons data for 28-psalms
+        var weaponsData = new Dictionary<string, List<object>>
+        {
+            ["oneHandedMelee"] = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "Dagger",
+                    ["damage"] = "D4",
+                    ["stat"] = "Agility",
+                    ["cost"] = 1,
+                    ["slots"] = 1,
+                    ["properties"] = new List<string> { "Thrown" }
+                },
+                new Dictionary<string, object>
+                {
+                    ["name"] = "Sword",
+                    ["damage"] = "D6",
+                    ["stat"] = "Strength",
+                    ["cost"] = 3,
+                    ["slots"] = 1,
+                    ["properties"] = new List<string>()
+                }
+            }
+        };
+
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "weapons.json"))
+            .ReturnsAsync(weaponsData);
+
+        // Setup armor data for 28-psalms
+        var armorData = new List<object>
+        {
+            new Dictionary<string, object>
+            {
+                ["name"] = "Light",
+                ["armorValue"] = 1,
+                ["cost"] = 2,
+                ["slots"] = 1
+            }
+        };
+
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<List<object>>("28-psalms", "armor.json"))
+            .ReturnsAsync(armorData);
+
+        // Setup items data for 28-psalms
+        var itemsData = new Dictionary<string, List<object>>
+        {
+            ["items"] = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "Cheese",
+                    ["effect"] = "Heals 1 HP",
+                    ["cost"] = 3,
+                    ["slots"] = 1
+                }
+            }
+        };
+
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "equipment.json"))
+            .ReturnsAsync(itemsData);
     }
 
 
@@ -631,6 +706,329 @@ public class GameStateServiceTests
             default:
                 throw new ArgumentException($"Unknown operation: {operation}. Please implement the test case.");
         }
+    }
+
+    // Equipment Management Tests
+
+    [Fact]
+    public async Task AddEquipmentToCharacterAsync_ShouldAddWeaponToCharacter()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync();
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband", GameVariant = "28-psalms" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        character.Stats.Strength = -2; // Equipment slots = 5 + (-2) = 3
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.AddEquipmentToCharacterAsync(warband.Id, character.Id, "dagger", "weapon");
+
+        // Assert
+        Assert.Single(character.Equipment);
+        Assert.Equal("Dagger", character.Equipment[0].Name);
+        Assert.Equal("weapon", character.Equipment[0].Type);
+        _mockRepository.Verify(x => x.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task AddEquipmentToCharacterAsync_ShouldAddArmorToCharacter()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync();
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband", GameVariant = "28-psalms" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        character.Stats.Strength = -2; // Equipment slots = 5 + (-2) = 3
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.AddEquipmentToCharacterAsync(warband.Id, character.Id, "light", "armor");
+
+        // Assert
+        Assert.Single(character.Equipment);
+        Assert.Equal("Light", character.Equipment[0].Name);
+        Assert.Equal("armor", character.Equipment[0].Type);
+    }
+
+    [Fact]
+    public async Task AddEquipmentToCharacterAsync_ShouldAddItemToCharacter()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync();
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband", GameVariant = "28-psalms" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        character.Stats.Strength = -2; // Equipment slots = 5 + (-2) = 3
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.AddEquipmentToCharacterAsync(warband.Id, character.Id, "cheese", "item");
+
+        // Assert
+        Assert.Single(character.Equipment);
+        Assert.Equal("Cheese", character.Equipment[0].Name);
+        Assert.Equal("item", character.Equipment[0].Type);
+    }
+
+    [Fact]
+    public async Task AddEquipmentToCharacterAsync_ShouldThrow_WhenNotEnoughSlots()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync();
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband", GameVariant = "28-psalms" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        character.Stats.Strength = -4; // Equipment slots = 5 + (-4) = 1
+
+        // Add equipment that fills the slot
+        character.Equipment.Add(new Equipment { Name = "Dagger", Slots = 1, Type = "weapon" });
+
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.AddEquipmentToCharacterAsync(warband.Id, character.Id, "sword", "weapon")
+        );
+    }
+
+    [Fact]
+    public async Task RemoveEquipmentFromCharacterAsync_ShouldRemoveEquipment()
+    {
+        // Arrange
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband", GameVariant = "28-psalms" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        var equipment = new Equipment { Id = "eq-1", Name = "Dagger", Slots = 1, Type = "weapon" };
+        character.Equipment.Add(equipment);
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.RemoveEquipmentFromCharacterAsync(warband.Id, character.Id, equipment.Id);
+
+        // Assert
+        Assert.Empty(character.Equipment);
+        _mockRepository.Verify(x => x.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public void CanCharacterEquip_ShouldReturnTrue_WhenEnoughSlots()
+    {
+        // Arrange
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        character.Stats.Strength = -2; // Equipment slots = 5 + (-2) = 3
+        character.Equipment.Add(new Equipment { Name = "Dagger", Slots = 1, Type = "weapon" });
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        var newEquipment = new Equipment { Name = "Sword", Slots = 1, Type = "weapon" };
+
+        // Act
+        var canEquip = _service.CanCharacterEquip(warband.Id, character.Id, newEquipment);
+
+        // Assert
+        Assert.True(canEquip);
+    }
+
+    [Fact]
+    public void CanCharacterEquip_ShouldReturnFalse_WhenNotEnoughSlots()
+    {
+        // Arrange
+        var warband = new Warband { Id = "test-warband", Name = "Test Warband" };
+        var character = new Character { Id = "test-char", Name = "Test Character" };
+        character.Stats.Strength = -3; // Equipment slots = 5 + (-3) = 2
+        character.Equipment.Add(new Equipment { Name = "Dagger", Slots = 1, Type = "weapon" });
+        character.Equipment.Add(new Equipment { Name = "Light Armor", Slots = 1, Type = "armor" });
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        var newEquipment = new Equipment { Name = "Sword", Slots = 1, Type = "weapon" };
+
+        // Act
+        var canEquip = _service.CanCharacterEquip(warband.Id, character.Id, newEquipment);
+
+        // Assert
+        Assert.False(canEquip);
+    }
+
+    // Buy/Sell/Transfer Equipment Tests
+
+    [Fact]
+    public async Task BuyEquipmentAsync_ShouldAddToStashAndDeductGold()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync(); // Load game data to access weapons
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1", Gold = 50 };
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.BuyEquipmentAsync(warband.Id, "sword", "weapon");
+
+        // Assert
+        Assert.Single(warband.Stash);
+        Assert.Equal("Sword", warband.Stash[0].Name);
+        Assert.Equal(47, warband.Gold); // 50 - 3 (sword cost)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task BuyEquipmentAsync_ShouldThrow_WhenInsufficientGold()
+    {
+        // Arrange
+        await _service.LoadGameDataAsync(); // Load game data to access weapons
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1", Gold = 2 };
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.BuyEquipmentAsync(warband.Id, "sword", "weapon"));
+        Assert.Contains("Not enough gold", exception.Message);
+        Assert.Empty(warband.Stash);
+        Assert.Equal(2, warband.Gold); // Gold unchanged
+    }
+
+    [Fact]
+    public async Task SellEquipmentAsync_ShouldRemoveFromStashAndAddGold()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1", Gold = 50 };
+        var equipment = new Equipment { Id = "eq-1", Name = "Sword", Cost = 3, Type = "weapon" };
+        warband.Stash.Add(equipment);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.SellEquipmentAsync(warband.Id, "eq-1");
+
+        // Assert
+        Assert.Empty(warband.Stash);
+        Assert.Equal(53, warband.Gold); // 50 + 3 (sword sell value)
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task SellEquipmentAsync_ShouldThrow_WhenEquipmentNotFound()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1", Gold = 50 };
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.SellEquipmentAsync(warband.Id, "nonexistent"));
+        Assert.Contains("Equipment not found in stash", exception.Message);
+    }
+
+    [Fact]
+    public async Task TransferEquipmentToCharacterAsync_ShouldMoveFromStashToCharacter()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1" };
+        var character = new Character { Id = "char-1", Name = "Hero" };
+        var equipment = new Equipment { Id = "eq-1", Name = "Sword", Cost = 3, Slots = 1, Type = "weapon" };
+        warband.Stash.Add(equipment);
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.TransferEquipmentToCharacterAsync(warband.Id, character.Id, equipment.Id);
+
+        // Assert
+        Assert.Empty(warband.Stash);
+        Assert.Single(character.Equipment);
+        Assert.Equal("Sword", character.Equipment[0].Name);
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task TransferEquipmentToCharacterAsync_ShouldThrow_WhenNotEnoughSlots()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1" };
+        var character = new Character { Id = "char-1", Name = "Hero" };
+        character.Stats.Strength = -3; // Equipment slots = 5 + (-3) = 2
+        character.Equipment.Add(new Equipment { Name = "Dagger", Slots = 2, Type = "weapon" });
+
+        var equipment = new Equipment { Id = "eq-1", Name = "Sword", Cost = 3, Slots = 1, Type = "weapon" };
+        warband.Stash.Add(equipment);
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.TransferEquipmentToCharacterAsync(warband.Id, character.Id, equipment.Id));
+        Assert.Contains("Not enough equipment slots", exception.Message);
+        Assert.Single(warband.Stash); // Equipment still in stash
+    }
+
+    [Fact]
+    public async Task TransferEquipmentToStashAsync_ShouldMoveFromCharacterToStash()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1" };
+        var character = new Character { Id = "char-1", Name = "Hero" };
+        var equipment = new Equipment { Id = "eq-1", Name = "Sword", Cost = 3, Slots = 1, Type = "weapon" };
+        character.Equipment.Add(equipment);
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+        _mockRepository.Setup(r => r.SaveAsync(It.IsAny<Warband>())).ReturnsAsync((Warband w) => w);
+
+        // Act
+        await _service.TransferEquipmentToStashAsync(warband.Id, character.Id, equipment.Id);
+
+        // Assert
+        Assert.Empty(character.Equipment);
+        Assert.Single(warband.Stash);
+        Assert.Equal("Sword", warband.Stash[0].Name);
+        _mockRepository.Verify(r => r.SaveAsync(It.IsAny<Warband>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task TransferEquipmentToStashAsync_ShouldThrow_WhenEquipmentNotFoundOnCharacter()
+    {
+        // Arrange
+        var warband = new Warband("Test Warband", "28-psalms") { Id = "warband-1" };
+        var character = new Character { Id = "char-1", Name = "Hero" };
+        warband.Members.Add(character);
+        _state.Warbands[warband.Id] = warband;
+
+        _mockRepository.Setup(r => r.GetByIdAsync(warband.Id)).ReturnsAsync(warband);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.TransferEquipmentToStashAsync(warband.Id, character.Id, "nonexistent"));
+        Assert.Contains("Equipment not found on character", exception.Message);
     }
 
 }

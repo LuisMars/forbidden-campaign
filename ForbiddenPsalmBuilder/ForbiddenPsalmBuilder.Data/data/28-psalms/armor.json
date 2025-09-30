@@ -6,7 +6,8 @@
     "cost": 2,
     "slots": 1,
     "effects": [],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Medium",
@@ -15,7 +16,8 @@
     "cost": 10,
     "slots": 1,
     "effects": [],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-chest-armor"
   },
   {
     "name": "Heavy",
@@ -24,7 +26,8 @@
     "cost": 20,
     "slots": 1,
     "effects": [],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-heavy-armor"
   },
   {
     "name": "Power/Plate",
@@ -39,7 +42,8 @@
         "stat": "strength",
         "requiredValue": 2
       }
-    ]
+    ],
+    "iconClass": "ra ra-heavy-armor"
   },
   {
     "name": "Homemade",
@@ -53,6 +57,7 @@
         "modifier": -1
       }
     ],
-    "restrictions": []
+    "restrictions": [],
+    "iconClass": "ra ra-vest"
   }
 ]

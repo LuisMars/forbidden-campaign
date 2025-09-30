@@ -5,21 +5,24 @@
       "effect": "Cures Bleeding",
       "cost": 1,
       "slots": 1,
-      "roll": 1
+      "roll": 1,
+      "iconClass": "fas fa-band-aid"
     },
     {
       "name": "Lantern",
       "effect": "Required for models to see in the dark",
       "cost": 3,
       "slots": 1,
-      "roll": 2
+      "roll": 2,
+      "iconClass": "fas fa-lantern"
     },
     {
       "name": "Torch",
       "effect": "As a lantern but only lasts 3 rounds. Can be used as One-Handed Makeshift Weapon",
       "cost": 1,
       "slots": 1,
-      "roll": 3
+      "roll": 3,
+      "iconClass": "ra ra-torch"
     },
     {
       "name": "Backpack",
@@ -27,14 +30,16 @@
       "cost": 1,
       "slots": 1,
       "extraSlots": 2,
-      "roll": 4
+      "roll": 4,
+      "iconClass": "fas fa-backpack"
     },
     {
       "name": "Potion",
       "effect": "Heals D6, then drinker makes Toughness test or becomes Dazed",
       "cost": 6,
       "slots": 1,
-      "roll": 5
+      "roll": 5,
+      "iconClass": "ra ra-potion"
     },
     {
       "name": "Ammo",
@@ -42,35 +47,40 @@
       "cost": 1,
       "slots": 1,
       "shots": 5,
-      "roll": 6
+      "roll": 6,
+      "iconClass": "ra ra-bullets"
     },
     {
       "name": "Antidote",
       "effect": "Cures Poisoned",
       "cost": 7,
       "slots": 1,
-      "roll": 7
+      "roll": 7,
+      "iconClass": "ra ra-potion"
     },
     {
       "name": "Bag o' Rats",
       "effect": "Special throwable item",
       "cost": 3,
       "slots": 1,
-      "roll": 8
+      "roll": 8,
+      "iconClass": "fas fa-sack"
     },
     {
       "name": "Whisky",
       "effect": "Required for Dutch Courage flaw",
       "cost": 2,
       "slots": 1,
-      "roll": 9
+      "roll": 9,
+      "iconClass": "fas fa-wine-bottle"
     },
     {
       "name": "Manuscript",
       "effect": "Ancient writings",
       "cost": "Variable",
       "slots": 1,
-      "roll": 10
+      "roll": 10,
+      "iconClass": "ra ra-scroll-unfurled"
     }
   ]
 }

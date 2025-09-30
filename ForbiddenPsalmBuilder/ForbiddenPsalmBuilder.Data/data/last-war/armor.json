@@ -5,6 +5,7 @@
     "special": null,
     "cost": 1,
     "slots": 1,
+    "iconClass": "ra ra-vest",
     "effects": [],
     "restrictions": []
   },
@@ -14,6 +15,7 @@
     "special": "Immune to morale",
     "cost": 10,
     "slots": 1,
+    "iconClass": "ra ra-shield",
     "effects": [
       {
         "type": "immunity",
@@ -28,6 +30,7 @@
     "special": "-3 to Ranged Attack tests",
     "cost": 15,
     "slots": 1,
+    "iconClass": "ra ra-heavy-armor",
     "effects": [
       {
         "type": "attack_penalty",
@@ -43,6 +46,7 @@
     "special": "Ignores Muddy conditions, no slot",
     "cost": 5,
     "slots": 0,
+    "iconClass": "fas fa-hiking",
     "effects": [
       {
         "type": "immunity",
@@ -57,6 +61,7 @@
     "special": "+2 Strength required or -1 Agility",
     "cost": 50,
     "slots": 2,
+    "iconClass": "ra ra-heavy-armor",
     "effects": [],
     "restrictions": [
       {
@@ -77,6 +82,7 @@
     "special": "-1 Agility",
     "cost": 0,
     "slots": 1,
+    "iconClass": "ra ra-vest",
     "effects": [
       {
         "type": "stat_modifier",
@@ -92,6 +98,7 @@
     "special": "Cannot be Dazed by attacks",
     "cost": 5,
     "slots": 1,
+    "iconClass": "ra ra-helmet",
     "effects": [
       {
         "type": "immunity",
@@ -106,6 +113,7 @@
     "special": "Ignores Burn",
     "cost": 3,
     "slots": 1,
+    "iconClass": "ra ra-vest",
     "effects": [
       {
         "type": "immunity",

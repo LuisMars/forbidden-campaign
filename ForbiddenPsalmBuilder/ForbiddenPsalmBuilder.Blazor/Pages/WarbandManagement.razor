@@ -10,9 +10,7 @@
 @inject IGameStateService StateService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
-
 <PageTitle>@(warband?.Name ?? "Warband") - Forbidden Psalm Builder</PageTitle>
-
 <main>
     @if (warband == null)
     {
@@ -70,7 +68,9 @@
         <!-- Warband Title and Stats -->
         <section>
             <div class="horizontal space">
-                <h1>@warband.Name</h1>
+                <h1 class="waband-name">
+                @warband.Name
+                </h1>
                 <StatsDisplay Stats="@GetWarbandStats()" />
             </div>
         </section>

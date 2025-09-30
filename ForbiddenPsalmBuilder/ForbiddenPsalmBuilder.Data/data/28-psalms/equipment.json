@@ -5,28 +5,32 @@
       "effect": "Can be eaten as action to heal 1 HP",
       "cost": 3,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "fas fa-cheese"
     },
     {
       "name": "Tincture",
       "effect": "Removes Poison and Disease",
       "cost": 7,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-potion"
     },
     {
       "name": "Bandage",
       "effect": "Cures Bleeding",
       "cost": 1,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "fas fa-band-aid"
     },
     {
       "name": "Potion/Stimpack",
       "effect": "Heals 1D6 HP",
       "cost": 6,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-potion"
     },
     {
       "name": "Hacking Deck",
@@ -34,7 +38,8 @@
       "cost": 20,
       "slots": 1,
       "techLevel": "future",
-      "roll": null
+      "roll": null,
+      "iconClass": "fas fa-laptop"
     }
   ],
   "ammo": [
@@ -43,35 +48,40 @@
       "shots": 5,
       "cost": 2,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-arrow"
     },
     {
       "type": "Bullets",
       "shots": 6,
       "cost": 4,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-bullets"
     },
     {
       "type": "Plasma Cell",
       "shots": 2,
       "cost": 10,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-lightning"
     },
     {
       "type": "Flame",
       "shots": 1,
       "cost": 5,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-flame"
     },
     {
       "type": "Laser",
       "shots": 12,
       "cost": 12,
       "slots": 1,
-      "roll": null
+      "roll": null,
+      "iconClass": "ra ra-laser-blast"
     }
   ]
 }

@@ -47,6 +47,17 @@ public interface IGameStateService
     Task<bool> CanAddSpecialClassAsync(string warbandId, string specialClassId);
     Task<string?> ValidateSpecialClassSelectionAsync(string warbandId, string? specialClassId, string? characterIdToExclude = null);
 
+    // Equipment Management
+    Task AddEquipmentToCharacterAsync(string warbandId, string characterId, string equipmentId, string equipmentType);
+    Task RemoveEquipmentFromCharacterAsync(string warbandId, string characterId, string equipmentId);
+    bool CanCharacterEquip(string warbandId, string characterId, Equipment equipment);
+
+    // Equipment Economy & Transfers
+    Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType);
+    Task SellEquipmentAsync(string warbandId, string equipmentId);
+    Task TransferEquipmentToCharacterAsync(string warbandId, string characterId, string equipmentId);
+    Task TransferEquipmentToStashAsync(string warbandId, string characterId, string equipmentId);
+
     // State persistence
     Task SaveStateAsync();
     Task LoadStateAsync();
