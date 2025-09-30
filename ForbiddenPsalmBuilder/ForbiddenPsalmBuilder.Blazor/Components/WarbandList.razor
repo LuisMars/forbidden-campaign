@@ -35,14 +35,18 @@
                             }
                         </small>
                     </article>
-                    <aside class="horizontal">
+                    <aside class="horizontal card-actions">
                         <button @onclick="() => EditWarband(warband.Id)"
-                                @onclick:stopPropagation="true">
-                            <i class="fas fa-edit"></i> Edit
+                                @onclick:stopPropagation="true"
+                                class="button-edit"
+                                title="Edit warband">
+                            <i class="fas fa-edit"></i>
                         </button>
-                        <button @onclick="() => DeleteWarband(warband.Id)"
-                                @onclick:stopPropagation="true">
-                            <i class="fas fa-trash"></i> Delete
+                        <button @onclick="() => ShowDeleteConfirm(warband)"
+                                @onclick:stopPropagation="true"
+                                class="button-delete"
+                                title="Delete warband">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </aside>
                 </li>
@@ -120,11 +124,21 @@
     </EditForm>
 </Modal>
 
+<ConfirmDialog
+    IsVisible="@showDeleteWarbandConfirm"
+    Title="Delete Warband"
+    Message="@($"Are you sure you want to delete the warband '{warbandToDelete?.Name}'? This will delete all characters and cannot be undone.")"
+    ConfirmText="Delete Warband"
+    OnConfirm="HandleDeleteWarbandConfirm"
+    OnCancel="CancelDeleteWarband" />
+
 @code {
     private List<Warband> warbands = new();
     private bool showCreateModal = false;
     private CreateWarbandDto createWarbandDto = new();
     private List<string> validationErrors = new();
+    private bool showDeleteWarbandConfirm = false;
+    private Warband? warbandToDelete = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -236,17 +250,32 @@
         Navigation.NavigateTo($"/warband/{warbandId}");
     }
 
-    private async Task DeleteWarband(string warbandId)
+    private void ShowDeleteConfirm(Warband warband)
     {
-        // TODO: Add confirmation dialog
+        warbandToDelete = warband;
+        showDeleteWarbandConfirm = true;
+    }
+
+    private async Task HandleDeleteWarbandConfirm()
+    {
+        if (warbandToDelete == null) return;
+
         try
         {
-            await StateService.DeleteWarbandAsync(warbandId);
+            await StateService.DeleteWarbandAsync(warbandToDelete.Id);
+            showDeleteWarbandConfirm = false;
+            warbandToDelete = null;
         }
         catch (Exception ex)
         {
             await StateService.SetErrorAsync($"Failed to delete warband: {ex.Message}");
         }
+    }
+
+    private void CancelDeleteWarband()
+    {
+        showDeleteWarbandConfirm = false;
+        warbandToDelete = null;
     }
 
     private string GetCurrencySymbol(string gameVariant)

@@ -3,17 +3,36 @@
 @using ForbiddenPsalmBuilder.Components
 @using static ForbiddenPsalmBuilder.Components.StatsDisplay
 
-<article class="character-card">
+<article class="character-card @(PrintMode ? "print-mode" : "")">
     <div class="horizontal space">
-        <h3>@Character.Name</h3>
-        <div class="horizontal">
-            <button @onclick="OnEdit">
-                <i class="fas fa-edit"></i>
-            </button>
-            <button @onclick="OnDelete">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
+        @if (PrintMode)
+        {
+            <h3>
+                @if (!string.IsNullOrEmpty(SpecialClassIcon))
+                {
+                    <i class="@SpecialClassIcon character-special-icon"></i>
+                }
+                @Character.Name
+            </h3>
+        }
+        else
+        {
+            <h3 class="clickable-name" @onclick="OnEdit">
+                @if (!string.IsNullOrEmpty(SpecialClassIcon))
+                {
+                    <i class="@SpecialClassIcon character-special-icon"></i>
+                }
+                @Character.Name
+            </h3>
+            <div class="card-actions">
+                <button @onclick="OnEdit" class="button-edit" title="Edit character">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button @onclick="ShowDeleteConfirm" class="button-delete" title="Delete character">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        }
     </div>
 
     <StatsDisplay Stats="@MainStats" />
@@ -49,6 +68,17 @@
             }
         </div>
     }
+
+    @if (!PrintMode)
+    {
+        <ConfirmDialog
+            IsVisible="@showDeleteConfirm"
+            Title="Delete Character"
+            Message="@($"Are you sure you want to delete {Character.Name}? This action cannot be undone.")"
+            ConfirmText="Delete"
+            OnConfirm="HandleDeleteConfirm"
+            OnCancel="CancelDelete" />
+    }
 </article>
 
 @code {
@@ -56,12 +86,39 @@
     public Character Character { get; set; } = null!;
 
     [Parameter]
+    public string? SpecialClassIcon { get; set; }
+
+    [Parameter]
+    public bool PrintMode { get; set; } = false;
+
+    [Parameter]
     public EventCallback OnEdit { get; set; }
 
     [Parameter]
     public EventCallback OnDelete { get; set; }
 
+    private bool showDeleteConfirm = false;
+
     private int UsedSlots => Character.Equipment.Sum(e => e.Slots);
+
+    private void ShowDeleteConfirm()
+    {
+        showDeleteConfirm = true;
+    }
+
+    private async Task HandleDeleteConfirm()
+    {
+        showDeleteConfirm = false;
+        if (OnDelete.HasDelegate)
+        {
+            await OnDelete.InvokeAsync();
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+    }
 
     private List<StatItem> MainStats => new()
     {
@@ -74,7 +131,7 @@
     private List<StatItem> CalculatedStats => new()
     {
         new StatItem { Value = Character.Stats.HP.ToString(), Label = "HP" },
-        new StatItem { Value = $"{Character.Stats.Movement}\"", Label = "MOV" },
+        new StatItem { Value = Character.Stats.Movement.ToString(), Label = "MOV" },
         new StatItem { Value = $"{UsedSlots}/{Character.Stats.EquipmentSlots}", Label = "SLOTS" }
     };
 }
