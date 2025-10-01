@@ -12,7 +12,9 @@
 @inject TraderService TraderService
 @inject NavigationManager Navigation
 @inject ILogger<CharacterEdit> Logger
+@inject IJSRuntime JSRuntime
 @using Microsoft.Extensions.Logging
+@using Microsoft.JSInterop
 
 <PageTitle>
     @(IsNewCharacter ? "New Character" : $"Edit {character?.Name}") - Forbidden Psalm Builder
@@ -23,9 +25,9 @@
     Subtitle="@(warband?.Name ?? "Unknown Warband")"
     BreadcrumbItems="@GetBreadcrumbItems()">
     <Actions>
-        <button type="button" @onclick="Cancel">
-            <i class="fas fa-times"></i>
-            Cancel
+        <button type="button" @onclick="GoBack">
+            <i class="fas fa-arrow-left"></i>
+            Back to Warband
         </button>
     </Actions>
 </PageHeader>
@@ -54,7 +56,7 @@
     }
     else
     {
-        <EditForm Model="editCharacterDto" OnValidSubmit="SaveCharacter" OnInvalidSubmit="HandleInvalidSubmit">
+        <EditForm Model="editCharacterDto" OnInvalidSubmit="HandleInvalidSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
@@ -69,6 +71,7 @@
                                 <InputText
                                     id="characterName"
                                     @bind-Value="editCharacterDto.Name"
+                                    @bind-Value:after="AutoSave"
                                     placeholder="Enter character name..." />
                                 <button
                                     type="button"
@@ -87,6 +90,7 @@
                     <InfoSelector
                         Items="@availableSpecialClasses"
                         @bind-SelectedId="editCharacterDto.SpecialClassId"
+                        @bind-SelectedId:after="AutoSave"
                         Label="Special Class"
                         ModalLabel="Select Special Class"
                         Category="special-class"
@@ -160,16 +164,6 @@
                 </aside>
             }
 
-            <footer class="horizontal">
-                <button type="button" @onclick="Cancel">
-                    <i class="fas fa-times"></i>
-                    Cancel
-                </button>
-                <button type="submit" disabled="@(!IsValidForm())">
-                    <i class="fas fa-save"></i>
-                    @(IsNewCharacter ? "Create Character" : "Save Changes")
-                </button>
-            </footer>
         </EditForm>
     }
 
@@ -222,7 +216,7 @@
                 Traders="@availableTraders"
                 SelectedTraderId="@selectedTraderId"
                 SelectedTraderIdChanged="@OnTraderChanged"
-                Label="Select Trader (optional - leave blank for free)"
+                Label="Select Trader"
                 AllowNone="true"
                 ShowPricingInfo="true" />
 
@@ -234,8 +228,11 @@
                 ShowSearch="true"
                 ShowPrice="@(!string.IsNullOrEmpty(selectedTraderId))"
                 ShowActions="true"
+                UseCompactMode="true"
+                CurrencySymbol="G"
                 PriceCalculator="@CalculateBuyPrice"
                 DisabledEquipmentIds="@GetUnaffordableEquipmentIds()"
+                DisableBuyButton="@(string.IsNullOrEmpty(selectedTraderId))"
                 OnBuy="@_handleBuyEquipment"
                 OnAssign="@AddNewEquipment" />
         </Modal>
@@ -362,7 +359,35 @@
         }
     }
 
-    private async Task SaveCharacter()
+    private CancellationTokenSource? _autoSaveCts;
+
+    private async Task AutoSave()
+    {
+        // Cancel any pending auto-save
+        _autoSaveCts?.Cancel();
+        _autoSaveCts = new CancellationTokenSource();
+
+        try
+        {
+            // Debounce: wait 500ms before saving
+            await Task.Delay(500, _autoSaveCts.Token);
+
+            // Validate before saving
+            if (!IsValidForm())
+            {
+                Logger.LogInformation("AutoSave skipped - form is not valid");
+                return;
+            }
+
+            await SaveCharacter(navigateAfterSave: false);
+        }
+        catch (TaskCanceledException)
+        {
+            // Auto-save was cancelled, ignore
+        }
+    }
+
+    private async Task SaveCharacter(bool navigateAfterSave = true)
     {
         Logger.LogInformation("SaveCharacter called - IsNewCharacter: {IsNew}, Stats: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
             IsNewCharacter, editCharacterDto.Agility, editCharacterDto.Presence, editCharacterDto.Strength, editCharacterDto.Toughness);
@@ -389,6 +414,10 @@
 
                 await StateService.AddCharacterToWarbandAsync(WarbandId, newCharacter);
                 Logger.LogInformation("Character created successfully");
+
+                // Switch to edit mode after first save
+                CharacterId = newCharacter.Id;
+                character = newCharacter;
             }
             else if (character != null)
             {
@@ -414,8 +443,11 @@
                 Logger.LogInformation("Character updated successfully");
             }
 
-            Logger.LogInformation("Navigating to /warband/{WarbandId}", WarbandId);
-            Navigation.NavigateTo($"/warband/{WarbandId}");
+            if (navigateAfterSave)
+            {
+                Logger.LogInformation("Navigating to /warband/{WarbandId}", WarbandId);
+                Navigation.NavigateTo($"/warband/{WarbandId}");
+            }
         }
         catch (Exception ex)
         {
@@ -424,7 +456,7 @@
         }
     }
 
-    private void Cancel()
+    private void GoBack()
     {
         Navigation.NavigateTo($"/warband/{WarbandId}");
     }
@@ -509,7 +541,7 @@
         };
     }
 
-    private void OnStatArrayStatsChanged((int Agility, int Presence, int Strength, int Toughness) stats)
+    private async Task OnStatArrayStatsChanged((int Agility, int Presence, int Strength, int Toughness) stats)
     {
         Logger.LogInformation("OnStatArrayStatsChanged called: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
             stats.Agility, stats.Presence, stats.Strength, stats.Toughness);
@@ -519,6 +551,7 @@
         editCharacterDto.Toughness = stats.Toughness;
         Logger.LogInformation("Updated editCharacterDto: AGI={Agility}, PRE={Presence}, STR={Strength}, TGH={Toughness}",
             editCharacterDto.Agility, editCharacterDto.Presence, editCharacterDto.Strength, editCharacterDto.Toughness);
+        await AutoSave();
         StateHasChanged();
     }
 
@@ -532,6 +565,7 @@
     {
         if (warband == null) return;
         editCharacterDto.Name = await StateService.GenerateCharacterNameAsync(warband.GameVariant);
+        await AutoSave();
         StateHasChanged();
     }
 
@@ -702,13 +736,9 @@
 
         var disabled = new List<string>();
 
-        // If no trader selected, disable all buy buttons (user must use Assign for free)
+        // If no trader selected, disable only buy button (equipment still selectable via Assign)
         if (selectedTrader == null)
         {
-            // Disable buy for all equipment
-            disabled.AddRange(allWeapons.Select(w => w.Id));
-            disabled.AddRange(allArmors.Select(a => a.Id));
-            disabled.AddRange(allItems.Select(i => i.Id));
             return disabled;
         }
 
@@ -755,6 +785,12 @@
     private async Task RemoveEquipment(string equipmentId)
     {
         if (character == null) return;
+
+        var equipment = character.Equipment.FirstOrDefault(e => e.Id == equipmentId);
+        if (equipment == null) return;
+
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Move {equipment.Name} to warband stash?" });
+        if (!confirmed) return;
 
         try
         {

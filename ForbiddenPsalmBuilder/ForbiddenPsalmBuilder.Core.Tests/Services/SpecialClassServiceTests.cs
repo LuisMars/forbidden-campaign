@@ -22,7 +22,7 @@ public class SpecialClassServiceTests
     }
 
     [Fact]
-    public async Task GetSpecialClassesAsync_ForEndTimes_ShouldReturnWitch()
+    public async Task GetSpecialClassesAsync_ForEndTimes_ShouldReturnSpellcaster()
     {
         // Arrange
         var service = new SpecialClassService();
@@ -31,13 +31,13 @@ public class SpecialClassServiceTests
         var specialClasses = await service.GetSpecialClassesAsync("end-times");
 
         // Assert
-        var witch = specialClasses.FirstOrDefault(sc => sc.Name == "Witch");
-        Assert.NotNull(witch);
-        Assert.Equal("witch", witch.Id);
-        Assert.Equal("Witch", witch.DisplayName);
-        Assert.Equal(5, witch.Cost);
-        Assert.Equal("ra ra-crystal-ball", witch.IconClass);
-        Assert.Contains("end-times", witch.GameVariant);
+        var spellcaster = specialClasses.FirstOrDefault(sc => sc.Name == "Spellcaster");
+        Assert.NotNull(spellcaster);
+        Assert.Equal("spellcaster", spellcaster.Id);
+        Assert.Equal("Spellcaster", spellcaster.DisplayName);
+        Assert.Equal(5, spellcaster.Cost);
+        Assert.Equal("ra ra-scroll-unfurled", spellcaster.IconClass);
+        Assert.Contains("end-times", spellcaster.GameVariant);
     }
 
     [Fact]

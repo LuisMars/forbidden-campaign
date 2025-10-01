@@ -3,7 +3,7 @@
 @using ForbiddenPsalmBuilder.Core.Models.Character
 @using Microsoft.Extensions.Logging
 
-<div class="equipment-selector">
+<div class="equipment-selector @(UseCompactMode ? "with-side-panel" : "")">
     @if (ShowTabs)
     {
         <div class="equipment-tabs">
@@ -47,9 +47,90 @@
         </div>
     }
 
-    <div class="equipment-grid">
+    @if (activeTab == "weapons" && Weapons.Any())
+    {
+        <div class="equipment-filter">
+            <div class="filter-group">
+                <button type="button"
+                        class="filter-button @(weaponHandFilter == "all" ? "active" : "")"
+                        @onclick='() => weaponHandFilter = "all"'>
+                    All Hands
+                </button>
+                <button type="button"
+                        class="filter-button @(weaponHandFilter == "one-handed" ? "active" : "")"
+                        @onclick='() => weaponHandFilter = "one-handed"'>
+                    One-Handed
+                </button>
+                <button type="button"
+                        class="filter-button @(weaponHandFilter == "two-handed" ? "active" : "")"
+                        @onclick='() => weaponHandFilter = "two-handed"'>
+                    Two-Handed
+                </button>
+            </div>
+            <div class="filter-group">
+                <button type="button"
+                        class="filter-button @(weaponTypeFilter == "all" ? "active" : "")"
+                        @onclick='() => weaponTypeFilter = "all"'>
+                    All Types
+                </button>
+                <button type="button"
+                        class="filter-button @(weaponTypeFilter == "melee" ? "active" : "")"
+                        @onclick='() => weaponTypeFilter = "melee"'>
+                    Melee
+                </button>
+                <button type="button"
+                        class="filter-button @(weaponTypeFilter == "ranged" ? "active" : "")"
+                        @onclick='() => weaponTypeFilter = "ranged"'>
+                    Ranged
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="@(UseCompactMode ? "equipment-list" : "equipment-grid")">
         @{
             var filteredEquipment = GetFilteredEquipment(activeTab);
+
+            // Apply weapon filters
+            if (activeTab == "weapons")
+            {
+                // Apply hand filter
+                if (weaponHandFilter != "all")
+                {
+                    filteredEquipment = filteredEquipment.Where(e =>
+                    {
+                        if (weaponHandFilter == "one-handed")
+                            return e.Slots == 1;
+                        if (weaponHandFilter == "two-handed")
+                            return e.Slots == 2;
+                        return true;
+                    }).ToList();
+                }
+
+                // Apply type filter (melee vs ranged)
+                if (weaponTypeFilter != "all")
+                {
+                    filteredEquipment = filteredEquipment.Where(e =>
+                    {
+                        var category = !string.IsNullOrEmpty(e.Category) ? e.Category.ToLower() : "";
+
+                        if (weaponTypeFilter == "melee")
+                        {
+                            // Check if category contains "melee" OR if it doesn't have "ranged" property and isn't a throwable
+                            return category.Contains("melee") ||
+                                   (!e.Properties.Any(p => p.Equals("Ranged", StringComparison.OrdinalIgnoreCase)) &&
+                                    !category.Contains("throwable"));
+                        }
+                        if (weaponTypeFilter == "ranged")
+                        {
+                            // Check if category contains "ranged" OR has "Ranged" property
+                            return category.Contains("ranged") ||
+                                   e.Properties.Any(p => p.Equals("Ranged", StringComparison.OrdinalIgnoreCase));
+                        }
+                        return true;
+                    }).ToList();
+                }
+            }
 
             if (!string.IsNullOrEmpty(searchQuery))
             {
@@ -79,20 +160,154 @@
                     var price = PriceCalculator?.Invoke(equipment);
 
                     <EquipmentCard Equipment="equipment"
+                                   CompactMode="UseCompactMode"
                                    ShowPrice="ShowPrice"
                                    Price="price"
-                                   ShowActions="ShowActions"
+                                   ShowActions="@(!UseCompactMode && ShowActions)"
                                    IsSelected="isSelected"
                                    IsDisabled="isDisabled"
                                    OnClick="() => HandleEquipmentClick(equipment)"
-                                   OnBuy="@HandleBuy"
-                                   OnSell="@HandleSell"
-                                   OnRemove="@HandleRemove"
-                                   OnAssign="@HandleAssign" />
+                                   OnBuy="@GetBuyCallback()"
+                                   OnSell="@GetSellCallback()"
+                                   OnRemove="@GetRemoveCallback()"
+                                   OnAssign="@GetAssignCallback()" />
                 }
             }
         }
     </div>
+
+    @if (UseCompactMode && selectedEquipmentForPanel != null)
+    {
+        <div class="equipment-side-panel">
+            <div class="side-panel-header">
+                <h3>@selectedEquipmentForPanel.Name</h3>
+                <button type="button" class="close-button" @onclick="CloseSidePanel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="side-panel-content">
+                @if (!string.IsNullOrEmpty(selectedEquipmentForPanel.Damage))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label"><i class="ra ra-crossed-swords"></i> Damage:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.Damage</span>
+                    </div>
+                }
+
+                @if (selectedEquipmentForPanel.ArmorValue > 0)
+                {
+                    <div class="detail-row">
+                        <span class="detail-label"><i class="ra ra-shield"></i> Armor:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.ArmorValue</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(selectedEquipmentForPanel.ArmorType))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Type:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.ArmorType</span>
+                    </div>
+                }
+
+                @if (selectedEquipmentForPanel.Slots > 0)
+                {
+                    <div class="detail-row">
+                        <span class="detail-label"><i class="fas fa-box"></i> Slots:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.Slots</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(selectedEquipmentForPanel.Stat))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Stat:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.Stat</span>
+                    </div>
+                }
+
+                @if (selectedEquipmentForPanel.Properties?.Any() == true)
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Properties:</span>
+                        <div class="detail-value">
+                            @foreach (var prop in selectedEquipmentForPanel.Properties)
+                            {
+                                <span class="property-tag">@prop</span>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(selectedEquipmentForPanel.Special))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Special:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.Special</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(selectedEquipmentForPanel.Effect))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Effect:</span>
+                        <span class="detail-value">@selectedEquipmentForPanel.Effect</span>
+                    </div>
+                }
+
+                @if (ShowPrice && selectedEquipmentPrice.HasValue)
+                {
+                    <div class="detail-row price-row">
+                        <span class="detail-label">Price:</span>
+                        <span class="detail-value price">@selectedEquipmentPrice.Value@CurrencySymbol</span>
+                    </div>
+                }
+            </div>
+
+            @if (ShowActions)
+            {
+                <div class="side-panel-actions">
+                    @if (OnBuy.HasDelegate)
+                    {
+                        <button type="button" @onclick="() => HandleBuy(selectedEquipmentForPanel)"
+                                class="button-small"
+                                disabled="@(DisableBuyButton || (DisabledEquipmentIds?.Contains(selectedEquipmentForPanel.Id) ?? false))">
+                            <i class="fas fa-shopping-cart"></i>
+                            Buy
+                        </button>
+                    }
+
+                    @if (OnSell.HasDelegate)
+                    {
+                        <button type="button" @onclick="() => HandleSell(selectedEquipmentForPanel)"
+                                class="button-small">
+                            <i class="fas fa-coins"></i>
+                            Sell
+                        </button>
+                    }
+
+                    @if (OnRemove.HasDelegate)
+                    {
+                        <button type="button" @onclick="() => HandleRemove(selectedEquipmentForPanel)"
+                                class="button-small button-danger">
+                            <i class="fas fa-times"></i>
+                            Remove
+                        </button>
+                    }
+
+                    @if (OnAssign.HasDelegate)
+                    {
+                        <button type="button" @onclick="() => HandleAssign(selectedEquipmentForPanel)"
+                                class="button-small">
+                            <i class="ra ra-person"></i>
+                            Assign
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
 </div>
 
 @code {
@@ -147,8 +362,21 @@
     [Parameter]
     public string InitialTab { get; set; } = "all";
 
+    [Parameter]
+    public bool UseCompactMode { get; set; } = false;
+
+    [Parameter]
+    public string CurrencySymbol { get; set; } = "G";
+
+    [Parameter]
+    public bool DisableBuyButton { get; set; } = false;
+
     private string activeTab = "all";
     private string searchQuery = string.Empty;
+    private string weaponHandFilter = "all";
+    private string weaponTypeFilter = "all";
+    private Equipment? selectedEquipmentForPanel;
+    private int? selectedEquipmentPrice;
 
     protected override void OnInitialized()
     {
@@ -165,6 +393,8 @@
     {
         activeTab = tab;
         searchQuery = string.Empty;
+        weaponHandFilter = "all";
+        weaponTypeFilter = "all";
     }
 
     private void SetTabAll() => SetActiveTab("all");
@@ -189,6 +419,7 @@
                 Id = weapon.Id,
                 Name = weapon.Name,
                 Type = "weapon",
+                Category = weapon.Category,
                 Damage = weapon.Damage,
                 Properties = weapon.Properties,
                 Stat = weapon.Stat,
@@ -241,10 +472,23 @@
 
     private async Task HandleEquipmentClick(Equipment equipment)
     {
-        if (OnEquipmentSelected.HasDelegate)
+        if (UseCompactMode)
+        {
+            // In compact mode, open side panel
+            selectedEquipmentForPanel = equipment;
+            selectedEquipmentPrice = PriceCalculator?.Invoke(equipment);
+            StateHasChanged();
+        }
+        else if (OnEquipmentSelected.HasDelegate)
         {
             await OnEquipmentSelected.InvokeAsync(equipment);
         }
+    }
+
+    private void CloseSidePanel()
+    {
+        selectedEquipmentForPanel = null;
+        selectedEquipmentPrice = null;
     }
 
     [Inject]
@@ -297,4 +541,9 @@
             await OnAssign.InvokeAsync(equipment);
         }
     }
+
+    private EventCallback<Equipment> GetBuyCallback() => OnBuy.HasDelegate ? OnBuy : default;
+    private EventCallback<Equipment> GetSellCallback() => OnSell.HasDelegate ? OnSell : default;
+    private EventCallback<Equipment> GetRemoveCallback() => OnRemove.HasDelegate ? OnRemove : default;
+    private EventCallback<Equipment> GetAssignCallback() => OnAssign.HasDelegate ? OnAssign : default;
 }

@@ -1,7 +1,7 @@
 @namespace ForbiddenPsalmBuilder.Components
 @using ForbiddenPsalmBuilder.Core.Models.Character
 
-<div class="equipment-card @(IsSelected ? "selected" : "") @(IsDisabled ? "disabled" : "")" @onclick="HandleClick">
+<div class="equipment-card @(CompactMode ? "compact" : "") @(IsSelected ? "selected" : "") @(IsDisabled ? "disabled" : "")" @onclick="HandleClick">
     @if (!string.IsNullOrEmpty(Equipment.IconClass))
     {
         <i class="@Equipment.IconClass equipment-icon"></i>
@@ -25,32 +25,64 @@
     <div class="equipment-info">
         <div class="equipment-name">@Equipment.Name</div>
 
-        <div class="equipment-stats">
-            @if (!string.IsNullOrEmpty(Equipment.Damage))
-            {
-                <span class="stat-badge damage">
-                    <i class="ra ra-crossed-swords"></i> @Equipment.Damage
-                </span>
-            }
-
-            @if (Equipment.ArmorValue > 0)
-            {
-                <span class="stat-badge armor">
-                    <i class="ra ra-shield"></i> @Equipment.ArmorValue
-                </span>
-            }
-
-            @if (Equipment.Slots > 0)
-            {
-                <span class="stat-badge slots">
-                    <i class="fas fa-box"></i> @Equipment.Slots
-                </span>
-            }
-        </div>
-
-        @if (!string.IsNullOrEmpty(Equipment.Special))
+        @if (!CompactMode)
         {
-            <div class="equipment-special">@Equipment.Special</div>
+            <div class="equipment-stats">
+                @if (!string.IsNullOrEmpty(Equipment.Damage))
+                {
+                    <span class="stat-badge damage">
+                        <i class="ra ra-crossed-swords"></i> @Equipment.Damage
+                    </span>
+                }
+
+                @if (Equipment.ArmorValue > 0)
+                {
+                    <span class="stat-badge armor">
+                        <i class="ra ra-shield"></i> @Equipment.ArmorValue
+                    </span>
+                }
+
+                @if (!string.IsNullOrEmpty(Equipment.ArmorType))
+                {
+                    <span class="stat-badge armor-type">
+                        @Equipment.ArmorType
+                    </span>
+                }
+
+                @if (!string.IsNullOrEmpty(Equipment.Stat))
+                {
+                    <span class="stat-badge stat">
+                        @Equipment.Stat
+                    </span>
+                }
+
+                @if (Equipment.Slots > 0)
+                {
+                    <span class="stat-badge slots">
+                        <i class="fas fa-box"></i> @Equipment.Slots
+                    </span>
+                }
+            </div>
+
+            @if (Equipment.Properties?.Any() == true)
+            {
+                <div class="equipment-properties">
+                    @foreach (var property in Equipment.Properties)
+                    {
+                        <span class="property-badge">@property</span>
+                    }
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Equipment.Special))
+            {
+                <div class="equipment-special">@Equipment.Special</div>
+            }
+
+            @if (!string.IsNullOrEmpty(Equipment.Effect))
+            {
+                <div class="equipment-effect">@Equipment.Effect</div>
+            }
         }
     </div>
 
@@ -133,6 +165,9 @@
 
     [Parameter]
     public bool IsSelected { get; set; } = false;
+
+    [Parameter]
+    public bool CompactMode { get; set; } = false;
 
     [Parameter]
     public bool IsDisabled { get; set; } = false;

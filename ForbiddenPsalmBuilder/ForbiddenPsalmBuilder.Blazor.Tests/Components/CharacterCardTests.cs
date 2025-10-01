@@ -77,7 +77,7 @@ public class CharacterCardTests : TestContext
 
         // Movement: 5 + agility(3) = 8
         Assert.Contains("MOV", calculatedStats);
-        Assert.Contains("8\"", calculatedStats);
+        Assert.Contains("8", calculatedStats);
 
         // Equipment Slots: 5 + strength(1) = 6
         Assert.Contains("SLOTS", calculatedStats);
@@ -141,7 +141,7 @@ public class CharacterCardTests : TestContext
             .Add(p => p.Character, character));
 
         // Assert
-        var equipmentDiv = cut.Find(".character-equipment");
+        var equipmentDiv = cut.Find(".character-equipment-grid");
         Assert.Contains("Sword", equipmentDiv.TextContent);
         Assert.Contains("Shield", equipmentDiv.TextContent);
 
@@ -203,13 +203,22 @@ public class CharacterCardTests : TestContext
         };
         var deleteCalled = false;
 
+        // Setup JSInterop for Modal
+        JSInterop.SetupVoid("document.body.classList.add", _ => true);
+        JSInterop.SetupVoid("document.body.classList.remove", _ => true);
+
         // Act
         var cut = RenderComponent<CharacterCard>(parameters => parameters
             .Add(p => p.Character, character)
             .Add(p => p.OnDelete, () => deleteCalled = true));
 
+        // Click delete button to show confirmation modal
         var deleteButton = cut.FindAll("button")[1];
         deleteButton.Click();
+
+        // Find and click the confirm button in the modal (it's the button-danger class)
+        var confirmButton = cut.Find(".button-danger");
+        confirmButton.Click();
 
         // Assert
         Assert.True(deleteCalled);

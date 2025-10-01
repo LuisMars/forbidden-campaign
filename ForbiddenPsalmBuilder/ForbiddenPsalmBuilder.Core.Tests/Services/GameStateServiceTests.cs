@@ -32,33 +32,33 @@ public class GameStateServiceTests
     private void SetupMockEquipmentData()
     {
         // Setup weapons data for 28-psalms
-        var weaponsData = new Dictionary<string, List<object>>
+        var weaponsData = new WeaponsData
         {
-            ["oneHandedMelee"] = new List<object>
+            OneHandedMelee = new List<WeaponDto>
             {
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["name"] = "Dagger",
-                    ["damage"] = "D4",
-                    ["stat"] = "Agility",
-                    ["cost"] = 1,
-                    ["slots"] = 1,
-                    ["properties"] = new List<string> { "Thrown" }
+                    Name = "Dagger",
+                    Damage = "D4",
+                    Stat = "Agility",
+                    Cost = 1,
+                    Slots = 1,
+                    Properties = new List<string> { "Thrown" }
                 },
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["name"] = "Sword",
-                    ["damage"] = "D6",
-                    ["stat"] = "Strength",
-                    ["cost"] = 3,
-                    ["slots"] = 1,
-                    ["properties"] = new List<string>()
+                    Name = "Sword",
+                    Damage = "D6",
+                    Stat = "Strength",
+                    Cost = 3,
+                    Slots = 1,
+                    Properties = new List<string>()
                 }
             }
         };
 
         _mockResourceService
-            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "weapons.json"))
+            .Setup(x => x.GetGameResourceAsync<WeaponsData>("28-psalms", "weapons.json"))
             .ReturnsAsync(weaponsData);
 
         // Setup armor data for 28-psalms
@@ -125,24 +125,23 @@ public class GameStateServiceTests
             .ReturnsAsync(tradersData);
 
         // Setup weapons data for end-times (for trader pricing tests)
-        var endTimesWeaponsData = new Dictionary<string, List<object>>
+        var endTimesWeaponsData = new WeaponsData
         {
-            ["melee"] = new List<object>
+            OneHandedMelee = new List<WeaponDto>
             {
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["id"] = "sword",
-                    ["name"] = "Sword",
-                    ["damage"] = "1D6",
-                    ["properties"] = new List<string>(),
-                    ["cost"] = 3,
-                    ["slots"] = 1
+                    Name = "Sword",
+                    Damage = "1D6",
+                    Properties = new List<string>(),
+                    Cost = 3,
+                    Slots = 1
                 }
             }
         };
 
         _mockResourceService
-            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("end-times", "weapons.json"))
+            .Setup(x => x.GetGameResourceAsync<WeaponsData>("end-times", "weapons.json"))
             .ReturnsAsync(endTimesWeaponsData);
 
         // Setup names data for 28-psalms

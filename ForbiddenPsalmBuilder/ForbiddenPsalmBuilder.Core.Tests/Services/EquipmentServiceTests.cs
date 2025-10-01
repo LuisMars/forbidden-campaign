@@ -1,5 +1,6 @@
 using ForbiddenPsalmBuilder.Core.Services;
 using ForbiddenPsalmBuilder.Core.Models.Selection;
+using ForbiddenPsalmBuilder.Core.Models.GameData;
 using ForbiddenPsalmBuilder.Data.Services;
 using Moq;
 using Xunit;
@@ -31,24 +32,24 @@ public class EquipmentServiceTests
     public async Task GetWeaponsAsync_ShouldLoadAndCacheWeapons()
     {
         // Arrange
-        var weaponData = new Dictionary<string, List<object>>
+        var weaponData = new WeaponsData
         {
-            ["oneHandedMelee"] = new List<object>
+            OneHandedMelee = new List<WeaponDto>
             {
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["name"] = "Dagger",
-                    ["damage"] = "D4",
-                    ["stat"] = "Agility",
-                    ["cost"] = 1,
-                    ["slots"] = 1,
-                    ["properties"] = new List<string> { "Thrown" }
+                    Name = "Dagger",
+                    Damage = "D4",
+                    Stat = "Agility",
+                    Cost = 1,
+                    Slots = 1,
+                    Properties = new List<string> { "Thrown" }
                 }
             }
         };
 
         _mockResourceService
-            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "weapons.json"))
+            .Setup(x => x.GetGameResourceAsync<WeaponsData>("28-psalms", "weapons.json"))
             .ReturnsAsync(weaponData);
 
         // Act
@@ -61,7 +62,7 @@ public class EquipmentServiceTests
         // Verify caching - should not call resource service again
         await _service.GetWeaponsAsync("28-psalms");
         _mockResourceService.Verify(
-            x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "weapons.json"),
+            x => x.GetGameResourceAsync<WeaponsData>("28-psalms", "weapons.json"),
             Times.Once
         );
     }
@@ -70,24 +71,24 @@ public class EquipmentServiceTests
     public async Task GetWeaponByIdAsync_ShouldReturnWeapon_WhenExists()
     {
         // Arrange
-        var weaponData = new Dictionary<string, List<object>>
+        var weaponData = new WeaponsData
         {
-            ["oneHandedMelee"] = new List<object>
+            OneHandedMelee = new List<WeaponDto>
             {
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["name"] = "Sword",
-                    ["damage"] = "D6",
-                    ["stat"] = "Strength",
-                    ["cost"] = 3,
-                    ["slots"] = 1,
-                    ["properties"] = new List<string>()
+                    Name = "Sword",
+                    Damage = "D6",
+                    Stat = "Strength",
+                    Cost = 3,
+                    Slots = 1,
+                    Properties = new List<string>()
                 }
             }
         };
 
         _mockResourceService
-            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "weapons.json"))
+            .Setup(x => x.GetGameResourceAsync<WeaponsData>("28-psalms", "weapons.json"))
             .ReturnsAsync(weaponData);
 
         // Act
@@ -205,7 +206,7 @@ public class EquipmentServiceTests
     {
         // Arrange
         _mockResourceService
-            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("invalid", "weapons.json"))
+            .Setup(x => x.GetGameResourceAsync<WeaponsData>("invalid", "weapons.json"))
             .ThrowsAsync(new Exception("File not found"));
 
         // Act
@@ -219,36 +220,36 @@ public class EquipmentServiceTests
     public async Task GetWeaponsAsync_ShouldAssignCategoryToWeapons()
     {
         // Arrange
-        var weaponData = new Dictionary<string, List<object>>
+        var weaponData = new WeaponsData
         {
-            ["oneHandedMelee"] = new List<object>
+            OneHandedMelee = new List<WeaponDto>
             {
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["name"] = "Dagger",
-                    ["damage"] = "D4",
-                    ["stat"] = "Agility",
-                    ["cost"] = 1,
-                    ["slots"] = 1,
-                    ["properties"] = new List<string>()
+                    Name = "Dagger",
+                    Damage = "D4",
+                    Stat = "Agility",
+                    Cost = 1,
+                    Slots = 1,
+                    Properties = new List<string>()
                 }
             },
-            ["twoHandedRanged"] = new List<object>
+            TwoHandedRanged = new List<WeaponDto>
             {
-                new Dictionary<string, object>
+                new WeaponDto
                 {
-                    ["name"] = "Bow",
-                    ["damage"] = "D6",
-                    ["stat"] = "Presence",
-                    ["cost"] = 5,
-                    ["slots"] = 2,
-                    ["properties"] = new List<string> { "Ranged" }
+                    Name = "Bow",
+                    Damage = "D6",
+                    Stat = "Presence",
+                    Cost = 5,
+                    Slots = 2,
+                    Properties = new List<string> { "Ranged" }
                 }
             }
         };
 
         _mockResourceService
-            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("28-psalms", "weapons.json"))
+            .Setup(x => x.GetGameResourceAsync<WeaponsData>("28-psalms", "weapons.json"))
             .ReturnsAsync(weaponData);
 
         // Act

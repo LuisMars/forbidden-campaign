@@ -89,7 +89,9 @@
                             Character="@character"
                             SpecialClassIcon="@GetSpecialClassIcon(character.SpecialClassId)"
                             OnEdit="@(() => EditCharacter(character.Id))"
-                            OnDelete="@(() => RemoveCharacter(character.Id))" />
+                            OnDelete="@(() => RemoveCharacter(character.Id))"
+                            OnEquipmentRemove="@(equipment => RemoveEquipmentFromCharacter(character.Id, equipment))"
+                            OnEquipmentSell="@(equipment => SellEquipmentFromCharacter(character.Id, equipment))" />
                     }
                 </div>
             }
@@ -106,6 +108,30 @@
                 </section>
             }
         </section>
+
+        <!-- Warband Stash -->
+        @if (warband.Stash.Any())
+        {
+            <section>
+                <div class="horizontal space">
+                    <h2>Warband Stash (@warband.Stash.Count items)</h2>
+                    <button @onclick="() => showStashModal = true" class="no-print">
+                        <i class="fas fa-exchange-alt"></i>
+                        Manage
+                    </button>
+                </div>
+                <div class="stash-grid">
+                    @foreach (var equipment in warband.Stash)
+                    {
+                        <EquipmentCard
+                            Equipment="equipment"
+                            CompactMode="false"
+                            ShowActions="false"
+                            ShowPrice="false" />
+                    }
+                </div>
+            </section>
+        }
     }
     <!-- Edit Warband Info Modal -->
     <Modal
@@ -324,6 +350,63 @@
         catch (Exception ex)
         {
             await StateService.SetErrorAsync($"Failed to remove character: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveEquipmentFromCharacter(string characterId, Equipment equipment)
+    {
+        if (warband == null) return;
+
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Move {equipment.Name} to warband stash?" });
+        if (!confirmed) return;
+
+        try
+        {
+            var character = warband.Members.FirstOrDefault(c => c.Id == characterId);
+            if (character == null) return;
+
+            // Remove equipment from character
+            character.Equipment.Remove(equipment);
+
+            // Add equipment to warband stash
+            warband.Stash.Add(equipment);
+
+            // Update the warband
+            await StateService.UpdateWarbandAsync(warband);
+            await LoadWarband(); // Refresh the page
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to remove equipment: {ex.Message}");
+        }
+    }
+
+    private async Task SellEquipmentFromCharacter(string characterId, Equipment equipment)
+    {
+        if (warband == null) return;
+
+        var sellPrice = equipment.Cost / 2;
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Sell {equipment.Name} for {sellPrice}{GetCurrencySymbol()}?" });
+        if (!confirmed) return;
+
+        try
+        {
+            var character = warband.Members.FirstOrDefault(c => c.Id == characterId);
+            if (character == null) return;
+
+            // Remove equipment from character
+            character.Equipment.Remove(equipment);
+
+            // Add gold to warband
+            warband.Gold += sellPrice;
+
+            // Update the warband
+            await StateService.UpdateWarbandAsync(warband);
+            await LoadWarband(); // Refresh the page
+        }
+        catch (Exception ex)
+        {
+            await StateService.SetErrorAsync($"Failed to sell equipment: {ex.Message}");
         }
     }
 

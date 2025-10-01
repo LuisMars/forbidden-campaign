@@ -211,6 +211,9 @@
     [Inject]
     public ILogger<StashModal> Logger { get; set; } = null!;
 
+    [Inject]
+    public IJSRuntime JSRuntime { get; set; } = null!;
+
     private string activeTab = "stash";
     private string? selectedTraderId;
     private List<Trader> availableTraders = new();
@@ -439,10 +442,15 @@
     {
         if (Warband == null) return;
 
+        var equipment = Warband.Stash.FirstOrDefault(e => e.Id == equipmentId);
+        if (equipment == null) return;
+
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Discard {equipment.Name}? This cannot be undone." });
+        if (!confirmed) return;
+
         try
         {
             // Find and remove equipment from stash
-            var equipment = Warband.Stash.FirstOrDefault(e => e.Id == equipmentId);
             if (equipment != null)
             {
                 Warband.Stash.Remove(equipment);

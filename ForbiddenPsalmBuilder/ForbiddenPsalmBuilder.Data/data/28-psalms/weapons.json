@@ -292,6 +292,16 @@
       "iconClass": "ra ra-bottle"
     },
     {
+      "name": "Black Powder Bomb",
+      "damage": "D6",
+      "properties": ["Explode", "Thrown"],
+      "stat": "Agility",
+      "cost": 3,
+      "slots": 1,
+      "techLevel": "past",
+      "iconClass": "ra ra-bomb"
+    },
+    {
       "name": "Space Grenade",
       "damage": "D6",
       "properties": ["Explode", "Thrown", "Template"],

@@ -5,6 +5,7 @@ public class Equipment
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty; // weapon, armor, item
+    public string? Category { get; set; } // oneHandedMelee, twoHandedMelee, oneHandedRanged, twoHandedRanged, throwables, etc.
     public string? Damage { get; set; }
     public List<string> Properties { get; set; } = new();
     public string? Stat { get; set; } // What stat this uses

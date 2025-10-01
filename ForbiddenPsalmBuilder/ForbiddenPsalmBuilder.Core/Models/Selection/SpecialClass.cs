@@ -26,6 +26,12 @@ public class SpecialClass : ISelectableItem
     {
         var sb = new StringBuilder();
 
+        if (!string.IsNullOrEmpty(Description))
+        {
+            sb.AppendLine(Description);
+            sb.AppendLine();
+        }
+
         if (Cost.HasValue)
         {
             sb.AppendLine($"**Cost:** {Cost}");

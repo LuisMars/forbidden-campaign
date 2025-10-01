@@ -1,4 +1,5 @@
 using ForbiddenPsalmBuilder.Core.Models.Selection;
+using ForbiddenPsalmBuilder.Core.Models.GameData;
 using ForbiddenPsalmBuilder.Data.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
@@ -35,7 +36,7 @@ public class EquipmentService
 
         try
         {
-            var weaponData = await _resourceService.GetGameResourceAsync<Dictionary<string, JsonElement>>(
+            var weaponData = await _resourceService.GetGameResourceAsync<WeaponsData>(
                 gameVariant,
                 "weapons.json"
             );
@@ -45,21 +46,12 @@ public class EquipmentService
 
             var weapons = new List<Weapon>();
 
-            // Parse each weapon category (skip non-array fields like "notes")
-            foreach (var category in weaponData)
-            {
-                // Skip if not an array (e.g., "notes" field)
-                if (category.Value.ValueKind != JsonValueKind.Array)
-                    continue;
-
-                var categoryName = category.Key;
-                foreach (var weaponElement in category.Value.EnumerateArray())
-                {
-                    var weapon = ParseWeapon(weaponElement, categoryName);
-                    if (weapon != null)
-                        weapons.Add(weapon);
-                }
-            }
+            // Convert each category
+            weapons.AddRange(ConvertWeaponDtos(weaponData.OneHandedMelee, "oneHandedMelee"));
+            weapons.AddRange(ConvertWeaponDtos(weaponData.TwoHandedMelee, "twoHandedMelee"));
+            weapons.AddRange(ConvertWeaponDtos(weaponData.OneHandedRanged, "oneHandedRanged"));
+            weapons.AddRange(ConvertWeaponDtos(weaponData.TwoHandedRanged, "twoHandedRanged"));
+            weapons.AddRange(ConvertWeaponDtos(weaponData.Throwables, "throwables"));
 
             _weaponCache[gameVariant] = weapons;
             return weapons;
@@ -69,6 +61,25 @@ public class EquipmentService
             _logger?.LogError(ex, "Error loading weapons for {GameVariant}", gameVariant);
             return new List<Weapon>();
         }
+    }
+
+    private List<Weapon> ConvertWeaponDtos(List<WeaponDto> dtos, string category)
+    {
+        return dtos.Select(dto => new Weapon
+        {
+            Id = dto.Name.ToLower().Replace(" ", "-"),
+            Name = dto.Name,
+            DisplayName = dto.Name,
+            Description = $"{dto.Name} - {category}",
+            Category = category,
+            Damage = dto.Damage,
+            Properties = dto.Properties,
+            Stat = dto.Stat,
+            Cost = dto.Cost,
+            Slots = dto.Slots,
+            TechLevel = dto.TechLevel,
+            IconClass = dto.IconClass ?? "ra ra-sword"
+        }).ToList();
     }
 
     public async Task<Weapon?> GetWeaponByIdAsync(string id, string gameVariant)
@@ -188,48 +199,6 @@ public class EquipmentService
         return items.FirstOrDefault(i => i.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
     }
 
-    private Weapon? ParseWeapon(JsonElement weaponElement, string category)
-    {
-        try
-        {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
-                weaponElement.GetRawText()
-            );
-
-            if (dict == null) return null;
-
-            var name = dict.ContainsKey("name") ? dict["name"].GetString() ?? "" : "";
-            var weapon = new Weapon
-            {
-                Id = name.ToLower().Replace(" ", "-"),
-                Name = name,
-                DisplayName = name,
-                Description = $"{name} - {category}",
-                Category = category,
-                Damage = dict.ContainsKey("damage") ? dict["damage"].GetString() ?? "" : "",
-                Stat = dict.ContainsKey("stat") ? dict["stat"].GetString() ?? "" : "",
-                Cost = dict.ContainsKey("cost") ? dict["cost"].GetInt32() : 0,
-                Slots = dict.ContainsKey("slots") ? dict["slots"].GetInt32() : 1,
-                TechLevel = dict.ContainsKey("techLevel") ? dict["techLevel"].GetString() : null,
-                Properties = new List<string>()
-            };
-
-            if (dict.ContainsKey("properties"))
-            {
-                try
-                {
-                    weapon.Properties = JsonSerializer.Deserialize<List<string>>(dict["properties"].GetRawText()) ?? new List<string>();
-                }
-                catch { }
-            }
-
-            return weapon;
-        }
-        catch
-        {
-            return null;
-        }
-    }
 
     private Armor? ParseArmor(object armorObj)
     {

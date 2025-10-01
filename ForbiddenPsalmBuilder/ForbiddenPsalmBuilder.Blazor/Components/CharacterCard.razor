@@ -49,24 +49,16 @@
     {
         <hr />
         <small>Equipment (@UsedSlots/@Character.Stats.EquipmentSlots slots):</small>
-        <div class="character-equipment">
+        <div class="character-equipment-grid">
             @foreach (var equipment in Character.Equipment)
             {
-                <span class="equipment-item" title="@GetEquipmentTooltip(equipment)">
-                    @if (!string.IsNullOrEmpty(equipment.Damage))
-                    {
-                        <i class="ra ra-crossed-swords"></i>
-                    }
-                    else if (equipment.IsArmor)
-                    {
-                        <i class="ra ra-shield"></i>
-                    }
-                    else
-                    {
-                        <i class="fas fa-box"></i>
-                    }
-                    @equipment.Name
-                </span>
+                <EquipmentCard
+                    Equipment="equipment"
+                    CompactMode="false"
+                    ShowActions="@(!PrintMode)"
+                    ShowPrice="false"
+                    OnRemove="OnEquipmentRemove"
+                    OnSell="OnEquipmentSell" />
             }
         </div>
     }
@@ -111,6 +103,12 @@
     [Parameter]
     public EventCallback OnDelete { get; set; }
 
+    [Parameter]
+    public EventCallback<Equipment> OnEquipmentRemove { get; set; }
+
+    [Parameter]
+    public EventCallback<Equipment> OnEquipmentSell { get; set; }
+
     private bool showDeleteConfirm = false;
 
     private int UsedSlots => Character.Equipment.Sum(e => e.Slots);
@@ -151,23 +149,4 @@
     };
 
     private int TotalArmorValue => Character.Equipment.Where(e => e.IsArmor).Sum(e => e.ArmorValue);
-
-    private string GetEquipmentTooltip(Equipment equipment)
-    {
-        var parts = new List<string> { equipment.Name };
-
-        if (!string.IsNullOrEmpty(equipment.Damage))
-            parts.Add($"Damage: {equipment.Damage}");
-
-        if (equipment.ArmorValue > 0)
-            parts.Add($"Armor: {equipment.ArmorValue}");
-
-        if (equipment.Slots > 0)
-            parts.Add($"Slots: {equipment.Slots}");
-
-        if (!string.IsNullOrEmpty(equipment.Special))
-            parts.Add($"Special: {equipment.Special}");
-
-        return string.Join(" | ", parts);
-    }
 }
