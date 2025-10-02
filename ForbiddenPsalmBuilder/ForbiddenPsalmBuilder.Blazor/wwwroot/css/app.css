@@ -1465,6 +1465,11 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   margin-right: var(--spacing-half);
 }
 
+/* Print-only Stats */
+.print-only-stats {
+  display: none;
+}
+
 /* Character Tags */
 .character-tags {
   display: flex;
@@ -1587,31 +1592,73 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     order: -3 !important;
   }
 
+  /* Font sizes for print - base 14px */
+  body, p, div, span {
+    font-size: 14px !important;
+  }
+
+  h1 {
+    font-size: 20px !important;
+    margin: 4px 0 !important;
+  }
+
+  h2 {
+    font-size: 18px !important;
+    margin: 4px 0 !important;
+  }
+
+  h3 {
+    font-size: 18px !important;
+    margin: 4px 0 !important;
+  }
+
+  h4 {
+    font-size: 16px !important;
+    margin: 4px 0 !important;
+  }
+
+  h5, h6 {
+    font-size: 15px !important;
+    margin: 4px 0 !important;
+  }
+
   .character-card h3 {
     margin: 0 0 4px 0 !important;
+  }
+
+  .stat-value, .equipment-name {
     font-size: 16px !important;
+  }
+
+  .stat-label, small, .equipment-stats, .equipment-properties, .equipment-special, .equipment-effect {
+    font-size: 12px !important;
+  }
+
+  /* Character card layout */
+  .character-card .character-stats-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    order: -2 !important;
+  }
+
+  .character-card .print-only-stats {
+    display: flex !important;
   }
 
   .character-card .stats-container {
     gap: 4px !important;
-    margin: 2px 0 !important;
+    margin: 0 !important;
     flex-direction: row !important;
     display: flex !important;
-    order: -2 !important;
   }
 
   .character-card .stat-item {
     padding: 2px 6px !important;
     flex-direction: column !important;
     display: flex !important;
-  }
-
-  .character-card .stat-value {
-    font-size: 16px !important;
-  }
-
-  .character-card .stat-label {
-    font-size: 11px !important;
   }
 
   .character-card hr {
@@ -1642,6 +1689,15 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+
+  section {
+    page-break-inside: avoid !important;
+    margin-bottom: 8px !important;
+  }
+
+  .horizontal.space {
+    gap: 8px !important;
   }
 }
 
@@ -2287,9 +2343,35 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   }
 
   .stash-grid {
-    /* Optimize grid for print - 2 columns max */
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    /* Show as single column list for print like character equipment */
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .stash-grid .equipment-card {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    grid-template-areas: "icon info" !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    align-items: flex-start !important;
+    margin-bottom: 2px !important;
+  }
+
+  .stash-grid .equipment-info {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .stash-grid .equipment-icon {
+    font-size: 14px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   .equipment-stats,
@@ -2299,6 +2381,8 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     /* Ensure all details are visible */
     display: flex !important;
     opacity: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .stat-badge,

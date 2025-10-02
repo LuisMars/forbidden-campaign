@@ -35,8 +35,13 @@
         }
     </div>
 
-    <StatsDisplay Stats="@MainStats" />
-    <StatsDisplay Stats="@CalculatedStats" />
+    <div class="character-stats-wrapper">
+        <StatsDisplay Stats="@MainStats" />
+        <StatsDisplay Stats="@CalculatedStats" />
+        <div class="print-only-stats">
+            <StatsDisplay Stats="@SlotsStats" />
+        </div>
+    </div>
 
     @if (Character.Equipment.Any())
     {
@@ -145,6 +150,11 @@
         new StatItem { Value = Character.Stats.HP.ToString(), Label = "HP" },
         new StatItem { Value = TotalArmorValue.ToString(), Label = "AV" },
         new StatItem { Value = Character.Stats.Movement.ToString(), Label = "MOV" }
+    };
+
+    private List<StatItem> SlotsStats => new()
+    {
+        new StatItem { Value = $"{UsedSlots}/{Character.Stats.EquipmentSlots}", Label = "SLOTS" }
     };
 
     private int TotalArmorValue => Character.Equipment.Where(e => e.IsArmor).Sum(e => e.ArmorValue);
