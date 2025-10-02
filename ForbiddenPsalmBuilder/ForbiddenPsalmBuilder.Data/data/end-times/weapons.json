@@ -302,8 +302,5 @@
       "iconClass": "fas fa-sack-dollar"
     }
   ],
-  "notes": {
-    "ammo": "All ranged weapons come with 5 Ammo except Cannon (which comes with 1 Cannonball). Additional Ammo can be purchased in Equipment for 1G per stack (5 shots). Cannonballs cost 2G each.",
-    "slots": "Each crew member has 5 + Strength slots for Equipment. Weapons, Items, Armor, Artefacts, and Ammo each take up one Equipment slot unless otherwise stated."
-  }
+  "notes": "All ranged weapons come with 5 Ammo except Cannon (which comes with 1 Cannonball). Additional Ammo can be purchased in Equipment for 1G per stack (5 shots). Cannonballs cost 2G each. Each crew member has 5 + Strength slots for Equipment. Weapons, Items, Armor, Artefacts, and Ammo each take up one Equipment slot unless otherwise stated."
 }

@@ -490,6 +490,17 @@ body.modal-open {
   border: none;
 }
 
+.warband-header .stats-container {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.warband-header .waband-name,
+.warband-header .warband-name {
+  width: 100%;
+  flex-grow: 1;
+}
+
 .stat-item {
   flex: 1;
   display: flex;
@@ -2519,7 +2530,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--color-text-secondary);
-  font-family: var(--font-family-primary);
+  font-family: var(--font-primary);
   font-size: var(--font-size-base);
   cursor: pointer;
   white-space: nowrap;
@@ -2564,7 +2575,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   background: var(--color-container);
   border: var(--border-width) solid var(--color-border);
   color: var(--color-text-secondary);
-  font-family: var(--font-family-primary);
+  font-family: var(--font-primary);
   font-size: var(--font-size-small);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -2603,7 +2614,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   background: var(--color-container);
   border: var(--border-width) solid var(--color-border);
   color: var(--color-text-primary);
-  font-family: var(--font-family-primary);
+  font-family: var(--font-primary);
   font-size: var(--font-size-base);
 }
 
@@ -2947,6 +2958,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 /* Section Header with Bar */
 .section-header-with-bar {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: var(--spacing-one);
   margin-bottom: var(--spacing-one);

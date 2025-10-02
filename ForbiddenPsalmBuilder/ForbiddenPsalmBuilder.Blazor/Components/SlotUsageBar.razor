@@ -20,10 +20,10 @@
     [Parameter, EditorRequired]
     public int TotalSlots { get; set; }
 
-    private double GetFillPercentage()
+    private int GetFillPercentage()
     {
         if (TotalSlots == 0) return 0;
-        var percentage = (double)UsedSlots / TotalSlots * 100;
+        var percentage = (int)Math.Round((double)UsedSlots / TotalSlots * 100);
         return Math.Min(percentage, 100); // Cap at 100% for visual display
     }
 
