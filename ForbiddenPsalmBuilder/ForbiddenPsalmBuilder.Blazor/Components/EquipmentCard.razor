@@ -86,7 +86,20 @@
         }
     </div>
 
-    @if (ShowPrice && Price.HasValue)
+    @if (CompactMode && (Price.HasValue || Equipment.Cost > 0))
+    {
+        <div class="equipment-price">
+            @if (Price.HasValue)
+            {
+                <text>@Price.Value@CurrencySymbol</text>
+            }
+            else if (Equipment.Cost > 0)
+            {
+                <text>@Equipment.Cost G</text>
+            }
+        </div>
+    }
+    else if (!CompactMode && ShowPrice && Price.HasValue)
     {
         <div class="equipment-price">
             @if (Price.Value > 0)
@@ -129,7 +142,7 @@
             @if (OnAssign.HasDelegate)
             {
                 <button type="button" @onclick="HandleAssign" class="button-small" title="Assign to character">
-                    <i class="ra ra-person"></i>
+                    <i class="fas fa-user"></i>
                     Assign
                 </button>
             }

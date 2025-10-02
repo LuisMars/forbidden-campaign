@@ -110,16 +110,18 @@
                         </button>
                     </div>
 
-                    <StatsDisplay Stats="@GetAllStats()" />
+                    <StatsDisplay Stats="@GetMainStats()" />
+                    <StatsDisplay Stats="@GetCalculatedStats()" />
                 </section>
 
                 <!-- Equipment -->
                 <section class="edit-section">
-                    <h2>Equipment</h2>
-
-                    <SlotUsageBar
-                        UsedSlots="@GetUsedEquipmentSlots()"
-                        TotalSlots="@GetTotalEquipmentSlots()" />
+                    <div class="section-header-with-bar">
+                        <h2>Equipment</h2>
+                        <SlotUsageBar
+                            UsedSlots="@GetUsedEquipmentSlots()"
+                            TotalSlots="@GetTotalEquipmentSlots()" />
+                    </div>
 
                     @if (character != null && character.Equipment.Any())
                     {
@@ -129,7 +131,8 @@
                                 <EquipmentCard
                                     Equipment="equipment"
                                     ShowActions="true"
-                                    OnRemove="() => RemoveEquipment(equipment.Id)" />
+                                    OnRemove="() => RemoveEquipment(equipment.Id)"
+                                    OnSell="@(e => SellEquipment(e))" />
                             }
                         </div>
                     }
@@ -220,19 +223,38 @@
                 AllowNone="true"
                 ShowPricingInfo="true" />
 
+            @if (selectedTrader?.HasLimitedInventory == true)
+            {
+                <div class="merchant-roll-section">
+                    <button type="button" @onclick="RollMerchantInventory" class="button">
+                        <i class="fas fa-dice"></i> Roll Merchant Inventory
+                    </button>
+                    @if (merchantInventoryIds.Any())
+                    {
+                        <span class="merchant-inventory-count">
+                            (@merchantInventoryIds.Count items available)
+                        </span>
+                        <button type="button" @onclick="ClearMerchantInventory" class="button-small">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    }
+                </div>
+            }
+
             <EquipmentSelector
-                Weapons="@allWeapons"
-                Armors="@allArmors"
-                Items="@allItems"
+                Weapons="@GetFilteredWeapons()"
+                Armors="@GetFilteredArmors()"
+                Items="@GetFilteredItems()"
                 ShowTabs="true"
                 ShowSearch="true"
                 ShowPrice="@(!string.IsNullOrEmpty(selectedTraderId))"
                 ShowActions="true"
                 UseCompactMode="true"
                 CurrencySymbol="G"
+                WarbandMoney="@warband?.Gold"
                 PriceCalculator="@CalculateBuyPrice"
                 DisabledEquipmentIds="@GetUnaffordableEquipmentIds()"
-                DisableBuyButton="@(string.IsNullOrEmpty(selectedTraderId))"
+                DisableBuyButton="@(string.IsNullOrEmpty(selectedTraderId) || (selectedTrader?.HasLimitedInventory == true && !merchantInventoryIds.Any()))"
                 OnBuy="@_handleBuyEquipment"
                 OnAssign="@AddNewEquipment" />
         </Modal>
@@ -263,6 +285,7 @@
     private string? selectedTraderId;
     private Trader? selectedTrader;
     private EventCallback<Equipment> _handleBuyEquipment;
+    private List<string> merchantInventoryIds = new();
 
     private bool IsNewCharacter => string.IsNullOrEmpty(CharacterId) || CharacterId == "new";
 
@@ -499,7 +522,7 @@
         };
     }
 
-    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetAllStats()
+    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetMainStats()
     {
         return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
         {
@@ -522,12 +545,16 @@
             {
                 Value = editCharacterDto.Toughness.ToString(),
                 Label = "TGH"
-            },
-            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
-            {
-                Value = editCharacterDto.Movement.ToString(),
-                Label = "MOV"
-            },
+            }
+        };
+    }
+
+    private List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem> GetCalculatedStats()
+    {
+        var totalArmor = character?.Equipment.Where(e => e.IsArmor).Sum(e => e.ArmorValue) ?? 0;
+
+        return new List<ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem>
+        {
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
                 Value = editCharacterDto.HP.ToString(),
@@ -535,8 +562,13 @@
             },
             new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
             {
-                Value = editCharacterDto.EquipmentSlots.ToString(),
-                Label = "SLOTS"
+                Value = totalArmor.ToString(),
+                Label = "AV"
+            },
+            new ForbiddenPsalmBuilder.Components.StatsDisplay.StatItem
+            {
+                Value = editCharacterDto.Movement.ToString(),
+                Label = "MOV"
             }
         };
     }
@@ -722,6 +754,72 @@
         selectedTrader = !string.IsNullOrEmpty(traderId) && warband != null
             ? await TraderService.GetTraderByIdAsync(traderId, warband.GameVariant)
             : null;
+
+        // Don't clear merchant inventory - it persists until manually cleared or rerolled
+    }
+
+    private void RollMerchantInventory()
+    {
+        if (selectedTrader == null || !selectedTrader.HasLimitedInventory) return;
+
+        merchantInventoryIds.Clear();
+        var random = new Random();
+
+        // Roll weapons (max 3)
+        var weaponCount = selectedTrader.MaxWeapons ?? 0;
+        if (weaponCount > 0 && allWeapons.Any())
+        {
+            var selectedWeapons = allWeapons.OrderBy(x => random.Next()).Take(weaponCount);
+            merchantInventoryIds.AddRange(selectedWeapons.Select(w => w.Id));
+        }
+
+        // Roll armor (max 1)
+        var armorCount = selectedTrader.MaxArmor ?? 0;
+        if (armorCount > 0 && allArmors.Any())
+        {
+            var selectedArmors = allArmors.OrderBy(x => random.Next()).Take(armorCount);
+            merchantInventoryIds.AddRange(selectedArmors.Select(a => a.Id));
+        }
+
+        // Roll items/equipment (max 1)
+        var itemCount = selectedTrader.MaxEquipment ?? 0;
+        if (itemCount > 0 && allItems.Any())
+        {
+            var selectedItems = allItems.OrderBy(x => random.Next()).Take(itemCount);
+            merchantInventoryIds.AddRange(selectedItems.Select(i => i.Id));
+        }
+
+        StateHasChanged();
+    }
+
+    private void ClearMerchantInventory()
+    {
+        merchantInventoryIds.Clear();
+        StateHasChanged();
+    }
+
+    private List<Weapon> GetFilteredWeapons()
+    {
+        if (selectedTrader?.HasLimitedInventory != true || !merchantInventoryIds.Any())
+            return allWeapons;
+
+        return allWeapons.Where(w => merchantInventoryIds.Contains(w.Id)).ToList();
+    }
+
+    private List<Armor> GetFilteredArmors()
+    {
+        if (selectedTrader?.HasLimitedInventory != true || !merchantInventoryIds.Any())
+            return allArmors;
+
+        return allArmors.Where(a => merchantInventoryIds.Contains(a.Id)).ToList();
+    }
+
+    private List<Item> GetFilteredItems()
+    {
+        if (selectedTrader?.HasLimitedInventory != true || !merchantInventoryIds.Any())
+            return allItems;
+
+        return allItems.Where(i => merchantInventoryIds.Contains(i.Id)).ToList();
     }
 
     private int? CalculateBuyPrice(Equipment equipment)
@@ -803,6 +901,33 @@
         {
             Logger.LogError(ex, "Failed to remove equipment");
             validationErrors.Add($"Failed to remove equipment: {ex.Message}");
+        }
+    }
+
+    private async Task SellEquipment(Equipment equipment)
+    {
+        if (character == null || warband == null || equipment == null) return;
+
+        var sellPrice = equipment.Cost / 2;
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Sell {equipment.Name} for {sellPrice} Gold?" });
+        if (!confirmed) return;
+
+        try
+        {
+            // Remove equipment from character
+            await StateService.RemoveEquipmentFromCharacterAsync(WarbandId, character.Id, equipment.Id);
+
+            // Add gold to warband
+            warband.Gold += sellPrice;
+            await StateService.UpdateWarbandAsync(warband);
+
+            // Refresh data
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to sell equipment");
+            validationErrors.Add($"Failed to sell equipment: {ex.Message}");
         }
     }
 }

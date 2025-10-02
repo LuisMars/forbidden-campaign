@@ -79,7 +79,18 @@ public class EquipmentService
             Slots = dto.Slots,
             TechLevel = dto.TechLevel,
             IconClass = dto.IconClass ?? "ra ra-sword"
-        }).ToList();
+        })
+        .OrderBy(w => GetRollRangeStart(dtos.FirstOrDefault(d => d.Name == w.Name)?.RollRange))
+        .ToList();
+    }
+
+    private int GetRollRangeStart(string? rollRange)
+    {
+        if (string.IsNullOrEmpty(rollRange))
+            return int.MaxValue; // Items without roll range go to the end
+
+        var parts = rollRange.Split('-');
+        return int.TryParse(parts[0], out var start) ? start : int.MaxValue;
     }
 
     public async Task<Weapon?> GetWeaponByIdAsync(string id, string gameVariant)

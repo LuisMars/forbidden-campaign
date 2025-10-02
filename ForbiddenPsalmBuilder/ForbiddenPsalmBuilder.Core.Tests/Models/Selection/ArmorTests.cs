@@ -29,7 +29,7 @@ public class ArmorTests
             Cost = 2,
             Slots = 1,
             Category = "armor",
-            IconClass = "ra ra-light-armor"
+            IconClass = "ra ra-vest"
         };
 
         // Assert
@@ -41,7 +41,7 @@ public class ArmorTests
         Assert.Equal(2, armor.Cost);
         Assert.Equal(1, armor.Slots);
         Assert.Equal("armor", armor.Category);
-        Assert.Equal("ra ra-light-armor", armor.IconClass);
+        Assert.Equal("ra ra-vest", armor.IconClass);
     }
 
     [Fact]

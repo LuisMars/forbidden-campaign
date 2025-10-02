@@ -59,7 +59,7 @@
                         Stash
                     </button>
                     <button @onclick="AddCharacter" disabled="@(!warband.CanAddMember)">
-                        <i class="ra ra-person"></i>
+                        <i class="fas fa-user"></i>
                         Add Member
                     </button>
                     <button @onclick="PrintWarband">
@@ -77,36 +77,6 @@
                 </h1>
                 <StatsDisplay Stats="@GetWarbandStats()" />
             </div>
-        </section>
-        <!-- Warband Members -->
-        <section>
-            @if (warband.Members.Any())
-            {
-                <div class="character-grid">
-                    @foreach (var character in warband.Members)
-                    {
-                        <CharacterCard
-                            Character="@character"
-                            SpecialClassIcon="@GetSpecialClassIcon(character.SpecialClassId)"
-                            OnEdit="@(() => EditCharacter(character.Id))"
-                            OnDelete="@(() => RemoveCharacter(character.Id))"
-                            OnEquipmentRemove="@(equipment => RemoveEquipmentFromCharacter(character.Id, equipment))"
-                            OnEquipmentSell="@(equipment => SellEquipmentFromCharacter(character.Id, equipment))" />
-                    }
-                </div>
-            }
-            else
-            {
-                <section>
-                    <i class="ra ra-muscle-up"></i>
-                    <p>No members in this warband yet.</p>
-                    <p>Add your first character to get started!</p>
-                    <button @onclick="AddCharacter">
-                        <i class="ra ra-person"></i>
-                        Add First Member
-                    </button>
-                </section>
-            }
         </section>
 
         <!-- Warband Stash -->
@@ -132,6 +102,35 @@
                 </div>
             </section>
         }
+
+        <!-- Warband Members -->
+        <section>
+            @if (warband.Members.Any())
+            {
+                <div class="character-grid">
+                    @foreach (var character in warband.Members)
+                    {
+                        <CharacterCard
+                            Character="@character"
+                            SpecialClassIcon="@GetSpecialClassIcon(character.SpecialClassId)"
+                            OnEdit="@(() => EditCharacter(character.Id))"
+                            OnDelete="@(() => RemoveCharacter(character.Id))" />
+                    }
+                </div>
+            }
+            else
+            {
+                <section>
+                    <i class="ra ra-muscle-up"></i>
+                    <p>No members in this warband yet.</p>
+                    <p>Add your first character to get started!</p>
+                    <button @onclick="AddCharacter">
+                        <i class="fas fa-user"></i>
+                        Add First Member
+                    </button>
+                </section>
+            }
+        </section>
     }
     <!-- Edit Warband Info Modal -->
     <Modal
@@ -353,62 +352,6 @@
         }
     }
 
-    private async Task RemoveEquipmentFromCharacter(string characterId, Equipment equipment)
-    {
-        if (warband == null) return;
-
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Move {equipment.Name} to warband stash?" });
-        if (!confirmed) return;
-
-        try
-        {
-            var character = warband.Members.FirstOrDefault(c => c.Id == characterId);
-            if (character == null) return;
-
-            // Remove equipment from character
-            character.Equipment.Remove(equipment);
-
-            // Add equipment to warband stash
-            warband.Stash.Add(equipment);
-
-            // Update the warband
-            await StateService.UpdateWarbandAsync(warband);
-            await LoadWarband(); // Refresh the page
-        }
-        catch (Exception ex)
-        {
-            await StateService.SetErrorAsync($"Failed to remove equipment: {ex.Message}");
-        }
-    }
-
-    private async Task SellEquipmentFromCharacter(string characterId, Equipment equipment)
-    {
-        if (warband == null) return;
-
-        var sellPrice = equipment.Cost / 2;
-        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { $"Sell {equipment.Name} for {sellPrice}{GetCurrencySymbol()}?" });
-        if (!confirmed) return;
-
-        try
-        {
-            var character = warband.Members.FirstOrDefault(c => c.Id == characterId);
-            if (character == null) return;
-
-            // Remove equipment from character
-            character.Equipment.Remove(equipment);
-
-            // Add gold to warband
-            warband.Gold += sellPrice;
-
-            // Update the warband
-            await StateService.UpdateWarbandAsync(warband);
-            await LoadWarband(); // Refresh the page
-        }
-        catch (Exception ex)
-        {
-            await StateService.SetErrorAsync($"Failed to sell equipment: {ex.Message}");
-        }
-    }
 
     private bool IsValidForm()
     {

@@ -2,7 +2,7 @@
 @import url('https://unpkg.com/normalize.css@8.0.1/normalize.css');
 
 /* Import Forbidden Psalm Gothic Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@100..900&family=IM+Fell+English:ital,wght@0,400;1,400&family=New+Rocker&family=Germania+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@100..900&family=IM+Fell+English:ital,wght@0,400;1,400&family=New+Rocker&family=Germania+One&family=Special+Elite&display=swap');
 
 * {
   margin: 0;
@@ -24,12 +24,15 @@
   --color-border: rgba(255, 255, 255, 0.1);
   --color-text: #ffffff;
   --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-tag-bg: rgba(213, 138, 42, 0.2);
+  --color-tag-border: rgba(213, 138, 42, 0.5);
 
   /* Fonts */
   --font-primary: 'Grenze Gotisch', serif;
   --font-secondary: 'IM Fell English', serif;
   --font-accent: 'New Rocker', cursive;
   --font-display: 'Germania One', cursive;
+  --font-monospace: 'Special Elite', cursive;
 
   /* Spacing */
   --spacing-quarter: 0.25rem;
@@ -596,6 +599,17 @@ body.modal-open {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-one);
+}
+
+.stat-array-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-half);
+}
+
+.stat-array-header h3 {
+  margin: 0;
 }
 
 .array-options {
@@ -1451,6 +1465,26 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   margin-right: var(--spacing-half);
 }
 
+/* Character Tags */
+.character-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-half);
+  margin-top: var(--spacing-half);
+}
+
+.character-tags .tag {
+  display: inline-block;
+  padding: var(--spacing-quarter) var(--spacing-half);
+  background: var(--color-tag-bg);
+  border: var(--border-width) solid var(--color-tag-border);
+  font-family: var(--font-monospace);
+  font-size: var(--font-size-small);
+  color: var(--color-accent-1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Clickable Name */
 .clickable-name {
   cursor: pointer;
@@ -1541,16 +1575,73 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   .character-card {
     border: 2px solid var(--color-black) !important;
     page-break-inside: avoid;
+    padding: 8px !important;
+    gap: 0 !important;
   }
 
   .character-card .clickable-name {
     cursor: default;
   }
 
+  .character-card > .horizontal.space {
+    order: -3 !important;
+  }
+
+  .character-card h3 {
+    margin: 0 0 4px 0 !important;
+    font-size: 16px !important;
+  }
+
+  .character-card .stats-container {
+    gap: 4px !important;
+    margin: 2px 0 !important;
+    flex-direction: row !important;
+    display: flex !important;
+    order: -2 !important;
+  }
+
+  .character-card .stat-item {
+    padding: 2px 6px !important;
+    flex-direction: column !important;
+    display: flex !important;
+  }
+
+  .character-card .stat-value {
+    font-size: 16px !important;
+  }
+
+  .character-card .stat-label {
+    font-size: 11px !important;
+  }
+
+  .character-card hr {
+    display: none !important;
+  }
+
+  .character-card small {
+    display: none !important;
+  }
+
+  .character-card .character-equipment-grid {
+    order: -1 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .character-card .character-tags {
+    order: 999 !important;
+    margin-top: 4px !important;
+  }
+
+  .character-card .character-tags .tag {
+    background: #f5f5f5 !important;
+    border-color: #333 !important;
+    color: #000 !important;
+  }
+
   .character-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-one);
+    gap: 8px;
   }
 }
 
@@ -1779,8 +1870,9 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--spacing-one);
-  padding: var(--spacing-half) var(--spacing-one);
+  gap: 4px;
+  padding: 2px 4px;
+  margin: 0;
   grid-template-columns: unset;
   grid-template-areas: unset;
   cursor: pointer;
@@ -1792,8 +1884,13 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 }
 
 .equipment-card.compact .equipment-icon {
-  font-size: 1.5rem;
+  font-size: 1rem;
   margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
 }
 
 .equipment-card.compact .equipment-info {
@@ -1801,12 +1898,18 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 }
 
 .equipment-card.compact .equipment-name {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-small);
   margin: 0;
+  padding: 0;
+  line-height: 1.2;
 }
 
 .equipment-card.compact .equipment-price {
-  margin-left: auto;
+  margin: 0 0 0 auto;
+  padding: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 /* Equipment List (for compact mode) */
@@ -1814,6 +1917,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin: 0;
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--border-radius);
   overflow: hidden;
@@ -1835,7 +1939,6 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   grid-template-columns: 1fr 400px;
   grid-template-rows: auto auto auto 1fr;
   gap: var(--spacing-one);
-  height: 600px;
 }
 
 .equipment-selector.with-side-panel > .equipment-tabs {
@@ -1851,7 +1954,6 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 }
 
 .equipment-selector.with-side-panel > .equipment-list {
-  overflow-y: auto;
   height: 100%;
   grid-column: 1;
   grid-row: 4;
@@ -1871,8 +1973,9 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   border-radius: var(--border-radius);
   background: var(--color-bg-secondary);
   padding: var(--spacing-one);
-  height: 100%;
-  overflow-y: auto;
+  height: fit-content;
+  position: sticky;
+  top: var(--spacing-one);
 }
 
 .side-panel-header {
@@ -1882,6 +1985,18 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   align-items: center;
   padding-bottom: var(--spacing-one);
   border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.warband-money {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-half);
+  padding: var(--spacing-half) 0;
+  margin-bottom: var(--spacing-half);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
 }
 
 .side-panel-header h3 {
@@ -1951,14 +2066,14 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
 .side-panel-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: var(--spacing-half);
   padding-top: var(--spacing-one);
   border-top: var(--border-width) solid var(--color-border);
 }
 
 .side-panel-actions button {
-  width: 100%;
+  flex: 1;
   justify-content: center;
 }
 
@@ -2102,21 +2217,25 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     break-inside: avoid;
     page-break-inside: avoid;
     border: 1px solid #333;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
   }
 
   .character-equipment-grid {
-    /* Show as grid in print with full details */
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px;
+    /* Show as single column list in print with full details */
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    margin-top: 4px !important;
   }
 
   .character-equipment-grid .equipment-card {
-    /* Reset to full card layout for print */
+    /* One item per line with full layout for print */
     display: grid !important;
     grid-template-columns: auto 1fr !important;
     grid-template-areas: "icon info" !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    align-items: flex-start !important;
   }
 
   .character-equipment-grid .equipment-properties,
@@ -2124,17 +2243,47 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   .character-equipment-grid .equipment-effect {
     /* Show all details in print */
     display: flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .character-equipment-grid .equipment-name {
     /* Remove truncation in print */
     white-space: normal !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .character-equipment-grid .equipment-stats {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .character-equipment-grid .equipment-actions {
     /* Hide actions in print */
     display: none !important;
+  }
+
+  .character-equipment-grid .equipment-info {
+    /* Force horizontal layout in print */
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .character-equipment-grid .equipment-icon {
+    font-size: 14px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .stash-grid {
@@ -2432,8 +2581,8 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 .equipment-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-one);
-  margin: var(--spacing-two) 0;
+  gap: 0;
+  margin: 0;
 }
 
 .no-equipment-message {
@@ -2696,4 +2845,35 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
 .error-banner button:hover {
   opacity: 0.7;
+}
+
+/* Merchant Roll Section */
+.merchant-roll-section {
+  margin: var(--spacing-one) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-one);
+}
+
+.merchant-inventory-count {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+/* Section Header with Bar */
+.section-header-with-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-one);
+  margin-bottom: var(--spacing-one);
+}
+
+.section-header-with-bar h2 {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.section-header-with-bar .slot-usage-bar {
+  flex: 1;
+  min-width: 0;
 }

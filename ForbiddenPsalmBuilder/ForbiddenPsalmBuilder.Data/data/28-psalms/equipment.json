@@ -49,7 +49,7 @@
       "cost": 2,
       "slots": 1,
       "roll": null,
-      "iconClass": "ra ra-arrow"
+      "iconClass": "ra ra-arrow-cluster"
     },
     {
       "type": "Bullets",
@@ -73,7 +73,7 @@
       "cost": 5,
       "slots": 1,
       "roll": null,
-      "iconClass": "ra ra-flame"
+      "iconClass": "ra ra-flame-symbol"
     },
     {
       "type": "Laser",
@@ -81,7 +81,7 @@
       "cost": 12,
       "slots": 1,
       "roll": null,
-      "iconClass": "ra ra-laser-blast"
+      "iconClass": "ra ra-lightning"
     }
   ]
 }

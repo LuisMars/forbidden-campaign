@@ -7,6 +7,6 @@
     "buyMultiplier": 0.5,
     "sellMultiplier": 1.0,
     "hasLimitedInventory": false,
-    "iconClass": "ra ra-wooden-crate"
+    "iconClass": "ra ra-wooden-sign"
   }
 ]

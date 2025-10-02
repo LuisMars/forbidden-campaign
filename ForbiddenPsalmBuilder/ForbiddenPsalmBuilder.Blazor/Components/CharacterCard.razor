@@ -38,13 +38,6 @@
     <StatsDisplay Stats="@MainStats" />
     <StatsDisplay Stats="@CalculatedStats" />
 
-    @if (!string.IsNullOrEmpty(Character.SpecialClassId))
-    {
-        <div class="character-tags">
-            <span class="tag">@Character.SpecialClassId</span>
-        </div>
-    }
-
     @if (Character.Equipment.Any())
     {
         <hr />
@@ -55,7 +48,7 @@
                 <EquipmentCard
                     Equipment="equipment"
                     CompactMode="false"
-                    ShowActions="@(!PrintMode)"
+                    ShowActions="@(!PrintMode && (OnEquipmentRemove.HasDelegate || OnEquipmentSell.HasDelegate))"
                     ShowPrice="false"
                     OnRemove="OnEquipmentRemove"
                     OnSell="OnEquipmentSell" />
@@ -72,6 +65,13 @@
             {
                 <span class="injury-item">@injury</span>
             }
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Character.SpecialClassId))
+    {
+        <div class="character-tags">
+            <span class="tag">@Character.SpecialClassId</span>
         </div>
     }
 
@@ -143,9 +143,8 @@
     private List<StatItem> CalculatedStats => new()
     {
         new StatItem { Value = Character.Stats.HP.ToString(), Label = "HP" },
-        new StatItem { Value = TotalArmorValue.ToString(), Label = "ARMOR" },
-        new StatItem { Value = Character.Stats.Movement.ToString(), Label = "MOV" },
-        new StatItem { Value = $"{UsedSlots}/{Character.Stats.EquipmentSlots}", Label = "SLOTS" }
+        new StatItem { Value = TotalArmorValue.ToString(), Label = "AV" },
+        new StatItem { Value = Character.Stats.Movement.ToString(), Label = "MOV" }
     };
 
     private int TotalArmorValue => Character.Equipment.Where(e => e.IsArmor).Sum(e => e.ArmorValue);

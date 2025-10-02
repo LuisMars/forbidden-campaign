@@ -38,7 +38,7 @@ public class WeaponDto
     public string Stat { get; set; } = string.Empty;
 
     [JsonPropertyName("cost")]
-    public int Cost { get; set; }
+    public int? Cost { get; set; }
 
     [JsonPropertyName("slots")]
     public int Slots { get; set; } = 1;

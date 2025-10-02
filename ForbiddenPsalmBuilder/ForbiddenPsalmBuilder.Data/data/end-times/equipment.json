@@ -64,7 +64,7 @@
       "cost": 3,
       "slots": 1,
       "roll": 8,
-      "iconClass": "fas fa-sack"
+      "iconClass": "fas fa-sack-dollar"
     },
     {
       "name": "Whisky",

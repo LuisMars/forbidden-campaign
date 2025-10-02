@@ -19,7 +19,7 @@
     "slots": 1,
     "effects": [],
     "restrictions": [],
-    "iconClass": "ra ra-chest-armor"
+    "iconClass": "ra ra-circular-shield"
   },
   {
     "name": "Heavy Armor",
@@ -35,7 +35,7 @@
         "excludedClasses": ["spellcaster"]
       }
     ],
-    "iconClass": "ra ra-heavy-armor"
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Helm",
@@ -85,7 +85,7 @@
       }
     ],
     "restrictions": [],
-    "iconClass": "ra ra-tower-shield"
+    "iconClass": "ra ra-tower"
   },
   {
     "name": "Full Plate",
@@ -107,7 +107,7 @@
         }
       }
     ],
-    "iconClass": "ra ra-heavy-armor"
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Pet Armor",

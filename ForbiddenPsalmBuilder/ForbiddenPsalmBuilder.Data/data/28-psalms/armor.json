@@ -19,7 +19,7 @@
     "slots": 1,
     "effects": [],
     "restrictions": [],
-    "iconClass": "ra ra-chest-armor"
+    "iconClass": "ra ra-circular-shield"
   },
   {
     "name": "Heavy",
@@ -30,7 +30,7 @@
     "slots": 1,
     "effects": [],
     "restrictions": [],
-    "iconClass": "ra ra-heavy-armor"
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Power/Plate",
@@ -47,7 +47,7 @@
         "requiredValue": 2
       }
     ],
-    "iconClass": "ra ra-heavy-armor"
+    "iconClass": "ra ra-vest"
   },
   {
     "name": "Homemade",

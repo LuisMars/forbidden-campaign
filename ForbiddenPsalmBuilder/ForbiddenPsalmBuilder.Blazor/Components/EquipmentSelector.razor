@@ -267,6 +267,14 @@
 
             @if (ShowActions)
             {
+                @if (WarbandMoney.HasValue)
+                {
+                    <div class="warband-money">
+                        <span>Available:</span>
+                        <span><i class="fas fa-coins"></i> @WarbandMoney.Value G</span>
+                    </div>
+                }
+
                 <div class="side-panel-actions">
                     @if (OnBuy.HasDelegate)
                     {
@@ -300,7 +308,7 @@
                     {
                         <button type="button" @onclick="() => HandleAssign(selectedEquipmentForPanel)"
                                 class="button-small">
-                            <i class="ra ra-person"></i>
+                            <i class="fas fa-user"></i>
                             Assign
                         </button>
                     }
@@ -370,6 +378,9 @@
 
     [Parameter]
     public bool DisableBuyButton { get; set; } = false;
+
+    [Parameter]
+    public int? WarbandMoney { get; set; }
 
     private string activeTab = "all";
     private string searchQuery = string.Empty;

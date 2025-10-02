@@ -8,7 +8,7 @@
     "sellMultiplier": 1.0,
     "hasLimitedInventory": false,
     "sellsRelics": true,
-    "iconClass": "ra ra-wizard-staff"
+    "iconClass": "ra ra-sword"
   },
   {
     "id": "hogs-head-inn",

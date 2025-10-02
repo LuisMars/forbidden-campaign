@@ -31,7 +31,7 @@ public class WeaponTests
             Cost = 1,
             Slots = 1,
             Category = "oneHandedMelee",
-            IconClass = "ra ra-dagger"
+            IconClass = "ra ra-daggers"
         };
 
         // Assert
@@ -46,7 +46,7 @@ public class WeaponTests
         Assert.Equal(1, weapon.Cost);
         Assert.Equal(1, weapon.Slots);
         Assert.Equal("oneHandedMelee", weapon.Category);
-        Assert.Equal("ra ra-dagger", weapon.IconClass);
+        Assert.Equal("ra ra-daggers", weapon.IconClass);
     }
 
     [Fact]

@@ -386,16 +386,17 @@
     private async Task SellEquipment(Equipment equipment)
     {
         Logger.LogInformation("SellEquipment called for {EquipmentName}, WarbandId: {WarbandId}, TraderId: {TraderId}", equipment?.Name, Warband?.Id, selectedTraderId);
-        if (Warband == null || string.IsNullOrEmpty(selectedTraderId))
+        if (Warband == null || equipment == null || string.IsNullOrEmpty(selectedTraderId))
         {
-            Logger.LogWarning("SellEquipment aborted - Warband is null: {WarbandNull}, TraderId empty: {TraderIdEmpty}", Warband == null, string.IsNullOrEmpty(selectedTraderId));
+            Logger.LogWarning("SellEquipment aborted - Warband is null: {WarbandNull}, Equipment is null: {EquipmentNull}, TraderId empty: {TraderIdEmpty}",
+                Warband == null, equipment == null, string.IsNullOrEmpty(selectedTraderId));
             return;
         }
 
         try
         {
             Logger.LogInformation("Calling StateService.SellEquipmentAsync");
-            await StateService.SellEquipmentAsync(Warband.Id, equipment.Id, selectedTraderId);
+            await StateService.SellEquipmentAsync(Warband.Id, equipment.Id, selectedTraderId!);
             Logger.LogInformation("SellEquipmentAsync succeeded");
             await NotifyEquipmentChanged();
             ClearError();
