@@ -51,6 +51,14 @@
       "iconClass": "ra ra-bullets"
     },
     {
+      "name": "Cannonball",
+      "effect": "One shot of Cannon Ammo",
+      "cost": 2,
+      "slots": 1,
+      "shots": 1,
+      "iconClass": "ra ra-cannon-shot"
+    },
+    {
       "name": "Antidote",
       "effect": "Cures Poisoned",
       "cost": 7,

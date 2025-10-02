@@ -210,7 +210,7 @@
       "damage": "D6",
       "properties": ["Criticals disarm enemy"],
       "stat": "Agility",
-      "cost": null,
+      "cost": 1,
       "slots": 1,
       "rollRange": "78-79",
       "iconClass": "ra ra-knife"
@@ -232,7 +232,7 @@
       "damage": "D10",
       "properties": ["Criticals destroy enemy Weapons"],
       "stat": "Strength",
-      "cost": null,
+      "cost": 10,
       "slots": 2,
       "rollRange": "85-89",
       "iconClass": "ra ra-broadsword"
@@ -242,7 +242,7 @@
       "damage": "D10",
       "properties": ["Criticals destroy Shields and deal damage"],
       "stat": "Strength",
-      "cost": null,
+      "cost": 10,
       "slots": 2,
       "rollRange": "90-91",
       "iconClass": "ra ra-crossed-axes"
@@ -252,7 +252,7 @@
       "damage": "D8",
       "properties": ["Reach"],
       "stat": "Strength",
-      "cost": null,
+      "cost": 8,
       "slots": 2,
       "rollRange": "92-93",
       "iconClass": "ra ra-halberd"
@@ -262,7 +262,7 @@
       "damage": "D6",
       "properties": ["Reach", "Thrown"],
       "stat": "Agility",
-      "cost": null,
+      "cost": 8,
       "slots": 2,
       "rollRange": "94",
       "iconClass": "ra ra-spear-head"
@@ -272,7 +272,7 @@
       "damage": "D6",
       "properties": ["Thrown", "Criticals disarm enemy"],
       "stat": "Agility",
-      "cost": null,
+      "cost": 7,
       "slots": 2,
       "rollRange": "95-96",
       "iconClass": "ra ra-trident"
@@ -302,5 +302,8 @@
       "iconClass": "fas fa-sack-dollar"
     }
   ],
-  "notes": "All ranged weapons come with 5 Ammo except Cannon"
+  "notes": {
+    "ammo": "All ranged weapons come with 5 Ammo except Cannon (which comes with 1 Cannonball). Additional Ammo can be purchased in Equipment for 1G per stack (5 shots). Cannonballs cost 2G each.",
+    "slots": "Each crew member has 5 + Strength slots for Equipment. Weapons, Items, Armor, Artefacts, and Ammo each take up one Equipment slot unless otherwise stated."
+  }
 }

@@ -79,9 +79,10 @@ public class CharacterCardTests : TestContext
         Assert.Contains("MOV", calculatedStats);
         Assert.Contains("8", calculatedStats);
 
-        // Equipment Slots: 5 + strength(1) = 6
-        Assert.Contains("SLOTS", calculatedStats);
-        Assert.Contains("0/6", calculatedStats);
+        // Armor Value: 0 (no armor equipped)
+        Assert.Contains("AV", calculatedStats);
+
+        // Note: SLOTS is only visible in print mode, not in normal view
     }
 
     [Fact]
@@ -145,10 +146,9 @@ public class CharacterCardTests : TestContext
         Assert.Contains("Sword", equipmentDiv.TextContent);
         Assert.Contains("Shield", equipmentDiv.TextContent);
 
-        // Used slots should be 2
-        var statsContainers = cut.FindAll(".stats-container");
-        var calculatedStats = statsContainers[1].TextContent;
-        Assert.Contains("2/7", calculatedStats); // 5 + strength(2) = 7 slots
+        // Equipment header should show slot usage
+        var equipmentSection = cut.Find("small");
+        Assert.Contains("2/7", equipmentSection.TextContent); // 5 + strength(2) = 7 slots
     }
 
     [Fact]

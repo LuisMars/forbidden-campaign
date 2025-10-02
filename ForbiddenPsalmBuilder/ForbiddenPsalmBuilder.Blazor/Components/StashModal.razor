@@ -80,30 +80,59 @@
                         Traders="@availableTraders"
                         SelectedTraderId="@selectedTraderId"
                         SelectedTraderIdChanged="@OnTraderChanged"
-                        Label="Select Trader"
+                        Label="Select Trader (or leave empty to assign equipment)"
                         AllowNone="true"
                         ShowPricingInfo="true" />
 
-                    @if (!string.IsNullOrEmpty(selectedTraderId))
+                    @if (selectedTrader?.HasLimitedInventory == true)
+                    {
+                        <div class="merchant-roll-section">
+                            <button type="button" @onclick="RollMerchantInventory" class="button">
+                                <i class="fas fa-dice"></i> Roll Merchant Inventory
+                            </button>
+                            @if (merchantInventoryIds.Any())
+                            {
+                                <span class="merchant-inventory-count">
+                                    (@merchantInventoryIds.Count items available)
+                                </span>
+                                <button type="button" @onclick="ClearMerchantInventory" class="button-small">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    @if (string.IsNullOrEmpty(selectedTraderId))
                     {
                         <EquipmentSelector
-                            Weapons="@availableWeapons"
-                            Armors="@availableArmors"
-                            Items="@availableItems"
+                            Weapons="@GetFilteredWeapons()"
+                            Armors="@GetFilteredArmors()"
+                            Items="@GetFilteredItems()"
+                            ShowTabs="true"
+                            ShowSearch="true"
+                            ShowPrice="false"
+                            ShowActions="true"
+                            UseCompactMode="true"
+                            CurrencySymbol="@GetCurrencySymbol()"
+                            OnAssign="@_handleAssignEquipment" />
+                    }
+                    else
+                    {
+                        <EquipmentSelector
+                            Weapons="@GetFilteredWeapons()"
+                            Armors="@GetFilteredArmors()"
+                            Items="@GetFilteredItems()"
                             ShowTabs="true"
                             ShowSearch="true"
                             ShowPrice="true"
                             ShowActions="true"
+                            UseCompactMode="true"
+                            CurrencySymbol="@GetCurrencySymbol()"
+                            WarbandMoney="@Warband?.Gold"
                             PriceCalculator="@CalculateBuyPrice"
                             DisabledEquipmentIds="@GetUnaffordableEquipmentIds()"
+                            DisableBuyButton="@((selectedTrader?.HasLimitedInventory == true && !merchantInventoryIds.Any()))"
                             OnBuy="@_handleBuyEquipment" />
-                    }
-                    else
-                    {
-                        <div class="empty-state">
-                            <i class="fas fa-store"></i>
-                            <p>Select a trader to browse equipment</p>
-                        </div>
                     }
                 </div>
             }
@@ -224,11 +253,17 @@
     private bool showCharacterSelector = false;
     private Equipment? equipmentToAssign;
     private string? errorMessage;
+    private List<string> merchantInventoryIds = new();
+
+    private EventCallback<Equipment> _handleBuyEquipment;
+    private EventCallback<Equipment> _handleSellEquipment;
+    private EventCallback<Equipment> _handleAssignEquipment;
 
     protected override void OnInitialized()
     {
         _handleBuyEquipment = EventCallback.Factory.Create<Equipment>(this, BuyEquipment);
         _handleSellEquipment = EventCallback.Factory.Create<Equipment>(this, SellEquipment);
+        _handleAssignEquipment = EventCallback.Factory.Create<Equipment>(this, AssignEquipment);
     }
 
     protected override async Task OnParametersSetAsync()
@@ -345,8 +380,32 @@
         return unaffordable;
     }
 
-    private EventCallback<Equipment> _handleBuyEquipment;
-    private EventCallback<Equipment> _handleSellEquipment;
+    private async Task AssignEquipment(Equipment equipment)
+    {
+        Logger.LogInformation("AssignEquipment called for {EquipmentName}, WarbandId: {WarbandId}",
+            equipment?.Name, Warband?.Id);
+
+        if (equipment == null || Warband == null)
+        {
+            Logger.LogWarning("AssignEquipment called with null equipment or warband");
+            return;
+        }
+
+        try
+        {
+            // Add equipment directly to warband stash without cost
+            Warband.Stash.Add(equipment);
+            await StateService.UpdateWarbandAsync(Warband);
+            Logger.LogInformation("Equipment {EquipmentName} added to warband stash", equipment.Name);
+            await NotifyEquipmentChanged();
+            ClearError();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "AssignEquipment error");
+            errorMessage = ex.Message;
+        }
+    }
 
     private async Task BuyEquipment(Equipment equipment)
     {
@@ -478,5 +537,66 @@
     private void ClearError()
     {
         errorMessage = null;
+    }
+
+    private void RollMerchantInventory()
+    {
+        if (selectedTrader == null || !selectedTrader.HasLimitedInventory) return;
+
+        merchantInventoryIds.Clear();
+        var random = new Random();
+
+        // Roll weapons (max according to trader)
+        var weaponCount = selectedTrader.MaxWeapons ?? 0;
+        if (weaponCount > 0 && availableWeapons.Any())
+        {
+            var selectedWeapons = availableWeapons.OrderBy(x => random.Next()).Take(weaponCount);
+            merchantInventoryIds.AddRange(selectedWeapons.Select(w => w.Id));
+        }
+
+        // Roll armor (max according to trader)
+        var armorCount = selectedTrader.MaxArmor ?? 0;
+        if (armorCount > 0 && availableArmors.Any())
+        {
+            var selectedArmors = availableArmors.OrderBy(x => random.Next()).Take(armorCount);
+            merchantInventoryIds.AddRange(selectedArmors.Select(a => a.Id));
+        }
+
+        // Roll items (max according to trader)
+        var itemCount = selectedTrader.MaxEquipment ?? 0;
+        if (itemCount > 0 && availableItems.Any())
+        {
+            var selectedItems = availableItems.OrderBy(x => random.Next()).Take(itemCount);
+            merchantInventoryIds.AddRange(selectedItems.Select(i => i.Id));
+        }
+
+        StateHasChanged();
+    }
+
+    private void ClearMerchantInventory()
+    {
+        merchantInventoryIds.Clear();
+        StateHasChanged();
+    }
+
+    private List<Weapon> GetFilteredWeapons()
+    {
+        if (selectedTrader?.HasLimitedInventory != true || !merchantInventoryIds.Any())
+            return availableWeapons;
+        return availableWeapons.Where(w => merchantInventoryIds.Contains(w.Id)).ToList();
+    }
+
+    private List<Armor> GetFilteredArmors()
+    {
+        if (selectedTrader?.HasLimitedInventory != true || !merchantInventoryIds.Any())
+            return availableArmors;
+        return availableArmors.Where(a => merchantInventoryIds.Contains(a.Id)).ToList();
+    }
+
+    private List<Item> GetFilteredItems()
+    {
+        if (selectedTrader?.HasLimitedInventory != true || !merchantInventoryIds.Any())
+            return availableItems;
+        return availableItems.Where(i => merchantInventoryIds.Contains(i.Id)).ToList();
     }
 }
