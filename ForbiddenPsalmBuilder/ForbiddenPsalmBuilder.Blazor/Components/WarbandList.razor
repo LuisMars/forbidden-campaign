@@ -21,7 +21,7 @@
             @foreach (var warband in warbands)
             {
                 <li>
-                    <article @onclick="() => SetActiveWarband(warband.Id)">
+                    <article @onclick="() => EditWarband(warband.Id)" class="@(IsActiveWarband(warband) ? "active" : "")">
                         <h3>@warband.Name</h3>
                         <p>
                             @GetGameVariantDisplayName(warband.GameVariant) • @warband.Members.Count / 5 members • @warband.Gold @GetCurrencySymbol(warband.GameVariant)
@@ -34,13 +34,17 @@
                                 <text>Modified: @warband.LastModified.ToString("MMM dd, yyyy")</text>
                             }
                         </small>
+                        @if (IsActiveWarband(warband))
+                        {
+                            <span class="active-badge"><i class="fas fa-check-circle"></i> Active</span>
+                        }
                     </article>
                     <aside class="horizontal card-actions">
                         <button @onclick="() => EditWarband(warband.Id)"
                                 @onclick:stopPropagation="true"
                                 class="button-edit"
-                                title="Edit warband">
-                            <i class="fas fa-edit"></i>
+                                title="Manage warband">
+                            <i class="fas fa-folder-open"></i>
                         </button>
                         <button @onclick="() => ShowDeleteConfirm(warband)"
                                 @onclick:stopPropagation="true"

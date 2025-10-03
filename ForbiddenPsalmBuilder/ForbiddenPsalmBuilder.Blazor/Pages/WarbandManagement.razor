@@ -242,6 +242,9 @@
 
             if (warband != null)
             {
+                // Set this warband as active when navigating to it
+                await StateService.SetActiveWarbandAsync(WarbandId);
+
                 editWarbandDto = new EditWarbandDto
                 {
                     Id = warband.Id,

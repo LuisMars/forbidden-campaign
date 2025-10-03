@@ -42,28 +42,11 @@
       "iconClass": "ra ra-potion"
     },
     {
-      "name": "Ammo",
-      "effect": "Five shots per stack of Ammo",
-      "cost": 1,
-      "slots": 1,
-      "shots": 5,
-      "roll": 6,
-      "iconClass": "ra ra-bullets"
-    },
-    {
-      "name": "Cannonball",
-      "effect": "One shot of Cannon Ammo",
-      "cost": 2,
-      "slots": 1,
-      "shots": 1,
-      "iconClass": "ra ra-cannon-shot"
-    },
-    {
       "name": "Antidote",
       "effect": "Cures Poisoned",
       "cost": 7,
       "slots": 1,
-      "roll": 7,
+      "roll": 6,
       "iconClass": "ra ra-potion"
     },
     {
@@ -71,7 +54,7 @@
       "effect": "Special throwable item",
       "cost": 3,
       "slots": 1,
-      "roll": 8,
+      "roll": 7,
       "iconClass": "fas fa-sack-dollar"
     },
     {
@@ -79,7 +62,7 @@
       "effect": "Required for Dutch Courage flaw",
       "cost": 2,
       "slots": 1,
-      "roll": 9,
+      "roll": 8,
       "iconClass": "fas fa-wine-bottle"
     },
     {
@@ -87,8 +70,28 @@
       "effect": "Ancient writings",
       "cost": "Variable",
       "slots": 1,
-      "roll": 10,
+      "roll": 9,
       "iconClass": "ra ra-scroll-unfurled"
+    }
+  ],
+  "ammo": [
+    {
+      "type": "Ammo",
+      "effect": "Five shots per stack of Ammo",
+      "shots": 5,
+      "cost": 1,
+      "slots": 1,
+      "roll": null,
+      "iconClass": "ra ra-bullets"
+    },
+    {
+      "type": "Cannonball",
+      "effect": "One shot of Cannon Ammo",
+      "shots": 1,
+      "cost": 2,
+      "slots": 1,
+      "roll": null,
+      "iconClass": "ra ra-cannon-shot"
     }
   ]
 }

@@ -261,4 +261,65 @@ public class EquipmentServiceTests
         Assert.Equal("oneHandedMelee", dagger.Category);
         Assert.Equal("twoHandedRanged", bow.Category);
     }
+
+    [Fact]
+    public async Task GetItemsAsync_EndTimes_ShouldLoadAmmoWithTypeField()
+    {
+        // Arrange - end-times equipment structure with separate ammo array
+        var equipmentData = new Dictionary<string, List<object>>
+        {
+            ["items"] = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "Bandages",
+                    ["effect"] = "Cures Bleeding",
+                    ["cost"] = 1,
+                    ["slots"] = 1,
+                    ["roll"] = 1
+                }
+            },
+            ["ammo"] = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["type"] = "Ammo",
+                    ["effect"] = "Five shots per stack of Ammo",
+                    ["shots"] = 5,
+                    ["cost"] = 1,
+                    ["slots"] = 1
+                },
+                new Dictionary<string, object>
+                {
+                    ["type"] = "Cannonball",
+                    ["effect"] = "One shot of Cannon Ammo",
+                    ["shots"] = 1,
+                    ["cost"] = 2,
+                    ["slots"] = 1
+                }
+            }
+        };
+
+        _mockResourceService
+            .Setup(x => x.GetGameResourceAsync<Dictionary<string, List<object>>>("end-times", "equipment.json"))
+            .ReturnsAsync(equipmentData);
+
+        // Act
+        var items = await _service.GetItemsAsync("end-times");
+
+        // Assert
+        Assert.NotEmpty(items);
+
+        // Verify regular items
+        Assert.Contains(items, i => i.Name == "Bandages" && i.Type == "item");
+
+        // Verify ammo items use "type" field and have Type = "ammo"
+        var ammo = items.FirstOrDefault(i => i.Name == "Ammo");
+        Assert.NotNull(ammo);
+        Assert.Equal("ammo", ammo.Type);
+
+        var cannonball = items.FirstOrDefault(i => i.Name == "Cannonball");
+        Assert.NotNull(cannonball);
+        Assert.Equal("ammo", cannonball.Type);
+    }
 }
