@@ -962,18 +962,9 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   font-size: var(--font-size-large);
 }
 
+.edit-section,
 .edit-section-wide {
   grid-column: 1 / -1;
-}
-
-@media (max-width: 768px) {
-  .edit-sections-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .edit-section-wide {
-    grid-column: 1;
-  }
 }
 
 /* Special Classes Section */
@@ -1711,6 +1702,8 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   }
 
   main {
+    display: flex !important;
+    flex-direction: column !important;
     gap: 4px !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1725,6 +1718,23 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
   .horizontal.space {
     gap: 8px !important;
+  }
+
+  /* Reorder sections for print */
+  .no-print {
+    order: 0;
+  }
+
+  .warband-header {
+    order: 1 !important;
+  }
+
+  .warband-stash {
+    order: 2 !important;
+  }
+
+  .warband-members {
+    order: 3 !important;
   }
 }
 
@@ -1834,7 +1844,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     "icon info price actions";
   gap: var(--spacing-one);
   align-items: center;
-  padding: var(--spacing-one);
+  padding: var(--spacing-quarter);
   background: var(--color-container);
   border: var(--border-width) solid var(--color-border);
   cursor: pointer;
@@ -1897,11 +1907,11 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
 .equipment-icon {
   grid-area: icon;
-  font-size: 2rem;
+  font-size: 16px;
   color: var(--color-accent-1);
-  width: 48px;
-  height: 48px;
-  display: flex;
+  width: 24px;
+  height: 24px;
+  display: flex !important;
   align-items: center;
   justify-content: center;
 }
@@ -1909,9 +1919,11 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 .equipment-info {
   grid-area: info;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  width: 100%;
   gap: var(--spacing-half);
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .equipment-name {
@@ -1919,12 +1931,12 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   font-weight: bold;
   color: var(--color-text);
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .equipment-stats {
   display: flex;
+  flex-direction: row;
   gap: var(--spacing-half);
   flex-wrap: wrap;
 }
@@ -2800,10 +2812,6 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   padding: var(--spacing-two);
 }
 
-.equipment-actions {
-  margin-top: var(--spacing-one);
-}
-
 .modal-subtitle {
   color: var(--color-text-secondary);
   font-size: var(--font-size-small);
@@ -2894,7 +2902,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 .stash-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-one);
+  gap: var(--spacing-half);
 }
 
 .empty-state {

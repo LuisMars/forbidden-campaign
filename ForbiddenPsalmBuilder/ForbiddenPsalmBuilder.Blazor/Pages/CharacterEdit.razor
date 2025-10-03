@@ -191,7 +191,12 @@
     {
         <Modal IsVisible="true" OnClose="CloseAddFromStashModal">
             <div class="modal-header">
-                <h2>Add Equipment from Stash</h2>
+                <div class="modal-header-content">
+                    <h2>Add Equipment from Stash</h2>
+                </div>
+                <button type="button" class="modal-close-button" @onclick="CloseAddFromStashModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <EquipmentSelector
                 Equipment="@availableStashEquipment"
@@ -214,6 +219,19 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+
+            @if (validationErrors.Any())
+            {
+                <aside style="background: rgba(209, 86, 72, 0.1); border: 1px solid var(--color-accent-2); padding: var(--spacing-one); margin-bottom: var(--spacing-one);">
+                    <strong style="color: var(--color-accent-2);">⚠ Errors:</strong>
+                    <ul style="margin: var(--spacing-half) 0 0 0; padding-left: var(--spacing-one);">
+                        @foreach (var error in validationErrors)
+                        {
+                            <li style="color: var(--color-accent-2);">@error</li>
+                        }
+                    </ul>
+                </aside>
+            }
 
             <TraderSelector
                 Traders="@availableTraders"
@@ -636,6 +654,12 @@
 
         // Load available equipment from stash that this character can equip
         availableStashEquipment = await StateService.GetAvailableEquipmentForCharacterAsync(WarbandId, character.Id);
+        Logger.LogInformation("Warband stash count: {StashCount}, Available for character: {AvailableCount}",
+            warband.Stash.Count, availableStashEquipment.Count);
+        foreach (var eq in availableStashEquipment)
+        {
+            Logger.LogInformation("Available stash item: {Name} (ID: {Id})", eq.Name, eq.Id);
+        }
         showAddFromStashModal = true;
     }
 
@@ -660,6 +684,7 @@
         {
             Logger.LogError(ex, "Failed to add new equipment");
             validationErrors.Add($"Failed to add equipment: {ex.Message}");
+            StateHasChanged();
         }
     }
 
@@ -722,6 +747,7 @@
         {
             Logger.LogError(ex, "Failed to buy equipment");
             validationErrors.Add($"Failed to buy equipment: {ex.Message}");
+            StateHasChanged();
         }
     }
 
@@ -745,6 +771,7 @@
         {
             Logger.LogError(ex, "Failed to add equipment from stash");
             validationErrors.Add($"Failed to add equipment: {ex.Message}");
+            StateHasChanged();
         }
     }
 
@@ -901,6 +928,7 @@
         {
             Logger.LogError(ex, "Failed to remove equipment");
             validationErrors.Add($"Failed to remove equipment: {ex.Message}");
+            StateHasChanged();
         }
     }
 
@@ -928,6 +956,7 @@
         {
             Logger.LogError(ex, "Failed to sell equipment");
             validationErrors.Add($"Failed to sell equipment: {ex.Message}");
+            StateHasChanged();
         }
     }
 }

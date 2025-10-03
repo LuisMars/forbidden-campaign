@@ -70,7 +70,7 @@
             </div>
         </section>
         <!-- Warband Title and Stats -->
-        <section>
+        <section class="warband-header">
             <div class="horizontal space">
                 <h1 class="waband-name">
                 @warband.Name
@@ -79,32 +79,8 @@
             </div>
         </section>
 
-        <!-- Warband Stash -->
-        @if (warband.Stash.Any())
-        {
-            <section>
-                <div class="horizontal space">
-                    <h2>Warband Stash (@warband.Stash.Count items)</h2>
-                    <button @onclick="() => showStashModal = true" class="no-print">
-                        <i class="fas fa-exchange-alt"></i>
-                        Manage
-                    </button>
-                </div>
-                <div class="stash-grid">
-                    @foreach (var equipment in warband.Stash)
-                    {
-                        <EquipmentCard
-                            Equipment="equipment"
-                            CompactMode="false"
-                            ShowActions="false"
-                            ShowPrice="false" />
-                    }
-                </div>
-            </section>
-        }
-
         <!-- Warband Members -->
-        <section>
+        <section class="warband-members">
             @if (warband.Members.Any())
             {
                 <div class="character-grid">
@@ -131,6 +107,30 @@
                 </section>
             }
         </section>
+
+        <!-- Warband Stash -->
+        @if (warband.Stash.Any())
+        {
+            <section class="warband-stash">
+                <div class="horizontal space">
+                    <h2>Warband Stash (@warband.Stash.Count items)</h2>
+                    <button @onclick="() => showStashModal = true" class="no-print">
+                        <i class="fas fa-exchange-alt"></i>
+                        Manage
+                    </button>
+                </div>
+                <div class="stash-grid">
+                    @foreach (var equipment in warband.Stash)
+                    {
+                        <EquipmentCard
+                            Equipment="equipment"
+                            CompactMode="false"
+                            ShowActions="false"
+                            ShowPrice="false" />
+                    }
+                </div>
+            </section>
+        }
     }
     <!-- Edit Warband Info Modal -->
     <Modal

@@ -743,12 +743,9 @@ public class GameStateService : IGameStateService
         if (character == null)
             return new List<Equipment>();
 
-        // Get all equipment from warband stash that the character can equip
-        var availableEquipment = warband.Stash
-            .Where(equipment => character.CanEquip(equipment))
-            .ToList();
-
-        return availableEquipment;
+        // Return all equipment from warband stash (not filtered by CanEquip)
+        // The UI will show errors if items can't be equipped
+        return warband.Stash.ToList();
     }
 
     public async Task BuyEquipmentAsync(string warbandId, string equipmentId, string equipmentType, string? traderId = null)
