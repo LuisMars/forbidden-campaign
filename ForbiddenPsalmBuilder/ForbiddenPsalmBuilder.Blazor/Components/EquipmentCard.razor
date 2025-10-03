@@ -1,7 +1,7 @@
 @namespace ForbiddenPsalmBuilder.Components
 @using ForbiddenPsalmBuilder.Core.Models.Character
 
-<div class="equipment-card @(CompactMode ? "compact" : "") @(IsSelected ? "selected" : "") @(IsDisabled ? "disabled" : "")" @onclick="HandleClick">
+<div class="equipment-card @(CompactMode ? "compact" : "") @(IsSelected ? "selected" : "") @(IsDisabled ? "disabled" : "") @(Equipment.Type == "ammo" ? "ammo" : "")" @onclick="HandleClick">
     @if (!string.IsNullOrEmpty(Equipment.IconClass))
     {
         <i class="@Equipment.IconClass equipment-icon"></i>
@@ -23,7 +23,13 @@
     }
 
     <div class="equipment-info">
-        <div class="equipment-name">@Equipment.Name</div>
+        <div class="equipment-name">
+            @Equipment.Name
+            @if (Equipment.Type == "ammo")
+            {
+                <span class="ammo-badge"><i class="ra ra-bullets"></i> AMMO</span>
+            }
+        </div>
 
         @if (!CompactMode)
         {
@@ -60,6 +66,13 @@
                 {
                     <span class="stat-badge slots">
                         <i class="fas fa-box"></i> @Equipment.Slots
+                    </span>
+                }
+
+                @if (!string.IsNullOrEmpty(Equipment.AmmoType))
+                {
+                    <span class="stat-badge ammo-type">
+                        <i class="ra ra-bullets"></i> Requires: @Equipment.AmmoType
                     </span>
                 }
             </div>

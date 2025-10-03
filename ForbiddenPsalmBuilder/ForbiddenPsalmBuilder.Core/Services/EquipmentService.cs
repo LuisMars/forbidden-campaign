@@ -78,7 +78,8 @@ public class EquipmentService
             Cost = dto.Cost,
             Slots = dto.Slots,
             TechLevel = dto.TechLevel,
-            IconClass = dto.IconClass ?? "ra ra-sword"
+            IconClass = dto.IconClass ?? "ra ra-sword",
+            AmmoType = dto.AmmoType
         })
         .OrderBy(w => GetRollRangeStart(dtos.FirstOrDefault(d => d.Name == w.Name)?.RollRange))
         .ToList();
@@ -208,6 +209,24 @@ public class EquipmentService
 
         var items = await GetItemsAsync(gameVariant);
         return items.FirstOrDefault(i => i.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task<List<Item>> GetCompatibleAmmo(Weapon weapon, string gameVariant)
+    {
+        if (weapon == null || string.IsNullOrEmpty(gameVariant))
+            return new List<Item>();
+
+        // If weapon doesn't require ammo, return empty list
+        if (!weapon.RequiresAmmo)
+            return new List<Item>();
+
+        // Get all items for the game variant
+        var items = await GetItemsAsync(gameVariant);
+
+        // Filter to only ammo items that match the weapon's ammo type
+        return items
+            .Where(i => i.Type == "ammo" && i.Name.Equals(weapon.AmmoType, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
 

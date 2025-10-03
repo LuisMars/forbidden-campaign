@@ -17,8 +17,10 @@ public class Equipment
     public string? Effect { get; set; }
     public string? RollRange { get; set; }
     public string? IconClass { get; set; } // Icon class for displaying in UI
+    public string? AmmoType { get; set; } // Type of ammo this weapon requires (e.g., "Ammo", "Cannonball", "Arrows")
 
     public bool IsWeapon => Type.Equals("weapon", StringComparison.OrdinalIgnoreCase);
     public bool IsArmor => Type.Equals("armor", StringComparison.OrdinalIgnoreCase);
     public bool IsItem => Type.Equals("item", StringComparison.OrdinalIgnoreCase);
+    public bool RequiresAmmo => !string.IsNullOrEmpty(AmmoType);
 }

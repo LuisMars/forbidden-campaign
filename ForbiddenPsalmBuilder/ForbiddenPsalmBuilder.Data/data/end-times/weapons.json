@@ -8,7 +8,8 @@
       "cost": 15,
       "slots": 1,
       "rollRange": "1-3",
-      "iconClass": "ra ra-revolver"
+      "iconClass": "ra ra-revolver",
+      "ammoType": "Ammo"
     },
     {
       "name": "Sling",
@@ -18,7 +19,8 @@
       "cost": 1,
       "slots": 1,
       "rollRange": "4-7",
-      "iconClass": "ra ra-arrow-cluster"
+      "iconClass": "ra ra-arrow-cluster",
+      "ammoType": "Ammo"
     }
   ],
   "twoHandedRanged": [
@@ -30,7 +32,8 @@
       "cost": 20,
       "slots": 2,
       "rollRange": "8-9",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Ammo"
     },
     {
       "name": "Cannon",
@@ -41,7 +44,8 @@
       "slots": 2,
       "rollRange": "10",
       "special": "Does not come with ammo",
-      "iconClass": "ra ra-cannon-shot"
+      "iconClass": "ra ra-cannon-shot",
+      "ammoType": "Cannonball"
     },
     {
       "name": "Crossbow",
@@ -51,7 +55,8 @@
       "cost": 8,
       "slots": 2,
       "rollRange": "11-15",
-      "iconClass": "ra ra-crossbow"
+      "iconClass": "ra ra-crossbow",
+      "ammoType": "Ammo"
     },
     {
       "name": "Bow",
@@ -61,7 +66,8 @@
       "cost": 5,
       "slots": 2,
       "rollRange": "16-19",
-      "iconClass": "ra ra-crossbow"
+      "iconClass": "ra ra-crossbow",
+      "ammoType": "Ammo"
     }
   ],
   "oneHandedMelee": [

@@ -19,6 +19,9 @@ public class Weapon : ISelectableItem
     public string Stat { get; set; } = string.Empty;
     public int Slots { get; set; } = 1;
     public string? TechLevel { get; set; }
+    public string? AmmoType { get; set; } // Type of ammo this weapon requires (e.g., "Ammo", "Cannonball", "Arrows")
+
+    public bool RequiresAmmo => !string.IsNullOrEmpty(AmmoType);
 
     public string GetDetailedInfo()
     {

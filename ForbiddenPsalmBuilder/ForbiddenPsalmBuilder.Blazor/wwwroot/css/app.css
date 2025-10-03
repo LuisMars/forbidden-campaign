@@ -21,8 +21,11 @@
   --color-accent-2: #d15648;
   --color-bg: #000000;
   --color-bg-secondary: rgba(255, 255, 255, 0.03);
+  --color-bg-tertiary: rgba(255, 255, 255, 0.08);
+  --color-background: #000000;
   --color-border: rgba(255, 255, 255, 0.1);
   --color-text: #ffffff;
+  --color-text-primary: #ffffff;
   --color-text-secondary: rgba(255, 255, 255, 0.7);
   --color-tag-bg: rgba(213, 138, 42, 0.2);
   --color-tag-border: rgba(213, 138, 42, 0.5);
@@ -40,6 +43,7 @@
   --spacing-one: 1rem;
   --spacing-one-half: 1.5rem;
   --spacing-two: 2rem;
+  --spacing-three: 3rem;
 
   /* Border */
   --border-width: 1px;
@@ -49,6 +53,7 @@
   --transition-fast: 0.2s;
 
   /* Font Sizes */
+  --font-size-smaller: 0.75rem;
   --font-size-small: 0.875rem;
   --font-size-base: 1rem;
   --font-size-large: 1.125rem;
@@ -495,6 +500,10 @@ body.modal-open {
   flex-shrink: 0;
 }
 
+.waband-name {
+  width: 100%;
+}
+
 .warband-header .waband-name,
 .warband-header .warband-name {
   width: 100%;
@@ -840,7 +849,6 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--spacing-one);
-  margin-top: var(--spacing-one);
 }
 
 /* On smaller screens, make cards stack */
@@ -1605,7 +1613,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
   /* Font sizes for print - base 14px */
   body, p, div, span {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   h1 {
@@ -1702,9 +1710,17 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     gap: 8px;
   }
 
+  main {
+    gap: 4px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
   section {
     page-break-inside: avoid !important;
-    margin-bottom: 8px !important;
+    margin: 0 !important;
+    gap: 4px !important;
+    padding: 4px !important;
   }
 
   .horizontal.space {
@@ -1844,6 +1860,39 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 .equipment-card.disabled:hover {
   background: var(--color-container);
   border-color: var(--color-border);
+}
+
+/* Ammo Styling */
+.equipment-card.ammo {
+  border-left: 3px solid rgba(255, 215, 0, 0.6);
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, var(--color-container) 20%);
+}
+
+.equipment-card.ammo:hover {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 255, 255, 0.08) 20%);
+  border-left-color: rgba(255, 215, 0, 0.8);
+}
+
+.ammo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-quarter);
+  padding: 2px var(--spacing-half);
+  background: rgba(255, 215, 0, 0.2);
+  border: var(--border-width) solid rgba(255, 215, 0, 0.5);
+  font-size: 0.625rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 2px;
+  margin-left: var(--spacing-half);
+}
+
+.stat-badge.ammo-type {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.4);
+  color: #ffd700;
 }
 
 .equipment-icon {
@@ -2188,7 +2237,13 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   white-space: nowrap;
 }
 
-.character-equipment-grid .equipment-properties,
+.character-equipment-grid .equipment-properties {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacing-quarter);
+}
+
 .character-equipment-grid .equipment-special,
 .character-equipment-grid .equipment-effect {
   display: none;
@@ -2208,12 +2263,46 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   gap: var(--spacing-one);
 }
 
+.stash-grid .equipment-info {
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: var(--spacing-half) !important;
+  align-items: center !important;
+  overflow: hidden;
+}
+
+.stash-grid .equipment-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  max-width: 150px;
+}
+
+.stash-grid .equipment-stats {
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  overflow: hidden;
+}
+
+.stash-grid .equipment-properties {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacing-quarter);
+}
+
+.stash-grid .equipment-special,
+.stash-grid .equipment-effect {
+  display: none;
+}
+
 /* Equipment Properties */
 .equipment-properties {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   gap: var(--spacing-quarter);
-  margin-top: var(--spacing-quarter);
 }
 
 .property-badge {
@@ -2222,7 +2311,8 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   background: var(--color-bg-tertiary);
   border: var(--border-width) solid var(--color-border);
   border-radius: 2px;
-  font-size: var(--font-size-small);
+  font-family: var(--font-monospace);
+  font-size: var(--font-size-smaller);
   color: var(--color-text-secondary);
 }
 
@@ -2241,6 +2331,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
 .stat-badge.stat {
   color: var(--color-text);
+  font-family: var(--font-monospace);
   font-weight: bold;
 }
 
@@ -2311,6 +2402,7 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
   .character-equipment-grid .equipment-effect {
     /* Show all details in print */
     display: flex !important;
+    flex-direction: row !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -2373,9 +2465,27 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
 
   .stash-grid .equipment-info {
     flex-direction: row !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
     gap: 4px !important;
     align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .stash-grid .equipment-name {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    flex-shrink: 0 !important;
+    max-width: 150px !important;
+  }
+
+  .stash-grid .equipment-stats {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+    display: flex !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -2386,15 +2496,16 @@ input[type="number"].stat-selector::-webkit-inner-spin-button {
     height: 20px !important;
   }
 
-  .equipment-stats,
-  .equipment-properties,
-  .equipment-special,
-  .equipment-effect {
-    /* Ensure all details are visible */
+  .stash-grid .equipment-properties {
     display: flex !important;
-    opacity: 1 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 2px !important;
+  }
+
+  .stash-grid .equipment-special,
+  .stash-grid .equipment-effect {
+    display: none !important;
   }
 
   .stat-badge,

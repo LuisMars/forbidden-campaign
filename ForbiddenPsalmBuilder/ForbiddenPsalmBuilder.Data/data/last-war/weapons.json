@@ -9,6 +9,7 @@
       "slots": 1,
       "rollRange": "1-4",
       "iconClass": "ra ra-revolver",
+      "ammoType": "Flare",
       "special": "Can be fired into air for battlefield light (5 rounds). Roll D10, on 1: artillery mistake, all models take Agility test or 1D6 damage",
       "effects": [
         {
@@ -33,7 +34,8 @@
       "cost": 15,
       "slots": 1,
       "rollRange": "5-9",
-      "iconClass": "ra ra-revolver"
+      "iconClass": "ra ra-revolver",
+      "ammoType": "Pistol Round"
     },
     {
       "name": "Aerial Dart",
@@ -55,7 +57,8 @@
       "cost": 25,
       "slots": 2,
       "rollRange": "16-19",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Rifle Round"
     },
     {
       "name": "Shotgun",
@@ -65,7 +68,8 @@
       "cost": 20,
       "slots": 2,
       "rollRange": "20-23",
-      "iconClass": "fas fa-gun"
+      "iconClass": "fas fa-gun",
+      "ammoType": "Shotgun Shells"
     },
     {
       "name": "Sniper Rifle",
@@ -75,7 +79,8 @@
       "cost": 35,
       "slots": 2,
       "rollRange": "24",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Sniper Round"
     },
     {
       "name": "BuzzSaw",
@@ -85,7 +90,8 @@
       "cost": 50,
       "slots": 2,
       "rollRange": "25",
-      "iconClass": "ra ra-cog"
+      "iconClass": "ra ra-cog",
+      "ammoType": "Buzzsaw Round"
     },
     {
       "name": "Automatic Rifle",
@@ -95,7 +101,8 @@
       "cost": 30,
       "slots": 2,
       "rollRange": "26-27",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Auto Rifle Round"
     },
     {
       "name": "Anti-tank Rifle",
@@ -105,7 +112,8 @@
       "cost": 50,
       "slots": 2,
       "rollRange": "28-34",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Anti Tank Round"
     },
     {
       "name": "Flamethrower",
@@ -116,6 +124,7 @@
       "slots": 2,
       "rollRange": "35",
       "iconClass": "ra ra-fire",
+      "ammoType": "Fuel Tank",
       "special": "Requires fuel tank (replaced after 3 uses, 1 action to replace). Can attack all models within 6 inches (consumes all fuel). If Critically hit: tank explodes for 8 damage to all within 3 inches",
       "effects": [
         {

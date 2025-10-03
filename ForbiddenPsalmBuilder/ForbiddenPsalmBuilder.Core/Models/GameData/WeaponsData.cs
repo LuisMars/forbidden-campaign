@@ -57,4 +57,7 @@ public class WeaponDto
 
     [JsonPropertyName("effects")]
     public List<string>? Effects { get; set; }
+
+    [JsonPropertyName("ammoType")]
+    public string? AmmoType { get; set; }
 }

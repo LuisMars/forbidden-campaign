@@ -175,7 +175,8 @@
       "cost": 10,
       "slots": 1,
       "techLevel": "future",
-      "iconClass": "ra ra-revolver"
+      "iconClass": "ra ra-revolver",
+      "ammoType": "Bullets"
     },
     {
       "name": "Pistol",
@@ -185,7 +186,8 @@
       "cost": 11,
       "slots": 1,
       "techLevel": "future",
-      "iconClass": "ra ra-revolver"
+      "iconClass": "ra ra-revolver",
+      "ammoType": "Bullets"
     }
   ],
   "twoHandedRanged": [
@@ -197,7 +199,8 @@
       "cost": 5,
       "slots": 2,
       "techLevel": "past",
-      "iconClass": "ra ra-crossbow"
+      "iconClass": "ra ra-crossbow",
+      "ammoType": "Arrows"
     },
     {
       "name": "Crossbow",
@@ -207,7 +210,8 @@
       "cost": 8,
       "slots": 2,
       "techLevel": "past",
-      "iconClass": "ra ra-crossbow"
+      "iconClass": "ra ra-crossbow",
+      "ammoType": "Arrows"
     },
     {
       "name": "Rifle",
@@ -217,7 +221,8 @@
       "cost": 15,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Bullets"
     },
     {
       "name": "Plas-mar",
@@ -227,7 +232,8 @@
       "cost": 25,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "ra ra-lightning"
+      "iconClass": "ra ra-lightning",
+      "ammoType": "Plasma Cell"
     },
     {
       "name": "Pulse Rifle",
@@ -237,7 +243,8 @@
       "cost": 30,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Plasma Cell"
     },
     {
       "name": "Shotgun",
@@ -247,7 +254,8 @@
       "cost": 12,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "fas fa-gun"
+      "iconClass": "fas fa-gun",
+      "ammoType": "Bullets"
     },
     {
       "name": "Molten Slug Gun",
@@ -257,7 +265,8 @@
       "cost": 18,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "fas fa-gun"
+      "iconClass": "fas fa-gun",
+      "ammoType": "Bullets"
     },
     {
       "name": "Flamethrower",
@@ -267,7 +276,8 @@
       "cost": 20,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "ra ra-flame-symbol"
+      "iconClass": "ra ra-flame-symbol",
+      "ammoType": "Flame"
     },
     {
       "name": "Laser",
@@ -277,7 +287,8 @@
       "cost": 15,
       "slots": 2,
       "techLevel": "future",
-      "iconClass": "ra ra-rifle"
+      "iconClass": "ra ra-rifle",
+      "ammoType": "Laser"
     }
   ],
   "throwables": [
